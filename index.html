@@ -3,1005 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>北米中W杯 2026 シミュレーター</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <title>北米中W杯 2026 観戦アプリ</title>
   <style>
-    body {
-      background: radial-gradient(circle at top, #1e293b 0, #0f1219 42%, #080a10 100%);
-      color: white;
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    .soft-scroll::-webkit-scrollbar { height: 10px; width: 8px; }
-    .soft-scroll::-webkit-scrollbar-track { background: #111827; }
-    .soft-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 999px; }
-    .slot-panel { box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+    :root{--bg:#080b12;--panel:#111827;--panel2:#0f172a;--line:#334155;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--blue2:#1d4ed8;--yellow:#facc15;--red:#ef4444;--green:#22c55e}
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#1e293b 0,#0f1219 45%,#080a10 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif} a{color:inherit}.wrap{max-width:1200px;margin:0 auto;padding:18px 14px 40px}.eyebrow{font-size:12px;letter-spacing:.22em;color:#93c5fd;font-weight:800}.title{font-size:28px;margin:8px 0 6px;font-weight:900}.lead{font-size:14px;color:var(--muted);line-height:1.7;margin:0 0 16px}.tabs{display:flex;gap:8px;overflow-x:auto;padding:8px;background:rgba(15,23,42,.82);border:1px solid var(--line);border-radius:16px;position:sticky;top:0;z-index:20;backdrop-filter:blur(10px)}.tab{border:0;border-radius:12px;padding:10px 14px;background:#1e293b;color:#cbd5e1;font-weight:900;white-space:nowrap}.tab.active{background:var(--blue);color:white}.panel{margin-top:16px}.card{background:rgba(15,23,42,.78);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px}.note{background:rgba(30,64,175,.32);border-color:#3b82f6;color:#dbeafe}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.btn{border:0;border-radius:12px;background:var(--blue);color:white;font-weight:900;padding:10px 14px}.btn.secondary{background:#1e293b;color:#e2e8f0;border:1px solid #334155}.btn:disabled{opacity:.6}.grid{display:grid;gap:12px}.bracket{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px}.match{min-width:300px;background:rgba(15,23,42,.86);border:1px solid var(--line);border-radius:18px;padding:12px}.match h3{margin:0 0 4px;font-size:15px}.venue{font-size:11px;color:var(--muted);margin-bottom:8px}.slot{border:1px solid #475569;border-radius:14px;background:#111827;padding:10px;margin-top:8px}.slot.jp{border-color:var(--yellow);background:rgba(113,63,18,.72)}.slot-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.label{display:inline-block;min-width:78px;text-align:center;background:#334155;color:#e2e8f0;border-radius:9px;padding:5px 7px;font-weight:900;font-size:12px}.slot.jp .label{background:var(--yellow);color:#111827}.select{width:100%;border:1px solid #475569;border-radius:12px;background:#020617;color:white;padding:8px;min-height:92px}.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.pill{display:inline-flex;align-items:center;gap:5px;border:1px solid #475569;background:#020617;border-radius:999px;padding:4px 8px;font-size:12px}.pill.jp{background:var(--yellow);border-color:#fde68a;color:#111827;font-weight:900}.flag{width:20px;height:auto;border-radius:2px;object-fit:contain}.section-title{font-size:19px;margin:22px 0 10px;font-weight:900}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:rgba(15,23,42,.78)}table{border-collapse:collapse;width:100%;min-width:620px}th,td{border-bottom:1px solid #1f2937;padding:9px;text-align:left;font-size:14px}th{background:#1e293b;color:#cbd5e1}.input,.country-select,.api-input,.news-select{width:100%;border:1px solid #475569;border-radius:10px;background:#020617;color:white;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}.status{font-size:12px;color:#cbd5e1;margin-top:8px}.game{border:1px solid var(--line);background:rgba(15,23,42,.78);border-radius:16px;padding:12px}.scoreline{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-top:8px}.score{text-align:center;background:#020617;border-radius:10px;padding:8px 10px;font-weight:900}.right{text-align:right}.news-item{display:block;text-decoration:none;border:1px solid var(--line);border-radius:16px;background:rgba(15,23,42,.78);padding:12px}.news-title{font-weight:900;line-height:1.45}.source{font-size:11px;color:#cbd5e1;background:#1e293b;border-radius:999px;padding:3px 7px;margin-left:6px}.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}.group-card{background:#020617;border:1px solid #1f2937;border-radius:14px;padding:10px}.hide{display:none}.error{color:#fecaca}.success{color:#bbf7d0}@media(max-width:640px){.title{font-size:24px}.match{min-width:280px}.wrap{padding-left:10px;padding-right:10px}}
   </style>
 </head>
 <body>
-  <div id="root"></div>
-
-  <script type="text/babel">
-    const { useEffect, useMemo, useState } = React;
-
-    const APP_STORAGE_KEY = 'wc2026-app-v2';
-    const BRACKET_STORAGE_KEY = 'wc2026-bracket-v2';
-    const STATS_STORAGE_KEY = 'wc2026-stats-v2';
-    const RANKING_ENDPOINT_STORAGE_KEY = 'wc2026-ranking-endpoints-v1';
-    const FLASH_STORAGE_KEY = 'wc2026-flash-v1';
-    const LATEST_NEWS_STORAGE_KEY = 'wc2026-latest-news-v1';
-
-    // HTML単体で動かすため、外部取得は「公開API/RSSがCORS許可している場合」に利用します。
-    // 得点/アシストランキングを完全自動化する場合は、goalsJsonUrl / assistsJsonUrl にJSONのURLを設定してください。
-    const DATA_SOURCES = {
-      espnScoreboardUrl: 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard',
-      googleNewsRssBase: 'https://news.google.com/rss/search',
-      corsProxyRaw: 'https://api.allorigins.win/raw?url=',
-      ranking: {
-        goalsJsonUrl: '',
-        assistsJsonUrl: '',
-      },
-    };
-
-    const TEAMS = {
-      mx: { name: 'メキシコ', flag: 'mx' },
-      za: { name: '南アフリカ', flag: 'za' },
-      kr: { name: '韓国', flag: 'kr' },
-      cz: { name: 'チェコ', flag: 'cz' },
-      ca: { name: 'カナダ', flag: 'ca' },
-      ba: { name: 'ボスニア・ヘルツェゴビナ', flag: 'ba' },
-      qa: { name: 'カタール', flag: 'qa' },
-      ch: { name: 'スイス', flag: 'ch' },
-      br: { name: 'ブラジル', flag: 'br' },
-      ma: { name: 'モロッコ', flag: 'ma' },
-      ht: { name: 'ハイチ', flag: 'ht' },
-      'gb-sct': { name: 'スコットランド', flag: 'gb-sct' },
-      us: { name: 'アメリカ', flag: 'us' },
-      py: { name: 'パラグアイ', flag: 'py' },
-      au: { name: 'オーストラリア', flag: 'au' },
-      tr: { name: 'トゥルキエ', flag: 'tr' },
-      de: { name: 'ドイツ', flag: 'de' },
-      ci: { name: 'コートジボワール', flag: 'ci' },
-      ec: { name: 'エクアドル', flag: 'ec' },
-      cw: { name: 'キュラソー', flag: 'cw' },
-      nl: { name: 'オランダ', flag: 'nl' },
-      jp: { name: '日本', flag: 'jp' },
-      tn: { name: 'チュニジア', flag: 'tn' },
-      se: { name: 'スウェーデン', flag: 'se' },
-      be: { name: 'ベルギー', flag: 'be' },
-      eg: { name: 'エジプト', flag: 'eg' },
-      ir: { name: 'イラン', flag: 'ir' },
-      nz: { name: 'ニュージーランド', flag: 'nz' },
-      es: { name: 'スペイン', flag: 'es' },
-      sa: { name: 'サウジアラビア', flag: 'sa' },
-      cv: { name: 'カーボベルデ', flag: 'cv' },
-      uy: { name: 'ウルグアイ', flag: 'uy' },
-      fr: { name: 'フランス', flag: 'fr' },
-      sn: { name: 'セネガル', flag: 'sn' },
-      iq: { name: 'イラク', flag: 'iq' },
-      no: { name: 'ノルウェー', flag: 'no' },
-      ar: { name: 'アルゼンチン', flag: 'ar' },
-      dz: { name: 'アルジェリア', flag: 'dz' },
-      at: { name: 'オーストリア', flag: 'at' },
-      jo: { name: 'ヨルダン', flag: 'jo' },
-      pt: { name: 'ポルトガル', flag: 'pt' },
-      uz: { name: 'ウズベキスタン', flag: 'uz' },
-      co: { name: 'コロンビア', flag: 'co' },
-      cd: { name: 'コンゴ民主共和国', flag: 'cd' },
-      'gb-eng': { name: 'イングランド', flag: 'gb-eng' },
-      hr: { name: 'クロアチア', flag: 'hr' },
-      gh: { name: 'ガーナ', flag: 'gh' },
-      pa: { name: 'パナマ', flag: 'pa' },
-    };
-
-    const GROUPS = {
-      A: ['mx', 'za', 'kr', 'cz'],
-      B: ['ca', 'ba', 'qa', 'ch'],
-      C: ['br', 'ma', 'ht', 'gb-sct'],
-      D: ['us', 'py', 'au', 'tr'],
-      E: ['de', 'ci', 'ec', 'cw'],
-      F: ['nl', 'jp', 'tn', 'se'],
-      G: ['be', 'eg', 'ir', 'nz'],
-      H: ['es', 'sa', 'cv', 'uy'],
-      I: ['fr', 'sn', 'iq', 'no'],
-      J: ['ar', 'dz', 'at', 'jo'],
-      K: ['pt', 'uz', 'co', 'cd'],
-      L: ['gb-eng', 'hr', 'gh', 'pa'],
-    };
-
-    const allTeamIds = Object.keys(TEAMS);
-
-    const uniq = (arr) => Array.from(new Set(arr));
-    const groupTeams = (groups) => uniq(groups.flatMap((g) => GROUPS[g] || []));
-
-    const thirdOptions = {
-      'A/B/C/D/F': groupTeams(['A', 'B', 'C', 'D', 'F']),
-      'C/D/F/G/H': groupTeams(['C', 'D', 'F', 'G', 'H']),
-      'C/E/F/H/I': groupTeams(['C', 'E', 'F', 'H', 'I']),
-      'E/H/I/J/K': groupTeams(['E', 'H', 'I', 'J', 'K']),
-      'B/E/F/I/J': groupTeams(['B', 'E', 'F', 'I', 'J']),
-      'A/E/H/I/J': groupTeams(['A', 'E', 'H', 'I', 'J']),
-      'E/F/G/I/J': groupTeams(['E', 'F', 'G', 'I', 'J']),
-      'D/E/I/J/L': groupTeams(['D', 'E', 'I', 'J', 'L']),
-    };
-
-    const makeSlot = ({ label, kind = 'free', group = null, thirdKey = null, selected = null, note = '' }) => {
-      let options = allTeamIds;
-      let defaultSelected = [];
-
-      if (kind === 'group') {
-        options = GROUPS[group] || [];
-        defaultSelected = selected || options;
-      } else if (kind === 'third') {
-        options = thirdOptions[thirdKey] || allTeamIds;
-        defaultSelected = selected || [];
-      } else {
-        options = allTeamIds;
-        defaultSelected = selected || [];
-      }
-
-      return {
-        label,
-        kind,
-        group,
-        thirdKey,
-        note,
-        options,
-        selected: defaultSelected,
-        highlight: defaultSelected.includes('jp'),
-      };
-    };
-
-    const ro32 = [
-      {
-        id: 'M73',
-        title: 'Match 73',
-        venue: '6/28｜LA',
-        a: makeSlot({ label: 'A2', kind: 'group', group: 'A' }),
-        b: makeSlot({ label: 'B2', kind: 'group', group: 'B' }),
-      },
-      {
-        id: 'M74',
-        title: 'Match 74',
-        venue: '6/29｜Foxborough',
-        a: makeSlot({ label: 'E1', kind: 'group', group: 'E' }),
-        b: makeSlot({ label: '3位 A/B/C/D/F', kind: 'third', thirdKey: 'A/B/C/D/F' }),
-      },
-      {
-        id: 'M75',
-        title: 'Match 75',
-        venue: '6/30｜Guadalupe',
-        a: makeSlot({ label: 'F1', kind: 'group', group: 'F' }),
-        b: makeSlot({ label: 'C2', kind: 'group', group: 'C' }),
-      },
-      {
-        id: 'M76',
-        title: 'Match 76',
-        venue: '6/29｜Houston',
-        a: makeSlot({ label: 'C1', kind: 'group', group: 'C' }),
-        b: makeSlot({ label: 'F2', kind: 'group', group: 'F' }),
-      },
-      {
-        id: 'M77',
-        title: 'Match 77',
-        venue: '6/30｜New Jersey',
-        a: makeSlot({ label: 'I1', kind: 'group', group: 'I' }),
-        b: makeSlot({ label: '3位 C/D/F/G/H', kind: 'third', thirdKey: 'C/D/F/G/H' }),
-      },
-      {
-        id: 'M78',
-        title: 'Match 78',
-        venue: '6/30｜Arlington',
-        a: makeSlot({ label: 'E2', kind: 'group', group: 'E' }),
-        b: makeSlot({ label: 'I2', kind: 'group', group: 'I' }),
-      },
-      {
-        id: 'M79',
-        title: 'Match 79',
-        venue: '7/1｜Mexico City',
-        a: makeSlot({ label: 'A1', kind: 'group', group: 'A' }),
-        b: makeSlot({ label: '3位 C/E/F/H/I', kind: 'third', thirdKey: 'C/E/F/H/I' }),
-      },
-      {
-        id: 'M80',
-        title: 'Match 80',
-        venue: '7/1｜Atlanta',
-        a: makeSlot({ label: 'L1', kind: 'group', group: 'L' }),
-        b: makeSlot({ label: '3位 E/H/I/J/K', kind: 'third', thirdKey: 'E/H/I/J/K' }),
-      },
-      {
-        id: 'M81',
-        title: 'Match 81',
-        venue: '7/2｜Santa Clara',
-        a: makeSlot({ label: 'D1', kind: 'group', group: 'D' }),
-        b: makeSlot({ label: '3位 B/E/F/I/J', kind: 'third', thirdKey: 'B/E/F/I/J' }),
-      },
-      {
-        id: 'M82',
-        title: 'Match 82',
-        venue: '7/1｜Seattle',
-        a: makeSlot({ label: 'G1', kind: 'group', group: 'G' }),
-        b: makeSlot({ label: '3位 A/E/H/I/J', kind: 'third', thirdKey: 'A/E/H/I/J' }),
-      },
-      {
-        id: 'M83',
-        title: 'Match 83',
-        venue: '7/3｜Toronto',
-        a: makeSlot({ label: 'K2', kind: 'group', group: 'K' }),
-        b: makeSlot({ label: 'L2', kind: 'group', group: 'L' }),
-      },
-      {
-        id: 'M84',
-        title: 'Match 84',
-        venue: '7/2｜LA',
-        a: makeSlot({ label: 'H1', kind: 'group', group: 'H' }),
-        b: makeSlot({ label: 'J2', kind: 'group', group: 'J' }),
-      },
-      {
-        id: 'M85',
-        title: 'Match 85',
-        venue: '7/3｜Vancouver',
-        a: makeSlot({ label: 'B1', kind: 'group', group: 'B' }),
-        b: makeSlot({ label: '3位 E/F/G/I/J', kind: 'third', thirdKey: 'E/F/G/I/J' }),
-      },
-      {
-        id: 'M86',
-        title: 'Match 86',
-        venue: '7/3｜Miami',
-        a: makeSlot({ label: 'J1', kind: 'group', group: 'J' }),
-        b: makeSlot({ label: 'H2', kind: 'group', group: 'H' }),
-      },
-      {
-        id: 'M87',
-        title: 'Match 87',
-        venue: '7/4｜Kansas City',
-        a: makeSlot({ label: 'K1', kind: 'group', group: 'K' }),
-        b: makeSlot({ label: '3位 D/E/I/J/L', kind: 'third', thirdKey: 'D/E/I/J/L' }),
-      },
-      {
-        id: 'M88',
-        title: 'Match 88',
-        venue: '7/3｜Arlington',
-        a: makeSlot({ label: 'D2', kind: 'group', group: 'D' }),
-        b: makeSlot({ label: 'G2', kind: 'group', group: 'G' }),
-      },
-    ];
-
-    const laterRounds = [
-      { key: 'R16', title: 'ベスト16', matches: [
-        ['M89', '勝者 M73', '勝者 M75'], ['M90', '勝者 M74', '勝者 M77'],
-        ['M91', '勝者 M76', '勝者 M78'], ['M92', '勝者 M79', '勝者 M80'],
-        ['M93', '勝者 M83', '勝者 M84'], ['M94', '勝者 M81', '勝者 M82'],
-        ['M95', '勝者 M86', '勝者 M88'], ['M96', '勝者 M85', '勝者 M87'],
-      ]},
-      { key: 'QF', title: '準々決勝', matches: [
-        ['M97', '勝者 M89', '勝者 M90'], ['M98', '勝者 M93', '勝者 M94'],
-        ['M99', '勝者 M91', '勝者 M92'], ['M100', '勝者 M95', '勝者 M96'],
-      ]},
-      { key: 'SF', title: '準決勝', matches: [
-        ['M101', '勝者 M97', '勝者 M98'], ['M102', '勝者 M99', '勝者 M100'],
-      ]},
-      { key: 'FINAL', title: '決勝', matches: [
-        ['M104', '勝者 M101', '勝者 M102'],
-      ]},
-    ];
-
-    const buildInitialBracket = () => {
-      const base = {};
-      ro32.forEach((m) => {
-        base[m.id] = { id: m.id, title: m.title, venue: m.venue, a: m.a, b: m.b };
-      });
-      laterRounds.forEach((round) => {
-        round.matches.forEach(([id, labelA, labelB]) => {
-          base[id] = {
-            id,
-            title: id,
-            venue: '',
-            a: makeSlot({ label: labelA, kind: 'free' }),
-            b: makeSlot({ label: labelB, kind: 'free' }),
-          };
-        });
-      });
-      base.CHAMPION = {
-        id: 'CHAMPION',
-        title: '優勝予想',
-        venue: '',
-        a: makeSlot({ label: '優勝', kind: 'free' }),
-        b: makeSlot({ label: '準優勝', kind: 'free' }),
-      };
-      return base;
-    };
-
-    const INITIAL_BRACKET = buildInitialBracket();
-
-    const buildEmptyRankingRows = () => Array.from({ length: 10 }, (_, i) => ({
-      rank: i + 1,
-      player: '',
-      teamId: '',
-      value: '',
-    }));
-
-    const defaultStats = {
-      goals: buildEmptyRankingRows(),
-      assists: buildEmptyRankingRows(),
-      meta: {
-        goals: { lastUpdated: '', status: 'API未設定：手入力で利用できます。' },
-        assists: { lastUpdated: '', status: 'API未設定：手入力で利用できます。' },
-      },
-    };
-
-    const links = {
-      goals: [
-        { label: 'FIFA 公式｜大会ページ', url: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026' },
-        { label: 'FIFA 公式｜順位表', url: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings' },
-        { label: 'Googleニュース｜W杯 得点ランキング', url: 'https://www.google.com/search?q=2026+World+Cup+top+scorers' },
-      ],
-      assists: [
-        { label: 'FIFA 公式｜大会ページ', url: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026' },
-        { label: 'Googleニュース｜W杯 アシストランキング', url: 'https://www.google.com/search?q=2026+World+Cup+assist+leaders' },
-      ],
-      news: [
-        { label: 'FIFA 公式｜最新ニュース', url: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/articles' },
-        { label: 'FIFA 公式｜順位表', url: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings' },
-        { label: 'Googleニュース｜W杯 速報', url: 'https://news.google.com/search?q=FIFA%20World%20Cup%202026' },
-        { label: 'Yahoo Sports｜W杯', url: 'https://sports.yahoo.com/soccer/' },
-      ],
-    };
-
-    const safeLoad = (key, fallback) => {
-      try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
-      } catch (e) {
-        return fallback;
-      }
-    };
-
-    const saveJson = (key, value) => {
-      try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
-    };
-
-    const toDateInput = (date) => {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}${m}${d}`;
-    };
-
-    const formatDateTime = (value) => {
-      if (!value) return '';
-      const d = new Date(value);
-      if (Number.isNaN(d.getTime())) return value;
-      return new Intl.DateTimeFormat('ja-JP', {
-        month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit',
-      }).format(d);
-    };
-
-    const fetchWithTimeout = async (url, options = {}, timeoutMs = 9000) => {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const res = await fetch(url, { ...options, signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res;
-      } finally {
-        clearTimeout(timer);
-      }
-    };
-
-    const normalizeRankingRows = (payload, type) => {
-      const sourceRows = Array.isArray(payload) ? payload : (payload?.leaders || payload?.items || payload?.data || []);
-      return sourceRows.slice(0, 30).map((item, index) => {
-        const player = item.player || item.playerName || item.name || item.athlete?.displayName || item.athlete?.fullName || '';
-        const rawTeam = item.teamId || item.team || item.countryCode || item.country || item.nation || item.athlete?.team?.abbreviation || '';
-        const teamId = resolveTeamId(rawTeam);
-        const value = item.value ?? item.count ?? item.goals ?? item.assists ?? item.total ?? item.stat ?? '';
-        return {
-          rank: item.rank || index + 1,
-          player,
-          teamId,
-          value: String(value),
-        };
-      }).filter((row) => row.player || row.teamId || row.value);
-    };
-
-    const resolveTeamId = (raw) => {
-      if (!raw) return '';
-      const value = String(raw).toLowerCase().trim();
-      if (TEAMS[value]) return value;
-      const byFlag = Object.entries(TEAMS).find(([id, team]) => team.flag.toLowerCase() === value);
-      if (byFlag) return byFlag[0];
-      const byName = Object.entries(TEAMS).find(([id, team]) =>
-        team.name.toLowerCase() === value || value.includes(team.name.toLowerCase())
-      );
-      return byName ? byName[0] : '';
-    };
-
-    const parseEspnEvent = (event) => {
-      const comp = event?.competitions?.[0] || {};
-      const competitors = comp.competitors || [];
-      const home = competitors.find((c) => c.homeAway === 'home') || competitors[0];
-      const away = competitors.find((c) => c.homeAway === 'away') || competitors[1];
-      const statusType = event?.status?.type || {};
-      const statusText = statusType.shortDetail || statusType.description || event?.status?.type?.name || '';
-      return {
-        id: event.id,
-        name: event.shortName || event.name || '',
-        date: event.date,
-        status: statusText,
-        completed: Boolean(statusType.completed),
-        state: statusType.state || '',
-        home: {
-          name: home?.team?.displayName || home?.team?.shortDisplayName || '',
-          abbr: home?.team?.abbreviation || '',
-          score: home?.score ?? '',
-        },
-        away: {
-          name: away?.team?.displayName || away?.team?.shortDisplayName || '',
-          abbr: away?.team?.abbreviation || '',
-          score: away?.score ?? '',
-        },
-      };
-    };
-
-    const NEWS_OPTIONS = [
-      { id: 'all', label: 'W杯全体', query: 'サッカー ワールドカップ 2026' },
-      ...allTeamIds.map((id) => ({ id, label: TEAMS[id].name, query: `サッカー ワールドカップ 2026 ${TEAMS[id].name}` })),
-    ];
-
-    function Flag({ teamId, className = 'w-5 h-auto' }) {
-      const team = TEAMS[teamId];
-      if (!team) return null;
-      return <img src={`https://flagcdn.com/w40/${team.flag}.png`} alt={team.name} className={`${className} inline-block object-contain rounded-[2px]`} />;
-    }
-
-    function TeamPill({ teamId }) {
-      const team = TEAMS[teamId];
-      if (!team) return null;
-      return (
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs border ${teamId === 'jp' ? 'bg-yellow-300 text-slate-950 border-yellow-100 font-bold' : 'bg-slate-900/80 text-white border-slate-700'}`}>
-          <Flag teamId={teamId} className="w-4 h-auto" />
-          {team.name}
-        </span>
-      );
-    }
-
-    function SlotPicker({ slotKey, slot, onChange }) {
-      const [open, setOpen] = useState(false);
-      const selected = slot.selected || [];
-      const selectedText = selected.length > 0 ? selected.map((id) => TEAMS[id]?.name).filter(Boolean).join(' / ') : '候補を選択';
-
-      const toggleTeam = (teamId) => {
-        const next = selected.includes(teamId)
-          ? selected.filter((id) => id !== teamId)
-          : [...selected, teamId];
-        onChange({ ...slot, selected: next, highlight: next.includes('jp') });
-      };
-
-      const selectAll = () => onChange({ ...slot, selected: [...slot.options], highlight: slot.options.includes('jp') });
-      const clearAll = () => onChange({ ...slot, selected: [], highlight: false });
-
-      return (
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setOpen(!open)}
-            className={`w-full min-h-[3.1rem] rounded-xl border px-2.5 py-2 text-left transition ${slot.highlight ? 'bg-yellow-900/80 border-yellow-400' : 'bg-slate-800/95 border-slate-700 hover:border-slate-500'}`}
-          >
-            <div className="flex items-center gap-2">
-              <span className={`w-[4.8rem] shrink-0 rounded-lg px-2 py-1 text-center text-[11px] font-black ${slot.highlight ? 'bg-yellow-300 text-slate-950' : 'bg-slate-700 text-slate-200'}`}>
-                {slot.label}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap gap-1">
-                  {selected.length > 0 ? selected.slice(0, 5).map((id) => <TeamPill key={id} teamId={id} />) : <span className="text-sm text-slate-400">{selectedText}</span>}
-                  {selected.length > 5 && <span className="text-xs text-slate-400 px-1 py-1">+{selected.length - 5}</span>}
-                </div>
-              </div>
-              <span className="text-slate-400 text-xs">▼</span>
-            </div>
-          </button>
-
-          {open && (
-            <div className="slot-panel absolute left-0 right-0 z-40 mt-2 max-h-80 overflow-y-auto rounded-2xl border border-slate-600 bg-slate-950 p-3 soft-scroll">
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <p className="text-xs text-slate-400">
-                  {slot.kind === 'group' ? `グループ${slot.group}の4か国から選択` : slot.kind === 'third' ? `対象グループ：${slot.thirdKey}` : '全出場国から選択'}
-                </p>
-                <div className="flex gap-1">
-                  <button onClick={selectAll} className="rounded-lg bg-slate-800 px-2 py-1 text-[11px] hover:bg-slate-700">全選択</button>
-                  <button onClick={clearAll} className="rounded-lg bg-slate-800 px-2 py-1 text-[11px] hover:bg-slate-700">解除</button>
-                  <button onClick={() => setOpen(false)} className="rounded-lg bg-blue-600 px-2 py-1 text-[11px] font-bold hover:bg-blue-500">完了</button>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 gap-1">
-                {slot.options.map((teamId) => {
-                  const team = TEAMS[teamId];
-                  if (!team) return null;
-                  const checked = selected.includes(teamId);
-                  return (
-                    <label key={teamId} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-2.5 py-2 text-sm ${checked ? 'border-blue-400 bg-blue-950/70' : 'border-slate-800 bg-slate-900/70 hover:bg-slate-800'}`}>
-                      <input type="checkbox" checked={checked} onChange={() => toggleTeam(teamId)} />
-                      <Flag teamId={teamId} />
-                      <span className="font-medium">{team.name}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    function MatchCard({ match, updateSlot }) {
-      return (
-        <div className="w-[22rem] shrink-0 rounded-2xl border border-slate-700/80 bg-slate-900/70 p-3 backdrop-blur">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <div>
-              <p className="text-sm font-black text-white">{match.title}</p>
-              {match.venue && <p className="text-[11px] text-slate-400">{match.venue}</p>}
-            </div>
-            <span className="rounded-full bg-slate-800 px-2 py-1 text-[11px] text-slate-300">複数選択可</span>
-          </div>
-          <div className="space-y-2">
-            <SlotPicker slotKey={`${match.id}-a`} slot={match.a} onChange={(slot) => updateSlot(match.id, 'a', slot)} />
-            <SlotPicker slotKey={`${match.id}-b`} slot={match.b} onChange={(slot) => updateSlot(match.id, 'b', slot)} />
-          </div>
-        </div>
-      );
-    }
-
-    function BracketTab({ bracket, setBracket }) {
-      const updateSlot = (matchId, side, slot) => {
-        setBracket((prev) => ({
-          ...prev,
-          [matchId]: { ...prev[matchId], [side]: slot },
-        }));
-      };
-
-      const reset = () => {
-        if (!confirm('トーナメントの選択内容を初期状態に戻しますか？')) return;
-        localStorage.removeItem(BRACKET_STORAGE_KEY);
-        setBracket(INITIAL_BRACKET);
-      };
-
-      const ro32Matches = ro32.map((m) => bracket[m.id]).filter(Boolean);
-
-      return (
-        <section className="space-y-6">
-          <div className="rounded-2xl border border-blue-500/40 bg-blue-950/30 p-4 text-sm text-blue-100">
-            <p className="font-bold">決勝トーナメント・シミュレーション</p>
-            <p className="mt-1 text-blue-100/80">各枠をタップすると候補国を選べます。1か国に絞れば確定枠として、複数選べば候補枠として表示できます。</p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <button onClick={reset} className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-bold hover:bg-slate-700">初期化</button>
-            <button
-              onClick={() => {
-                navigator.clipboard?.writeText(JSON.stringify(bracket, null, 2));
-                alert('現在のシミュレーション内容をコピーしました。');
-              }}
-              className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-bold hover:bg-slate-700"
-            >
-              JSONコピー
-            </button>
-          </div>
-
-          <div>
-            <h2 className="mb-3 text-lg font-black">ラウンド32</h2>
-            <div className="soft-scroll flex gap-4 overflow-x-auto pb-4">
-              {ro32Matches.map((match) => <MatchCard key={match.id} match={match} updateSlot={updateSlot} />)}
-            </div>
-          </div>
-
-          {laterRounds.map((round) => (
-            <div key={round.key}>
-              <h2 className="mb-3 text-lg font-black">{round.title}</h2>
-              <div className="soft-scroll flex gap-4 overflow-x-auto pb-4">
-                {round.matches.map(([id]) => bracket[id] && <MatchCard key={id} match={bracket[id]} updateSlot={updateSlot} />)}
-              </div>
-            </div>
-          ))}
-
-          <div>
-            <h2 className="mb-3 text-lg font-black">優勝・準優勝予想</h2>
-            <MatchCard match={bracket.CHAMPION} updateSlot={updateSlot} />
-          </div>
-        </section>
-      );
-    }
-
-    function StatsTab({ type, stats, setStats }) {
-      const title = type === 'goals' ? '得点ランキング' : 'アシストランキング';
-      const unit = type === 'goals' ? '得点数' : 'アシスト数';
-      const rows = stats[type] || [];
-      const meta = stats.meta?.[type] || {};
-      const [loading, setLoading] = useState(false);
-      const [endpointMap, setEndpointMap] = useState(() => safeLoad(RANKING_ENDPOINT_STORAGE_KEY, {
-        goals: DATA_SOURCES.ranking.goalsJsonUrl,
-        assists: DATA_SOURCES.ranking.assistsJsonUrl,
-      }));
-      const endpoint = endpointMap[type] || '';
-
-      useEffect(() => saveJson(RANKING_ENDPOINT_STORAGE_KEY, endpointMap), [endpointMap]);
-
-      const updateRow = (index, field, value) => {
-        setStats((prev) => {
-          const nextRows = [...(prev[type] || [])];
-          nextRows[index] = { ...nextRows[index], [field]: value };
-          return { ...prev, [type]: nextRows };
-        });
-      };
-
-      const setMeta = (status, lastUpdated = '') => {
-        setStats((prev) => ({
-          ...prev,
-          meta: {
-            ...(prev.meta || {}),
-            [type]: { status, lastUpdated: lastUpdated || prev.meta?.[type]?.lastUpdated || '' },
-          },
-        }));
-      };
-
-      const fetchRanking = async () => {
-        if (!endpoint) {
-          setMeta('ランキングAPIが未設定です。下の「API設定」にJSON URLを入れると、更新ボタンで取得できます。');
-          return;
-        }
-        setLoading(true);
-        try {
-          const res = await fetchWithTimeout(endpoint);
-          const json = await res.json();
-          const nextRows = normalizeRankingRows(json, type);
-          if (!nextRows.length) throw new Error('ランキング形式のデータを読み取れませんでした。');
-          setStats((prev) => ({
-            ...prev,
-            [type]: nextRows,
-            meta: {
-              ...(prev.meta || {}),
-              [type]: { status: `${nextRows.length}件を取得しました。`, lastUpdated: new Date().toISOString() },
-            },
-          }));
-        } catch (e) {
-          setMeta(`取得できませんでした：${e.message || e}`);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      const addRow = () => {
-        setStats((prev) => ({
-          ...prev,
-          [type]: [...(prev[type] || []), { rank: (prev[type] || []).length + 1, player: '', teamId: '', value: '' }],
-        }));
-      };
-
-      const clearRows = () => {
-        if (!confirm(`${title}を空欄に戻しますか？`)) return;
-        setStats((prev) => ({ ...prev, [type]: buildEmptyRankingRows() }));
-      };
-
-      return (
-        <section className="space-y-4">
-          <div className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-black">{title}</h2>
-                <p className="mt-1 text-sm text-slate-400">順位、{unit}、国旗、選手名（国名）を一覧表示します。手入力データは端末内に自動保存されます。</p>
-              </div>
-              <button onClick={fetchRanking} disabled={loading} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black hover:bg-blue-500 disabled:opacity-60">
-                {loading ? '更新中...' : '更新'}
-              </button>
-            </div>
-            <p className="mt-3 text-xs text-slate-400">状態：{meta.status || '未更新'}{meta.lastUpdated && `｜最終更新 ${formatDateTime(meta.lastUpdated)}`}</p>
-            <details className="mt-3 rounded-xl bg-slate-950/60 p-3">
-              <summary className="cursor-pointer text-sm font-bold text-slate-200">API設定</summary>
-              <p className="mt-2 text-xs text-slate-400">JSON URLを設定すると、更新ボタンで取得できます。形式例：[{`{ "rank":1, "player":"選手名", "teamId":"jp", "value":3 }`}]</p>
-              <input
-                value={endpoint}
-                onChange={(e) => setEndpointMap((prev) => ({ ...prev, [type]: e.target.value }))}
-                placeholder="例: https://example.com/worldcup/goals.json"
-                className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white"
-              />
-            </details>
-          </div>
-
-          <div className="overflow-x-auto rounded-2xl border border-slate-700 bg-slate-900/70 soft-scroll">
-            <table className="min-w-[42rem] w-full text-sm">
-              <thead className="bg-slate-800 text-slate-300">
-                <tr>
-                  <th className="w-16 px-3 py-2 text-left">順位</th>
-                  <th className="w-28 px-3 py-2 text-left">{unit}</th>
-                  <th className="px-3 py-2 text-left">国旗 選手名（国名）</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, index) => {
-                  const team = TEAMS[row.teamId];
-                  return (
-                    <tr key={index} className="border-t border-slate-800">
-                      <td className="px-3 py-2 align-top">
-                        <input value={row.rank} onChange={(e) => updateRow(index, 'rank', e.target.value)} className="w-12 rounded-lg bg-slate-800 px-2 py-1 text-white" />
-                      </td>
-                      <td className="px-3 py-2 align-top">
-                        <input value={row.value} onChange={(e) => updateRow(index, 'value', e.target.value)} placeholder="0" className="w-20 rounded-lg bg-slate-800 px-2 py-1 text-white" />
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="grid gap-2 sm:grid-cols-[1fr_13rem]">
-                          <input value={row.player} onChange={(e) => updateRow(index, 'player', e.target.value)} placeholder="選手名" className="w-full rounded-lg bg-slate-800 px-2 py-1 text-white" />
-                          <select value={row.teamId} onChange={(e) => updateRow(index, 'teamId', e.target.value)} className="w-full rounded-lg bg-slate-800 px-2 py-1 text-white">
-                            <option value="">国を選択</option>
-                            {allTeamIds.map((id) => <option key={id} value={id}>{TEAMS[id].name}</option>)}
-                          </select>
-                        </div>
-                        {(row.player || team) && (
-                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-slate-950 px-3 py-1.5 text-sm">
-                            {row.teamId && <Flag teamId={row.teamId} />}
-                            <span className="font-bold">{row.player || '選手名未入力'}</span>
-                            {team && <span className="text-slate-400">（{team.name}）</span>}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={addRow} className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-bold hover:bg-slate-700">行を追加</button>
-            <button onClick={clearRows} className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-bold hover:bg-slate-700">空欄に戻す</button>
-          </div>
-        </section>
-      );
-    }
-
-    function FlashTab() {
-      const [flash, setFlash] = useState(() => safeLoad(FLASH_STORAGE_KEY, {
-        results: [], upcoming: [], live: [], status: '未更新', lastUpdated: ''
-      }));
-      const [loading, setLoading] = useState(false);
-
-      useEffect(() => saveJson(FLASH_STORAGE_KEY, flash), [flash]);
-
-      const loadFlash = async () => {
-        setLoading(true);
-        try {
-          const now = new Date();
-          const from = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-          const to = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-          const dateKeys = Array.from(new Set([from, now, to].map(toDateInput)));
-          const payloads = await Promise.all(dateKeys.map(async (dateKey) => {
-            const url = `${DATA_SOURCES.espnScoreboardUrl}?dates=${dateKey}&limit=100`;
-            const res = await fetchWithTimeout(url);
-            return res.json();
-          }));
-          const events = payloads.flatMap((p) => p.events || []).map(parseEspnEvent);
-          const deduped = Object.values(events.reduce((acc, event) => ({ ...acc, [event.id]: event }), {}));
-          const inWindow = deduped.filter((event) => {
-            const d = new Date(event.date);
-            return d >= from && d <= to;
-          }).sort((a, b) => new Date(a.date) - new Date(b.date));
-          const results = inWindow.filter((event) => event.completed && new Date(event.date) <= now).sort((a, b) => new Date(b.date) - new Date(a.date));
-          const upcoming = inWindow.filter((event) => !event.completed && new Date(event.date) >= now).sort((a, b) => new Date(a.date) - new Date(b.date));
-          const live = inWindow.filter((event) => !event.completed && event.state === 'in');
-          setFlash({
-            results,
-            upcoming,
-            live,
-            status: `結果${results.length}件、予定${upcoming.length}件を取得しました。`,
-            lastUpdated: new Date().toISOString(),
-          });
-        } catch (e) {
-          setFlash((prev) => ({ ...prev, status: `取得できませんでした：${e.message || e}` }));
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      const GameRow = ({ game, showScore }) => (
-        <div className="rounded-2xl border border-slate-700 bg-slate-900/70 p-3">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs text-slate-400">{formatDateTime(game.date)}</p>
-            <span className="rounded-full bg-slate-800 px-2 py-1 text-[11px] text-slate-300">{game.status}</span>
-          </div>
-          <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm">
-            <div className="text-right font-bold">{game.away.name || game.away.abbr}</div>
-            <div className="rounded-xl bg-slate-950 px-3 py-2 text-center font-black">
-              {showScore ? `${game.away.score} - ${game.home.score}` : 'vs'}
-            </div>
-            <div className="font-bold">{game.home.name || game.home.abbr}</div>
-          </div>
-        </div>
-      );
-
-      return (
-        <section className="space-y-4">
-          <div className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-black">速報</h2>
-                <p className="mt-1 text-sm text-slate-400">現在時刻を基準に、24時間前までの結果と24時間後までの試合予定を表示します。</p>
-              </div>
-              <button onClick={loadFlash} disabled={loading} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black hover:bg-blue-500 disabled:opacity-60">
-                {loading ? '更新中...' : '更新'}
-              </button>
-            </div>
-            <p className="mt-3 text-xs text-slate-400">状態：{flash.status}{flash.lastUpdated && `｜最終更新 ${formatDateTime(flash.lastUpdated)}`}</p>
-          </div>
-
-          {flash.live.length > 0 && (
-            <div>
-              <h3 className="mb-2 text-base font-black text-red-200">試合中</h3>
-              <div className="grid gap-3 lg:grid-cols-2">{flash.live.map((game) => <GameRow key={game.id} game={game} showScore />)}</div>
-            </div>
-          )}
-
-          <div>
-            <h3 className="mb-2 text-base font-black">直近24時間の結果</h3>
-            <div className="grid gap-3 lg:grid-cols-2">
-              {flash.results.length ? flash.results.map((game) => <GameRow key={game.id} game={game} showScore />) : <p className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-400">まだ取得結果がありません。更新ボタンを押してください。</p>}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="mb-2 text-base font-black">今後24時間の試合予定</h3>
-            <div className="grid gap-3 lg:grid-cols-2">
-              {flash.upcoming.length ? flash.upcoming.map((game) => <GameRow key={game.id} game={game} />) : <p className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-400">まだ取得予定がありません。更新ボタンを押してください。</p>}
-            </div>
-          </div>
-        </section>
-      );
-    }
-
-    function LatestNewsTab() {
-      const [selectedTarget, setSelectedTarget] = useState('all');
-      const [newsState, setNewsState] = useState(() => safeLoad(LATEST_NEWS_STORAGE_KEY, {
-        items: [], status: '未更新', lastUpdated: '', target: 'all'
-      }));
-      const [loading, setLoading] = useState(false);
-
-      useEffect(() => saveJson(LATEST_NEWS_STORAGE_KEY, newsState), [newsState]);
-
-      const fetchNews = async () => {
-        setLoading(true);
-        try {
-          const target = NEWS_OPTIONS.find((item) => item.id === selectedTarget) || NEWS_OPTIONS[0];
-          const params = new URLSearchParams({ q: target.query, hl: 'ja', gl: 'JP', ceid: 'JP:ja' });
-          const rssUrl = `${DATA_SOURCES.googleNewsRssBase}?${params.toString()}`;
-          const proxiedUrl = `${DATA_SOURCES.corsProxyRaw}${encodeURIComponent(rssUrl)}`;
-          const res = await fetchWithTimeout(proxiedUrl);
-          const text = await res.text();
-          const doc = new DOMParser().parseFromString(text, 'text/xml');
-          const items = Array.from(doc.querySelectorAll('item')).slice(0, 12).map((item) => ({
-            title: item.querySelector('title')?.textContent || '',
-            link: item.querySelector('link')?.textContent || '',
-            pubDate: item.querySelector('pubDate')?.textContent || '',
-            source: item.querySelector('source')?.textContent || '',
-          })).filter((item) => item.title && item.link);
-          if (!items.length) throw new Error('ニュースを読み取れませんでした。');
-          setNewsState({
-            items,
-            status: `${target.label}のニュースを${items.length}件取得しました。`,
-            lastUpdated: new Date().toISOString(),
-            target: selectedTarget,
-          });
-        } catch (e) {
-          setNewsState((prev) => ({ ...prev, status: `取得できませんでした：${e.message || e}` }));
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      return (
-        <section className="space-y-4">
-          <div className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4">
-            <h2 className="text-lg font-black">最新ニュース</h2>
-            <p className="mt-1 text-sm text-slate-400">W杯全体、または国別に日本語記事を取得します。</p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
-              <select value={selectedTarget} onChange={(e) => setSelectedTarget(e.target.value)} className="rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-white">
-                {NEWS_OPTIONS.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-              </select>
-              <button onClick={fetchNews} disabled={loading} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-black hover:bg-blue-500 disabled:opacity-60">
-                {loading ? '更新中...' : '更新'}
-              </button>
-            </div>
-            <p className="mt-3 text-xs text-slate-400">状態：{newsState.status}{newsState.lastUpdated && `｜最終更新 ${formatDateTime(newsState.lastUpdated)}`}</p>
-          </div>
-
-          <div className="grid gap-3">
-            {newsState.items.length ? newsState.items.map((item, index) => (
-              <a key={`${item.link}-${index}`} href={item.link} target="_blank" rel="noreferrer" className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 hover:border-blue-400 hover:bg-slate-800">
-                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="font-bold leading-snug">{item.title}</p>
-                  {item.source && <span className="shrink-0 rounded-full bg-slate-800 px-2 py-1 text-[11px] text-slate-300">{item.source}</span>}
-                </div>
-                <p className="mt-2 text-xs text-slate-500">{formatDateTime(item.pubDate)}</p>
-              </a>
-            )) : <p className="rounded-2xl border border-slate-700 bg-slate-900/70 p-4 text-sm text-slate-400">まだニュースがありません。対象を選んで更新してください。</p>}
-          </div>
-        </section>
-      );
-    }
-
-    function GroupReference() {
-      return (
-        <details className="rounded-2xl border border-slate-700 bg-slate-900/60 p-4">
-          <summary className="cursor-pointer text-sm font-bold text-slate-200">グループ一覧を表示</summary>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {Object.entries(GROUPS).map(([group, ids]) => (
-              <div key={group} className="rounded-xl bg-slate-950/70 p-3">
-                <p className="mb-2 font-black text-blue-200">Group {group}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {ids.map((id) => <TeamPill key={id} teamId={id} />)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </details>
-      );
-    }
-
-    function App() {
-      const [activeTab, setActiveTab] = useState(() => safeLoad(APP_STORAGE_KEY, 'bracket'));
-      const [bracket, setBracket] = useState(() => ({ ...INITIAL_BRACKET, ...safeLoad(BRACKET_STORAGE_KEY, {}) }));
-      const [stats, setStats] = useState(() => safeLoad(STATS_STORAGE_KEY, defaultStats));
-
-      useEffect(() => localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(activeTab)), [activeTab]);
-      useEffect(() => localStorage.setItem(BRACKET_STORAGE_KEY, JSON.stringify(bracket)), [bracket]);
-      useEffect(() => localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(stats)), [stats]);
-
-      const tabs = [
-        { key: 'bracket', label: '決勝トーナメント' },
-        { key: 'goals', label: '得点ランキング' },
-        { key: 'assists', label: 'アシストランキング' },
-        { key: 'flash', label: '速報' },
-        { key: 'latestNews', label: '最新ニュース' },
-      ];
-
-      useEffect(() => {
-        if (!tabs.some((tab) => tab.key === activeTab)) setActiveTab('bracket');
-      }, [activeTab]);
-
-      return (
-        <div className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
-          <header className="mx-auto mb-5 max-w-7xl">
-            <p className="text-xs font-bold tracking-[.25em] text-blue-300">FIFA WORLD CUP 2026</p>
-            <h1 className="mt-2 text-2xl font-black sm:text-4xl">北米中W杯 2026 観戦アプリ</h1>
-            <p className="mt-2 text-sm text-slate-400">決勝トーナメントのシミュレーション、ランキング、速報、国別ニュースをまとめた簡易Webアプリです。</p>
-          </header>
-
-          <main className="mx-auto max-w-7xl space-y-5">
-            <nav className="soft-scroll flex gap-2 overflow-x-auto rounded-2xl border border-slate-700 bg-slate-900/70 p-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`shrink-0 rounded-xl px-4 py-2 text-sm font-black transition ${activeTab === tab.key ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-
-            {activeTab === 'bracket' && <GroupReference />}
-            {activeTab === 'bracket' && <BracketTab bracket={bracket} setBracket={setBracket} />}
-            {activeTab === 'goals' && <StatsTab type="goals" stats={stats} setStats={setStats} />}
-            {activeTab === 'assists' && <StatsTab type="assists" stats={stats} setStats={setStats} />}
-            {activeTab === 'flash' && <FlashTab />}
-            {activeTab === 'latestNews' && <LatestNewsTab />}
-          </main>
-        </div>
-      );
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+  <noscript><div style="padding:20px;color:white;background:#991b1b">JavaScriptを有効にしてください。</div></noscript>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">FIFA WORLD CUP 2026</div>
+      <h1 class="title">北米中W杯 2026 観戦アプリ</h1>
+      <p class="lead">決勝トーナメントのシミュレーション、ランキング、速報、国別ニュースをまとめた簡易Webアプリです。React/Babelを使わないため、GitHub Pagesで白画面になりにくい版です。</p>
+    </header>
+
+    <nav class="tabs" id="tabs"></nav>
+    <main id="app"></main>
+  </div>
+
+<script>
+(function(){
+  'use strict';
+  const STORAGE='wc2026-vanilla-v1';
+  const SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+  const NEWS_RSS='https://news.google.com/rss/search';
+  const PROXY='https://api.allorigins.win/raw?url=';
+
+  const teams={
+    mx:['メキシコ','mx'], za:['南アフリカ','za'], kr:['韓国','kr'], cz:['チェコ','cz'],
+    ca:['カナダ','ca'], ba:['ボスニア・ヘルツェゴビナ','ba'], qa:['カタール','qa'], ch:['スイス','ch'],
+    br:['ブラジル','br'], ma:['モロッコ','ma'], ht:['ハイチ','ht'], sct:['スコットランド','gb-sct'],
+    us:['アメリカ','us'], py:['パラグアイ','py'], au:['オーストラリア','au'], tr:['トゥルキエ','tr'],
+    de:['ドイツ','de'], ci:['コートジボワール','ci'], ec:['エクアドル','ec'], cw:['キュラソー','cw'],
+    nl:['オランダ','nl'], jp:['日本','jp'], tn:['チュニジア','tn'], se:['スウェーデン','se'],
+    be:['ベルギー','be'], eg:['エジプト','eg'], ir:['イラン','ir'], nz:['ニュージーランド','nz'],
+    es:['スペイン','es'], sa:['サウジアラビア','sa'], cv:['カーボベルデ','cv'], uy:['ウルグアイ','uy'],
+    fr:['フランス','fr'], sn:['セネガル','sn'], iq:['イラク','iq'], no:['ノルウェー','no'],
+    ar:['アルゼンチン','ar'], dz:['アルジェリア','dz'], at:['オーストリア','at'], jo:['ヨルダン','jo'],
+    pt:['ポルトガル','pt'], uz:['ウズベキスタン','uz'], co:['コロンビア','co'], cd:['コンゴ民主共和国','cd'],
+    eng:['イングランド','gb-eng'], hr:['クロアチア','hr'], gh:['ガーナ','gh'], pa:['パナマ','pa']
+  };
+  const group={A:['mx','za','kr','cz'],B:['ca','ba','qa','ch'],C:['br','ma','ht','sct'],D:['us','py','au','tr'],E:['de','ci','ec','cw'],F:['nl','jp','tn','se'],G:['be','eg','ir','nz'],H:['es','sa','cv','uy'],I:['fr','sn','iq','no'],J:['ar','dz','at','jo'],K:['pt','uz','co','cd'],L:['eng','hr','gh','pa']};
+  const allIds=Object.keys(teams);
+  const uniq=a=>[...new Set(a)];
+  const groupTeams=letters=>uniq(letters.flatMap(g=>group[g]||[]));
+  const third={
+    'A/B/C/D/F':groupTeams(['A','B','C','D','F']),'C/D/F/G/H':groupTeams(['C','D','F','G','H']),
+    'C/E/F/H/I':groupTeams(['C','E','F','H','I']),'E/H/I/J/K':groupTeams(['E','H','I','J','K']),
+    'B/E/F/I/J':groupTeams(['B','E','F','I','J']),'A/E/H/I/J':groupTeams(['A','E','H','I','J']),
+    'E/F/G/I/J':groupTeams(['E','F','G','I','J']),'D/E/I/J/L':groupTeams(['D','E','I','J','L'])
+  };
+
+  const ro32=[
+    ['M73','Match 73','6/28｜LA',['A2','g','A'],['B2','g','B']],
+    ['M74','Match 74','6/29｜Foxborough',['E1','g','E'],['3位 A/B/C/D/F','t','A/B/C/D/F']],
+    ['M75','Match 75','6/30｜Guadalupe',['F1','g','F'],['C2','g','C']],
+    ['M76','Match 76','6/29｜Houston',['C1','g','C'],['F2','g','F']],
+    ['M77','Match 77','6/30｜New Jersey',['I1','g','I'],['3位 C/D/F/G/H','t','C/D/F/G/H']],
+    ['M78','Match 78','6/30｜Arlington',['E2','g','E'],['I2','g','I']],
+    ['M79','Match 79','7/1｜Mexico City',['A1','g','A'],['3位 C/E/F/H/I','t','C/E/F/H/I']],
+    ['M80','Match 80','7/1｜Atlanta',['L1','g','L'],['3位 E/H/I/J/K','t','E/H/I/J/K']],
+    ['M81','Match 81','7/2｜Santa Clara',['D1','g','D'],['3位 B/E/F/I/J','t','B/E/F/I/J']],
+    ['M82','Match 82','7/1｜Seattle',['G1','g','G'],['3位 A/E/H/I/J','t','A/E/H/I/J']],
+    ['M83','Match 83','7/3｜Toronto',['K2','g','K'],['L2','g','L']],
+    ['M84','Match 84','7/2｜LA',['H1','g','H'],['J2','g','J']],
+    ['M85','Match 85','7/3｜Vancouver',['B1','g','B'],['3位 E/F/G/I/J','t','E/F/G/I/J']],
+    ['M86','Match 86','7/3｜Miami',['J1','g','J'],['H2','g','H']],
+    ['M87','Match 87','7/4｜Kansas City',['K1','g','K'],['3位 D/E/I/J/L','t','D/E/I/J/L']],
+    ['M88','Match 88','7/3｜Arlington',['D2','g','D'],['G2','g','G']]
+  ];
+  const later=[
+    ['ベスト16',[['M89','勝者 M73','勝者 M75'],['M90','勝者 M74','勝者 M77'],['M91','勝者 M76','勝者 M78'],['M92','勝者 M79','勝者 M80'],['M93','勝者 M83','勝者 M84'],['M94','勝者 M81','勝者 M82'],['M95','勝者 M86','勝者 M88'],['M96','勝者 M85','勝者 M87']]],
+    ['準々決勝',[['M97','勝者 M89','勝者 M90'],['M98','勝者 M93','勝者 M94'],['M99','勝者 M91','勝者 M92'],['M100','勝者 M95','勝者 M96']]],
+    ['準決勝',[['M101','勝者 M97','勝者 M98'],['M102','勝者 M99','勝者 M100']]],
+    ['決勝',[['M104','勝者 M101','勝者 M102']]]
+  ];
+  const tabs=[['bracket','決勝トーナメント'],['goals','得点ランキング'],['assists','アシストランキング'],['flash','速報'],['news','最新ニュース']];
+
+  function initialState(){
+    const bracket={};
+    ro32.forEach(m=>{bracket[m[0]]={id:m[0],title:m[1],venue:m[2],a:slot(m[3]),b:slot(m[4])};});
+    later.forEach(r=>r[1].forEach(m=>{bracket[m[0]]={id:m[0],title:m[0],venue:'',a:freeSlot(m[1]),b:freeSlot(m[2])};}));
+    bracket.CHAMPION={id:'CHAMPION',title:'優勝予想',venue:'',a:freeSlot('優勝'),b:freeSlot('準優勝')};
+    return {active:'bracket',bracket,goals:blankRows(),assists:blankRows(),flash:{results:[],upcoming:[],live:[],status:'未更新',last:''},news:{items:[],status:'未更新',last:''},newsTarget:'all',goalsApi:'',assistsApi:''};
+  }
+  function slot(def){const [label,kind,key]=def; const opts=kind==='g'?(group[key]||[]):(kind==='t'?(third[key]||allIds):allIds); return {label,kind,key,opts,selected:kind==='g'?[...opts]:[]};}
+  function freeSlot(label){return {label,kind:'free',key:'',opts:allIds,selected:[]};}
+  function blankRows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}));}
+  function load(){try{return Object.assign(initialState(),JSON.parse(localStorage.getItem(STORAGE)||'{}'));}catch(e){return initialState();}}
+  let state=load();
+  function save(){localStorage.setItem(STORAGE,JSON.stringify(state));}
+  function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+  function flag(id){const t=teams[id];return t?`<img class="flag" src="https://flagcdn.com/w40/${t[1]}.png" alt="${esc(t[0])}">`:'';}
+  function pill(id){const t=teams[id];return t?`<span class="pill ${id==='jp'?'jp':''}">${flag(id)}${esc(t[0])}</span>`:'';}
+  function fmt(d){if(!d)return'';const x=new Date(d);if(isNaN(x))return d;return new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit'}).format(x);}
+  function ymd(d){return String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
+
+  function render(){renderTabs();const app=document.getElementById('app'); if(state.active==='bracket')app.innerHTML=bracketHtml(); if(state.active==='goals')app.innerHTML=rankingHtml('goals'); if(state.active==='assists')app.innerHTML=rankingHtml('assists'); if(state.active==='flash')app.innerHTML=flashHtml(); if(state.active==='news')app.innerHTML=newsHtml(); bind();}
+  function renderTabs(){document.getElementById('tabs').innerHTML=tabs.map(t=>`<button class="tab ${state.active===t[0]?'active':''}" data-tab="${t[0]}">${t[1]}</button>`).join('');}
+  function bind(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render();});
+    document.querySelectorAll('[data-slot]').forEach(sel=>sel.onchange=()=>{const [mid,side]=sel.dataset.slot.split('|');state.bracket[mid][side].selected=[...sel.selectedOptions].map(o=>o.value);save();render();});
+    document.querySelectorAll('[data-rank]').forEach(i=>i.oninput=rankingInput);
+    const reset=document.getElementById('resetBracket'); if(reset)reset.onclick=()=>{if(confirm('トーナメントを初期化しますか？')){state.bracket=initialState().bracket;save();render();}};
+    const copy=document.getElementById('copyJson'); if(copy)copy.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(state.bracket,null,2));alert('コピーしました。');};
+    const add=document.getElementById('addRow'); if(add)add.onclick=()=>{state[state.active].push({rank:state[state.active].length+1,value:'',player:'',team:''});save();render();};
+    const clear=document.getElementById('clearRows'); if(clear)clear.onclick=()=>{if(confirm('空欄に戻しますか？')){state[state.active]=blankRows();save();render();}};
+    const api=document.getElementById('apiUrl'); if(api)api.oninput=()=>{state[state.active+'Api']=api.value;save();};
+    const updateRanking=document.getElementById('updateRanking'); if(updateRanking)updateRanking.onclick=fetchRanking;
+    const updateFlash=document.getElementById('updateFlash'); if(updateFlash)updateFlash.onclick=fetchFlash;
+    const newsSel=document.getElementById('newsTarget'); if(newsSel)newsSel.onchange=()=>{state.newsTarget=newsSel.value;save();};
+    const updateNews=document.getElementById('updateNews'); if(updateNews)updateNews.onclick=fetchNews;
+  }
+  function bracketHtml(){return `<section class="panel"><div class="card note"><b>決勝トーナメント・シミュレーション</b><p class="small">各枠で候補国を複数選択できます。グループ1・2位枠は、そのグループ4か国を初期候補として表示しています。</p></div><div class="row"><button class="btn secondary" id="resetBracket">初期化</button><button class="btn secondary" id="copyJson">JSONコピー</button></div><div class="card"><details><summary><b>グループ一覧を表示</b></summary><div class="groups">${Object.entries(group).map(([g,ids])=>`<div class="group-card"><b>Group ${g}</b><div class="pills">${ids.map(pill).join('')}</div></div>`).join('')}</div></details></div>${roundHtml('ラウンド32',ro32.map(m=>state.bracket[m[0]]))}${later.map(r=>roundHtml(r[0],r[1].map(m=>state.bracket[m[0]]))).join('')}${roundHtml('優勝・準優勝予想',[state.bracket.CHAMPION])}</section>`;}
+  function roundHtml(title,matches){return `<h2 class="section-title">${title}</h2><div class="bracket">${matches.map(matchHtml).join('')}</div>`;}
+  function matchHtml(m){return `<div class="match"><h3>${esc(m.title)}</h3>${m.venue?`<div class="venue">${esc(m.venue)}</div>`:''}${slotHtml(m.id,'a',m.a)}${slotHtml(m.id,'b',m.b)}</div>`;}
+  function slotHtml(mid,side,s){const jp=s.selected.includes('jp');return `<div class="slot ${jp?'jp':''}"><div class="slot-head"><span class="label">${esc(s.label)}</span><span class="small">${s.kind==='g'?'グループ'+s.key:s.kind==='t'?'対象 '+s.key:'全出場国'}</span></div><select class="select" multiple data-slot="${mid}|${side}">${s.opts.map(id=>`<option value="${id}" ${s.selected.includes(id)?'selected':''}>${teams[id][0]}</option>`).join('')}</select><div class="pills">${s.selected.map(pill).join('')||'<span class="small">未選択</span>'}</div></div>`;}
+  function rankingHtml(type){const unit=type==='goals'?'得点数':'アシスト数';const title=type==='goals'?'得点ランキング':'アシストランキング';const api=state[type+'Api']||'';return `<section class="panel"><div class="card"><div class="row" style="justify-content:space-between"><div><h2 style="margin:0">${title}</h2><p class="small">順位、${unit}、国旗、選手名（国名）を表示します。</p></div><button class="btn" id="updateRanking">更新</button></div><div style="margin-top:10px"><div class="small">API設定。未設定なら手入力で使えます。</div><input class="api-input" id="apiUrl" value="${esc(api)}" placeholder="https://example.com/worldcup/${type}.json"></div></div><div class="table-wrap"><table><thead><tr><th>順位</th><th>${unit}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${state[type].map((r,i)=>rowHtml(type,r,i)).join('')}</tbody></table></div><div class="row" style="margin-top:10px"><button class="btn secondary" id="addRow">行を追加</button><button class="btn secondary" id="clearRows">空欄に戻す</button></div></section>`;}
+  function rowHtml(type,r,i){return `<tr><td><input class="input" style="width:70px" data-rank="${type}|${i}|rank" value="${esc(r.rank)}"></td><td><input class="input" style="width:90px" data-rank="${type}|${i}|value" value="${esc(r.value)}"></td><td><div class="grid" style="grid-template-columns:1fr 180px"><input class="input" data-rank="${type}|${i}|player" value="${esc(r.player)}" placeholder="選手名"><select class="country-select" data-rank="${type}|${i}|team"><option value="">国を選択</option>${allIds.map(id=>`<option value="${id}" ${r.team===id?'selected':''}>${teams[id][0]}</option>`).join('')}</select></div><div class="pills">${r.team?pill(r.team):''}<span class="small">${esc(r.player||'選手名未入力')}${r.team?'（'+esc(teams[r.team][0])+'）':''}</span></div></td></tr>`;}
+  function rankingInput(e){const [type,i,field]=e.target.dataset.rank.split('|');state[type][Number(i)][field]=e.target.value;save();}
+  async function fetchRanking(){const type=state.active;const url=state[type+'Api'];if(!url){alert('API URLが未設定です。現時点では手入力で利用してください。');return;}try{const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);const json=await res.json();const rows=(Array.isArray(json)?json:(json.items||json.data||json.leaders||[])).map((x,i)=>({rank:x.rank||i+1,value:String(x.value??x.goals??x.assists??x.count??''),player:x.player||x.playerName||x.name||'',team:resolveTeam(x.teamId||x.country||x.team||x.nation||'')}));state[type]=rows.length?rows:state[type];save();render();}catch(e){alert('取得できませんでした：'+e.message);}}
+  function resolveTeam(raw){const v=String(raw||'').toLowerCase();if(teams[v])return v;return allIds.find(id=>teams[id][0].toLowerCase()===v||v.includes(teams[id][0].toLowerCase()))||'';}
+  function flashHtml(){const f=state.flash;return `<section class="panel"><div class="card"><div class="row" style="justify-content:space-between"><div><h2 style="margin:0">速報</h2><p class="small">現在時刻を基準に、24時間前までの結果と24時間後までの試合予定を表示します。</p></div><button class="btn" id="updateFlash">更新</button></div><div class="status">状態：${esc(f.status)}${f.last?'｜最終更新 '+fmt(f.last):''}</div></div>${gameSection('試合中',f.live,true)}${gameSection('直近24時間の結果',f.results,true)}${gameSection('今後24時間の試合予定',f.upcoming,false)}</section>`;}
+  function gameSection(title,items,score){return `<h2 class="section-title">${title}</h2><div class="grid">${items.length?items.map(g=>gameHtml(g,score)).join(''):'<div class="card small">まだ取得結果がありません。更新ボタンを押してください。</div>'}</div>`;}
+  function gameHtml(g,show){return `<div class="game"><div class="row" style="justify-content:space-between"><span class="small">${fmt(g.date)}</span><span class="small">${esc(g.status)}</span></div><div class="scoreline"><div class="right"><b>${esc(g.away.name||g.away.abbr)}</b></div><div class="score">${show?esc(g.away.score)+' - '+esc(g.home.score):'vs'}</div><div><b>${esc(g.home.name||g.home.abbr)}</b></div></div></div>`;}
+  async function fetchFlash(){state.flash.status='更新中...';save();render();try{const now=new Date(),from=new Date(now-86400000),to=new Date(now.getTime()+86400000);const dates=[...new Set([from,now,to].map(ymd))];const payloads=await Promise.all(dates.map(d=>fetch(SCOREBOARD+'?dates='+d+'&limit=100').then(r=>r.json())));const events=payloads.flatMap(p=>p.events||[]).map(parseEvent);const unique=Object.values(events.reduce((a,e)=>(a[e.id]=e,a),{}));const win=unique.filter(e=>{const d=new Date(e.date);return d>=from&&d<=to;}).sort((a,b)=>new Date(a.date)-new Date(b.date));state.flash={results:win.filter(e=>e.completed&&new Date(e.date)<=now).sort((a,b)=>new Date(b.date)-new Date(a.date)),upcoming:win.filter(e=>!e.completed&&new Date(e.date)>=now),live:win.filter(e=>!e.completed&&e.state==='in'),status:'取得しました。',last:new Date().toISOString()};}catch(e){state.flash.status='取得できませんでした：'+e.message;}save();render();}
+  function parseEvent(ev){const c=(ev.competitions||[])[0]||{},cs=c.competitors||[],home=cs.find(x=>x.homeAway==='home')||cs[0]||{},away=cs.find(x=>x.homeAway==='away')||cs[1]||{},st=(ev.status||{}).type||{};return{id:ev.id,date:ev.date,status:st.shortDetail||st.description||st.name||'',completed:!!st.completed,state:st.state||'',home:{name:home.team?.displayName||home.team?.shortDisplayName||'',abbr:home.team?.abbreviation||'',score:home.score??''},away:{name:away.team?.displayName||away.team?.shortDisplayName||'',abbr:away.team?.abbreviation||'',score:away.score??''}};}
+  function newsOptions(){return [{id:'all',label:'W杯全体',query:'サッカー ワールドカップ 2026'}].concat(allIds.map(id=>({id,label:teams[id][0],query:'サッカー ワールドカップ 2026 '+teams[id][0]})));}
+  function newsHtml(){const opts=newsOptions();return `<section class="panel"><div class="card"><h2 style="margin:0">最新ニュース</h2><p class="small">W杯全体、または国別に日本語記事を取得します。</p><div class="row"><select class="news-select" id="newsTarget" style="flex:1">${opts.map(o=>`<option value="${o.id}" ${state.newsTarget===o.id?'selected':''}>${o.label}</option>`).join('')}</select><button class="btn" id="updateNews">更新</button></div><div class="status">状態：${esc(state.news.status)}${state.news.last?'｜最終更新 '+fmt(state.news.last):''}</div></div><div class="grid">${state.news.items.length?state.news.items.map(n=>`<a class="news-item" href="${esc(n.link)}" target="_blank" rel="noreferrer"><div class="news-title">${esc(n.title)}${n.source?`<span class="source">${esc(n.source)}</span>`:''}</div><div class="small">${fmt(n.pubDate)}</div></a>`).join(''):'<div class="card small">まだニュースがありません。対象を選んで更新してください。</div>'}</div></section>`;}
+  async function fetchNews(){state.news.status='更新中...';save();render();try{const o=newsOptions().find(x=>x.id===state.newsTarget)||newsOptions()[0];const params=new URLSearchParams({q:o.query,hl:'ja',gl:'JP',ceid:'JP:ja'});const rss=NEWS_RSS+'?'+params.toString();const text=await fetch(PROXY+encodeURIComponent(rss)).then(r=>r.text());const doc=new DOMParser().parseFromString(text,'text/xml');const items=[...doc.querySelectorAll('item')].slice(0,12).map(item=>({title:item.querySelector('title')?.textContent||'',link:item.querySelector('link')?.textContent||'',pubDate:item.querySelector('pubDate')?.textContent||'',source:item.querySelector('source')?.textContent||''})).filter(x=>x.title&&x.link);if(!items.length)throw new Error('ニュースを読み取れませんでした。');state.news={items,status:o.label+'のニュースを'+items.length+'件取得しました。',last:new Date().toISOString()};}catch(e){state.news.status='取得できませんでした：'+e.message;}save();render();}
+  try{render();}catch(e){document.getElementById('app').innerHTML='<div class="card error"><b>画面表示エラー</b><p>'+esc(e.message)+'</p></div>';console.error(e);}
+})();
+</script>
 </body>
 </html>
-

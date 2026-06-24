@@ -20,16 +20,85 @@
     .tab{border:1px solid transparent;border-radius:10px;padding:8px 10px;background:transparent;color:#c8d6ea;font-size:12px;font-weight:800;white-space:nowrap}.tab.active{background:rgba(52,210,208,.16);border-color:rgba(52,210,208,.45);color:#fff}
     .panel{margin-top:10px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 2px}.btn{border:1px solid var(--line);border-radius:10px;background:#111c30;color:#eaf3ff;padding:8px 10px;font-weight:800;font-size:12px}.btn.primary{background:linear-gradient(180deg,#1b8a94,#155c66);border-color:rgba(52,210,208,.44)}
 
-    .bracket-card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(11,18,32,.94),rgba(5,9,19,.96));box-shadow:var(--shadow);padding:8px;overflow:hidden}
-    .bracket{position:relative;display:grid;grid-template-columns:1fr 28px 1fr;gap:6px;min-height:760px;background:radial-gradient(circle at 50% 50%,rgba(52,210,208,.10),transparent 24%);border-radius:14px;padding:5px 0}
-    .spine{position:relative}.spine:before{content:"";position:absolute;top:40px;bottom:40px;left:50%;width:2px;background:linear-gradient(180deg,transparent,var(--line2),var(--line2),transparent)}.spine:after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:999px;background:var(--gold);box-shadow:0 0 18px rgba(240,201,107,.95);transform:translate(-45%,-50%)}
-    .side{display:flex;flex-direction:column;justify-content:space-between;min-width:0}.match{position:relative;min-height:82px}.match:after{content:"";position:absolute;top:50%;width:15px;height:2px;background:var(--line2)}.side.left .match:after{right:-16px}.side.right .match:after{left:-16px}.match-lines{position:absolute;top:19px;bottom:19px;width:13px;border-top:2px solid var(--line2);border-bottom:2px solid var(--line2)}.side.left .match-lines{right:-2px;border-right:2px solid var(--line2);border-radius:0 4px 4px 0}.side.right .match-lines{left:-2px;border-left:2px solid var(--line2);border-radius:4px 0 0 4px}
-    .slot{height:36px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,#14223a,#0d1728);display:flex;align-items:center;gap:6px;padding:4px 6px;margin-bottom:6px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);cursor:pointer;position:relative;z-index:2}.slot:hover{border-color:rgba(52,210,208,.62)}.slot.jp{background:linear-gradient(180deg,rgba(35,135,139,.95),rgba(16,89,96,.95));border-color:rgba(93,243,240,.64)}.slot.empty{color:#a4b3c9}.tag{min-width:31px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:#24314a;color:#c8d5e8;font-size:10px;font-weight:900}.slot.jp .tag{background:#6ee7e5;color:#08212a}.team-text{font-size:clamp(10px,2.5vw,14px);font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.team-text .muted{font-weight:700;color:#aab8cc}.flag{font-size:14px;margin-right:3px}.side.right .slot{flex-direction:row}.side.right .team-text{direction:ltr}
-
+    .bracket-card{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:
+        radial-gradient(circle at 50% 50%,rgba(52,210,208,.10),transparent 22%),
+        linear-gradient(180deg,rgba(11,18,32,.94),rgba(5,9,19,.96));
+      box-shadow:var(--shadow);
+      padding:8px;
+      overflow:hidden;
+    }
+    .bracket{
+      position:relative;
+      width:100%;
+      max-width:920px;
+      aspect-ratio:920/750;
+      margin:0 auto;
+      border-radius:14px;
+      background:linear-gradient(180deg,rgba(8,14,25,.2),rgba(5,9,19,.2));
+    }
+    .bracket-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+    .bracket-svg path,.bracket-svg line{
+      stroke:var(--line2);
+      stroke-width:2;
+      fill:none;
+      vector-effect:non-scaling-stroke;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+    .bracket-svg .final-dot{fill:var(--gold);stroke:none;filter:drop-shadow(0 0 8px rgba(240,201,107,.9))}
+    .slot{
+      position:absolute;
+      z-index:2;
+      width:31.8%;
+      height:4.9%;
+      min-height:30px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:linear-gradient(180deg,#14223a,#0d1728);
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 6px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
+      cursor:pointer;
+      overflow:hidden;
+    }
+    .slot:hover{border-color:rgba(52,210,208,.62)}
+    .slot.jp{background:linear-gradient(180deg,rgba(35,135,139,.95),rgba(16,89,96,.95));border-color:rgba(93,243,240,.64)}
+    .slot.empty{color:#a4b3c9}
+    .tag{
+      flex:0 0 31px;
+      height:24px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:6px;
+      background:#24314a;
+      color:#c8d5e8;
+      font-size:10px;
+      font-weight:900;
+    }
+    .slot.jp .tag{background:#6ee7e5;color:#08212a}
+    .team-text{
+      flex:1 1 auto;
+      min-width:0;
+      font-size:clamp(9px,1.35vw,14px);
+      font-weight:900;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .team-text .muted{font-weight:700;color:#aab8cc}
+    .flag{font-size:14px;margin-right:3px}
+    .toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px}
     .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px}.sheet-title{font-weight:900}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
 
     .card{border:1px solid var(--line);border-radius:16px;background:rgba(12,20,36,.9);padding:14px;margin:10px 0;box-shadow:var(--shadow)}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(205,220,245,.12);padding:8px;text-align:left}.input{width:100%;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#fff;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.bracket{grid-template-columns:1fr 18px 1fr;gap:3px;min-height:720px}.slot{height:34px;padding:3px 4px}.tag{min-width:27px;height:22px;font-size:9px}.flag{font-size:12px}.match:after{width:10px}.side.left .match:after{right:-11px}.side.right .match:after{left:-11px}.match-lines{width:9px}.title{font-size:19px}.lead{display:none}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.slot{padding:2px 3px;border-radius:6px}.tag{flex-basis:25px;height:20px;font-size:9px}.flag{font-size:11px}.team-text{font-size:9px}.toolbar{display:none}}
   </style>
 </head>
 <body>
@@ -87,9 +156,48 @@ function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function teamText(ids){if(!ids||!ids.length)return '<span class="muted">3位候補</span>';return ids.map(id=>T[id]?`<span class="flag">${T[id][1]}</span>${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
 function render(){document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():simpleTab(state.active);bind()}
-function bracketHTML(){return `<section class="panel"><div class="toolbar"><span class="small">各枠をタップして候補国を選択できます。</span><button class="btn" id="reset">初期表示に戻す</button></div><div class="bracket-card"><div class="bracket"><div class="side left">${state.bracket.left.map(matchHTML).join('')}</div><div class="spine"></div><div class="side right">${state.bracket.right.map(matchHTML).join('')}</div></div></div></section>`}
-function matchHTML(m){return `<div class="match"><span class="match-lines"></span>${m.map(slotHTML).join('')}</div>`}
-function slotHTML(s){return `<button class="slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'}" data-slot="${s.id}"><span class="tag">${esc(s.tag)}</span><span class="team-text">${teamText(s.sel)}</span></button>`}
+function bracketHTML(){
+  const leftSlots=state.bracket.left.flatMap((m,mi)=>m.map((slot,si)=>slotHTML(slot,'left',mi,si))).join('');
+  const rightSlots=state.bracket.right.flatMap((m,mi)=>m.map((slot,si)=>slotHTML(slot,'right',mi,si))).join('');
+  return `<section class="panel">
+    <div class="toolbar"><button class="btn" id="reset">初期表示に戻す</button></div>
+    <div class="bracket-card">
+      <div class="bracket">
+        ${linesSVG()}
+        ${leftSlots}
+        ${rightSlots}
+      </div>
+    </div>
+  </section>`
+}
+function linesSVG(){
+  const ys=[4.2,16.4,28.6,40.8,53.0,65.2,77.4,89.6];
+  const y1=ys.map(y=>[y,y+5.9]);
+  const mid=ys.map(y=>y+2.95);
+  const block=[(mid[0]+mid[1])/2,(mid[2]+mid[3])/2,(mid[4]+mid[5])/2,(mid[6]+mid[7])/2];
+  const semi=[(block[0]+block[1])/2,(block[2]+block[3])/2];
+  const final=(semi[0]+semi[1])/2;
+  let p=[];
+  const line=(x1,x2,y)=>p.push(`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/>`);
+  y1.forEach(([a,b],i)=>{line(32.8,35.0,a);line(32.8,35.0,b);p.push(`<line x1="35.0" y1="${a}" x2="35.0" y2="${b}"/>`);line(35.0,38.0,mid[i]);});
+  for(let i=0;i<4;i++){const a=mid[i*2],b=mid[i*2+1],m=block[i];p.push(`<line x1="38.0" y1="${a}" x2="38.0" y2="${b}"/>`);line(38.0,41.0,m);}
+  for(let i=0;i<2;i++){const a=block[i*2],b=block[i*2+1],m=semi[i];p.push(`<line x1="41.0" y1="${a}" x2="41.0" y2="${b}"/>`);line(41.0,45.0,m);}
+  p.push(`<line x1="45.0" y1="${semi[0]}" x2="45.0" y2="${semi[1]}"/>`);
+  line(45.0,49.0,final);
+  y1.forEach(([a,b],i)=>{line(67.2,65.0,a);line(67.2,65.0,b);p.push(`<line x1="65.0" y1="${a}" x2="65.0" y2="${b}"/>`);line(65.0,62.0,mid[i]);});
+  for(let i=0;i<4;i++){const a=mid[i*2],b=mid[i*2+1],m=block[i];p.push(`<line x1="62.0" y1="${a}" x2="62.0" y2="${b}"/>`);line(62.0,59.0,m);}
+  for(let i=0;i<2;i++){const a=block[i*2],b=block[i*2+1],m=semi[i];p.push(`<line x1="59.0" y1="${a}" x2="59.0" y2="${b}"/>`);line(59.0,55.0,m);}
+  p.push(`<line x1="55.0" y1="${semi[0]}" x2="55.0" y2="${semi[1]}"/>`);
+  line(55.0,51.0,final);
+  p.push(`<line x1="49.0" y1="${final}" x2="51.0" y2="${final}"/>`);
+  p.push(`<circle class="final-dot" cx="50" cy="${final}" r=".65"/>`);
+  return `<svg class="bracket-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${p.join('')}</svg>`
+}
+function slotHTML(s,side,mi,si){
+  const top=4.2+(mi*12.2)+(si?5.9:0);
+  const left=side==='left'?1.1:67.1;
+  return `<button class="slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'}" style="left:${left}%;top:${top}%" data-slot="${s.id}"><span class="tag">${esc(s.tag)}</span><span class="team-text">${teamText(s.sel)}</span></button>`
+}
 function simpleTab(tab){const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;let rowsData=state[tab];return `<div class="card"><h2>${title}</h2><table class="table"><thead><tr><th>順位</th><th>${tab==='goals'?'得点数':'アシスト数'}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank}</td><td><input class="input" data-r="${tab}|${i}|value" value="${esc(r.value)}"></td><td><input class="input" data-r="${tab}|${i}|player" placeholder="選手名" value="${esc(r.player)}"></td></tr>`).join('')}</tbody></table></div>`}
 function bind(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>openSheet(b.dataset.slot));const reset=document.getElementById('reset');if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);save();render()}};document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()})}
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}

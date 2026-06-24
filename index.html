@@ -6,579 +6,98 @@
   <title>北米中W杯 2026 観戦アプリ</title>
   <style>
     :root{
-      --bg:#07111f;
-      --bg2:#0c1728;
-      --panel:rgba(12,23,40,.84);
-      --panel-solid:#0f1c31;
-      --panel-soft:#13233c;
-      --line:rgba(166,188,220,.16);
-      --line-strong:rgba(166,188,220,.28);
-      --text:#eff5ff;
-      --muted:#9fb0ca;
-      --accent:#5aa8ff;
-      --accent2:#8dd0ff;
-      --gold:#f2c76b;
-      --gold-bg:rgba(242,199,107,.14);
-      --green:#48d597;
-      --chip:#132743;
-      --shadow:0 20px 50px rgba(0,0,0,.28);
-      --radius:20px;
+      --bg:#050913;--panel:#0c1424;--panel2:#111c30;--slot:#101b2f;
+      --line:rgba(205,220,245,.24);--line2:rgba(205,220,245,.48);
+      --text:#eef5ff;--muted:#8fa1bc;--accent:#34d2d0;--accent2:#155c66;
+      --gold:#f0c96b;--danger:#ff6b6b;--shadow:0 12px 30px rgba(0,0,0,.38);
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
-    body{
-      min-height:100vh;
-      color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
-      background:
-        radial-gradient(circle at 10% 0%, rgba(90,168,255,.18), transparent 30%),
-        radial-gradient(circle at 100% 10%, rgba(242,199,107,.16), transparent 28%),
-        linear-gradient(180deg, #08111d 0%, #091321 38%, #07101b 100%);
-    }
-    a{color:inherit}
-    .wrap{max-width:1460px;margin:0 auto;padding:20px 14px 42px}
-    .hero{padding:18px 16px 6px}
-    .eyebrow{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#8fc8ff;font-weight:800}
-    .title{margin:8px 0 10px;font-size:30px;font-weight:900;letter-spacing:.01em}
-    .lead{margin:0;color:var(--muted);font-size:14px;line-height:1.7;max-width:880px}
+    html,body{margin:0;min-height:100%;background:#050913;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+    body{background:radial-gradient(circle at 50% -10%,rgba(58,98,150,.32),transparent 34%),linear-gradient(180deg,#070c16 0%,#050913 100%)}
+    .wrap{max-width:1180px;margin:0 auto;padding:12px 8px 28px}
+    .hero{padding:8px 6px 4px}.eyebrow{font-size:10px;letter-spacing:.22em;color:#78c7ff;font-weight:800}.title{font-size:22px;margin:5px 0 2px;font-weight:900}.lead{font-size:12px;color:var(--muted);margin:0;line-height:1.55}
+    .tabs{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;z-index:50;margin-top:10px;padding:7px;border:1px solid var(--line);border-radius:14px;background:rgba(7,12,22,.82);backdrop-filter:blur(14px)}
+    .tab{border:1px solid transparent;border-radius:10px;padding:8px 10px;background:transparent;color:#c8d6ea;font-size:12px;font-weight:800;white-space:nowrap}.tab.active{background:rgba(52,210,208,.16);border-color:rgba(52,210,208,.45);color:#fff}
+    .panel{margin-top:10px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 2px}.btn{border:1px solid var(--line);border-radius:10px;background:#111c30;color:#eaf3ff;padding:8px 10px;font-weight:800;font-size:12px}.btn.primary{background:linear-gradient(180deg,#1b8a94,#155c66);border-color:rgba(52,210,208,.44)}
 
-    .tabs{
-      position:sticky;top:0;z-index:30;margin-top:16px;
-      display:flex;gap:8px;overflow-x:auto;padding:10px;
-      border:1px solid var(--line);border-radius:20px;
-      background:rgba(10,19,34,.75);backdrop-filter:blur(18px);
-      box-shadow:var(--shadow);
-    }
-    .tab{
-      border:1px solid transparent;border-radius:14px;
-      padding:11px 15px;background:transparent;color:#c2d2ea;
-      font-weight:800;white-space:nowrap;letter-spacing:.01em;cursor:pointer;
-    }
-    .tab.active{background:linear-gradient(180deg, rgba(86,163,251,.22), rgba(86,163,251,.1));color:#fff;border-color:rgba(86,163,251,.32)}
+    .bracket-card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(11,18,32,.94),rgba(5,9,19,.96));box-shadow:var(--shadow);padding:8px;overflow:hidden}
+    .bracket{position:relative;display:grid;grid-template-columns:1fr 28px 1fr;gap:6px;min-height:760px;background:radial-gradient(circle at 50% 50%,rgba(52,210,208,.10),transparent 24%);border-radius:14px;padding:5px 0}
+    .spine{position:relative}.spine:before{content:"";position:absolute;top:40px;bottom:40px;left:50%;width:2px;background:linear-gradient(180deg,transparent,var(--line2),var(--line2),transparent)}.spine:after{content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:999px;background:var(--gold);box-shadow:0 0 18px rgba(240,201,107,.95);transform:translate(-45%,-50%)}
+    .side{display:flex;flex-direction:column;justify-content:space-between;min-width:0}.match{position:relative;min-height:82px}.match:after{content:"";position:absolute;top:50%;width:15px;height:2px;background:var(--line2)}.side.left .match:after{right:-16px}.side.right .match:after{left:-16px}.match-lines{position:absolute;top:19px;bottom:19px;width:13px;border-top:2px solid var(--line2);border-bottom:2px solid var(--line2)}.side.left .match-lines{right:-2px;border-right:2px solid var(--line2);border-radius:0 4px 4px 0}.side.right .match-lines{left:-2px;border-left:2px solid var(--line2);border-radius:4px 0 0 4px}
+    .slot{height:36px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,#14223a,#0d1728);display:flex;align-items:center;gap:6px;padding:4px 6px;margin-bottom:6px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);cursor:pointer;position:relative;z-index:2}.slot:hover{border-color:rgba(52,210,208,.62)}.slot.jp{background:linear-gradient(180deg,rgba(35,135,139,.95),rgba(16,89,96,.95));border-color:rgba(93,243,240,.64)}.slot.empty{color:#a4b3c9}.tag{min-width:31px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;background:#24314a;color:#c8d5e8;font-size:10px;font-weight:900}.slot.jp .tag{background:#6ee7e5;color:#08212a}.team-text{font-size:clamp(10px,2.5vw,14px);font-weight:900;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.team-text .muted{font-weight:700;color:#aab8cc}.flag{font-size:14px;margin-right:3px}.side.right .slot{flex-direction:row}.side.right .team-text{direction:ltr}
 
-    .panel{margin-top:16px}
-    .card{
-      background:var(--panel);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      padding:16px;
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(12px);
-      margin-bottom:14px;
-    }
-    .subtle{background:linear-gradient(180deg, rgba(19,35,60,.95), rgba(12,23,40,.95))}
-    .note{border-color:rgba(90,168,255,.32);background:linear-gradient(180deg, rgba(16,34,60,.96), rgba(12,23,40,.96))}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .section-title{margin:24px 0 12px;font-size:20px;font-weight:900;letter-spacing:.01em}
-    .small{font-size:12px;color:var(--muted);line-height:1.7}
-    .status{font-size:12px;color:#c6d7ef;margin-top:10px}
-    .muted{color:var(--muted)}
+    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px}.sheet-title{font-weight:900}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
 
-    .btn{
-      appearance:none;border:1px solid transparent;border-radius:14px;padding:11px 14px;
-      background:linear-gradient(180deg, rgba(82,161,253,.95), rgba(55,123,226,.95));
-      color:white;font-weight:900;cursor:pointer;
-      box-shadow:0 8px 20px rgba(47,108,200,.32);
-    }
-    .btn.secondary{
-      background:rgba(17,31,53,.8);border-color:var(--line-strong);color:#e6efff;box-shadow:none
-    }
-
-    .tournament-board{
-      overflow-x:auto;
-      padding-bottom:14px;
-    }
-    .board-inner{
-      min-width:1320px;
-      display:grid;
-      grid-template-columns:repeat(5, 248px);
-      gap:24px;
-      align-items:start;
-    }
-    .round-column{position:relative}
-    .round-header{
-      position:sticky;top:76px;z-index:5;
-      margin-bottom:12px;padding:10px 12px;
-      border:1px solid var(--line);border-radius:16px;
-      background:rgba(12,23,40,.9);backdrop-filter:blur(10px);
-      font-size:13px;font-weight:900;color:#dce9fb;text-align:center;
-    }
-    .round-stack{display:flex;flex-direction:column;gap:16px}
-    .round-r32 .round-stack{gap:16px}
-    .round-r16 .round-stack{gap:44px;padding-top:42px}
-    .round-qf .round-stack{gap:108px;padding-top:96px}
-    .round-sf .round-stack{gap:252px;padding-top:220px}
-    .round-final .round-stack{gap:18px;padding-top:310px}
-
-    .match-card{
-      position:relative;
-      border:1px solid var(--line);
-      border-radius:22px;
-      background:linear-gradient(180deg, rgba(16,29,50,.98), rgba(11,20,36,.98));
-      box-shadow:var(--shadow);
-      overflow:visible;
-    }
-    .match-body{padding:14px 14px 12px}
-    .match-title{font-size:14px;font-weight:900;margin:0 0 4px}
-    .venue{font-size:11px;color:var(--muted);margin-bottom:10px}
-    .connector{position:absolute;right:-24px;top:50%;width:24px;height:2px;background:rgba(124,160,214,.24)}
-    .connector:after{content:"";position:absolute;right:0;top:-36px;width:2px;height:72px;background:rgba(124,160,214,.18)}
-    .round-final .connector,.round-final .connector:after{display:none}
-
-    .slot{
-      position:relative;
-      border:1px solid rgba(166,188,220,.16);
-      border-radius:16px;
-      background:rgba(8,17,31,.88);
-      padding:10px;
-      margin-top:8px;
-    }
-    .slot.jp{border-color:rgba(242,199,107,.58);background:linear-gradient(180deg, rgba(61,46,17,.8), rgba(29,24,15,.8))}
-    .slot-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
-    .slot-label{
-      display:inline-flex;align-items:center;justify-content:center;
-      min-width:78px;padding:5px 8px;border-radius:999px;
-      background:#183051;color:#eaf2ff;font-size:12px;font-weight:900
-    }
-    .slot.jp .slot-label{background:rgba(242,199,107,.95);color:#1d1b15}
-    .slot-meta{font-size:11px;color:var(--muted)}
-    .slot-trigger{
-      width:100%;text-align:left;border:1px solid rgba(166,188,220,.14);
-      background:linear-gradient(180deg, rgba(16,28,47,.98), rgba(11,18,31,.98));
-      color:#eef5ff;border-radius:14px;padding:10px 12px;cursor:pointer;
-    }
-    .slot-trigger .placeholder{color:#92a6c2}
-    .trigger-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-    .chev{font-size:11px;color:#bdd1ef}
-    .selected-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:var(--chip);border:1px solid rgba(166,188,220,.14);font-size:12px}
-    .chip.jp{background:var(--gold-bg);border-color:rgba(242,199,107,.36);color:#fff3d1}
-    .chip .flag{width:18px}
-    .slot-dropdown{
-      display:none;position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:25;
-      border:1px solid rgba(166,188,220,.18);border-radius:16px;background:rgba(9,17,30,.98);
-      box-shadow:0 18px 38px rgba(0,0,0,.38);padding:10px;max-height:280px;overflow:auto;
-    }
-    .slot.open .slot-dropdown{display:block}
-    .dropdown-title{font-size:12px;font-weight:900;color:#dce8fb;margin-bottom:8px}
-    .opt{display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:12px;cursor:pointer}
-    .opt:hover{background:rgba(22,40,69,.9)}
-    .opt input{accent-color:#5aa8ff}
-    .flag{width:20px;height:auto;border-radius:2px;object-fit:contain;flex:none}
-
-    .groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-    .group-card{background:rgba(8,17,31,.88);border:1px solid rgba(166,188,220,.12);border-radius:16px;padding:12px}
-
-    .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:var(--panel);box-shadow:var(--shadow)}
-    table{border-collapse:collapse;width:100%;min-width:620px}
-    th,td{padding:10px;border-bottom:1px solid rgba(166,188,220,.1);text-align:left;font-size:14px}
-    th{background:rgba(17,31,53,.95);color:#d7e4f7}
-    .input,.country-select,.api-input,.news-select{
-      width:100%;padding:10px 12px;border-radius:12px;
-      border:1px solid rgba(166,188,220,.18);background:#0a1525;color:#eef5ff
-    }
-
-    .grid{display:grid;gap:12px}
-    .game{border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:12px;box-shadow:var(--shadow)}
-    .scoreline{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-top:8px}
-    .score{background:#0a1525;padding:8px 12px;border-radius:12px;font-weight:900}
-    .right{text-align:right}
-    .news-item{display:block;text-decoration:none;border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:12px;box-shadow:var(--shadow)}
-    .news-title{font-weight:900;line-height:1.5}
-    .source{font-size:11px;background:rgba(18,40,68,.88);padding:3px 7px;border-radius:999px;margin-left:6px;color:#cfe0f8}
-    .error{color:#fecaca}
-
-    @media (max-width: 640px){
-      .wrap{padding:16px 10px 36px}
-      .title{font-size:24px}
-      .hero{padding-left:4px;padding-right:4px}
-      .tabs{border-radius:16px}
-      .card{padding:14px}
-      .board-inner{min-width:1230px;gap:18px}
-      .round-header{top:70px}
-    }
-  
-
-    /* --- Image-reference style bracket --- */
-    .bracket-panel{margin-top:10px}
-    .bracket-toolbar{display:flex;justify-content:flex-end;gap:8px;margin:8px 0 10px}
-    .bracket-toolbar .btn{padding:8px 10px;border-radius:11px;font-size:12px}
-    .bracket-stage{
-      position:relative;
-      width:100%;
-      height:min(76vh, 860px);
-      min-height:600px;
-      border:1px solid rgba(166,188,220,.20);
-      border-radius:22px;
-      background:
-        radial-gradient(circle at 50% 48%, rgba(242,199,107,.12), transparent 8%),
-        radial-gradient(circle at 50% 50%, rgba(90,168,255,.10), transparent 25%),
-        linear-gradient(180deg, rgba(7,15,27,.96), rgba(5,10,18,.98));
-      box-shadow:var(--shadow);
-      overflow:visible;
-    }
-    .bracket-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-    .bracket-lines line,.bracket-lines path{stroke:rgba(195,210,236,.58);stroke-width:.42;fill:none;stroke-linecap:round;filter:drop-shadow(0 0 2px rgba(120,160,220,.22))}
-    .center-spine{stroke:rgba(195,210,236,.76)!important;stroke-width:.5!important}
-    .center-dot{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:999px;background:var(--gold);box-shadow:0 0 16px rgba(242,199,107,.7);z-index:3}
-    .match-node{position:absolute;z-index:4;width:34.5%;height:8.6%;min-height:48px}
-    .match-node.left{left:1.2%}
-    .match-node.right{right:1.2%}
-    .match-node.y1{top:1.8%}.match-node.y2{top:14.3%}.match-node.y3{top:26.8%}.match-node.y4{top:39.3%}.match-node.y5{top:51.8%}.match-node.y6{top:64.3%}.match-node.y7{top:76.8%}.match-node.y8{top:89.3%}
-    .match-card.bracket-match{height:100%;border-radius:11px;background:transparent;border:0;box-shadow:none;overflow:visible}
-    .match-card.bracket-match .match-body{height:100%;padding:0;display:grid;grid-template-rows:1fr 1fr;gap:4px}
-    .match-card.bracket-match .connector,.match-card.bracket-match .match-title,.match-card.bracket-match .venue{display:none}
-    .slot{margin:0}
-    .slot.compact{height:100%;padding:0;border-radius:8px;background:linear-gradient(180deg, rgba(20,33,55,.98), rgba(11,20,34,.98));border:1px solid rgba(195,210,236,.32);box-shadow:0 8px 18px rgba(0,0,0,.22)}
-    .slot.compact.jp{background:linear-gradient(180deg, rgba(26,118,126,.96), rgba(14,91,101,.96));border-color:rgba(105,232,232,.62)}
-    .slot.compact .slot-trigger{height:100%;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;padding:5px 8px;border:0;background:transparent;border-radius:8px}
-    .slot.compact .slot-label{min-width:30px;padding:4px 6px;border-radius:6px;background:rgba(130,153,188,.22);font-size:10px;color:#dbe8ff}
-    .slot.compact.jp .slot-label{background:rgba(123,245,236,.82);color:#08292e}
-    .slot-team{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden}
-    .slot-team .chip{padding:0;background:transparent;border:0;border-radius:0;font-size:clamp(10px, 1.18vw, 14px);font-weight:900;color:#f4f8ff;white-space:nowrap;min-width:0}
-    .slot-team .chip span{overflow:hidden;text-overflow:ellipsis}
-    .slot-team .chip.jp{background:transparent;color:#fff8d9}
-    .slot-team .chip .flag{width:clamp(14px,1.5vw,20px)}
-    .slot-team .placeholder{color:#8fa1bc;font-weight:800;font-size:clamp(10px,1.12vw,13px)}
-    .slot.compact .chev{font-size:9px;color:#b7c8e1}
-    .slot.compact .slot-dropdown{top:calc(100% + 6px);left:0;right:auto;width:210px;z-index:80;border-radius:12px}
-    .match-node.right .slot.compact .slot-dropdown{left:auto;right:0}
-    .slot.compact .opt{padding:7px;font-size:13px}
-    .slot.compact .dropdown-title{font-size:11px}
-    @media(max-width:760px){
-      .hero{display:none}
-      .tabs{margin-top:0;padding:7px;border-radius:14px}
-      .tab{padding:8px 10px;font-size:12px}
-      .bracket-toolbar{margin:7px 0}
-      .bracket-stage{height:calc(100vh - 92px);min-height:520px;border-radius:16px}
-      .match-node{width:36.5%;height:8.2%;min-height:40px}
-      .match-node.left{left:.8%}.match-node.right{right:.8%}
-      .slot.compact .slot-trigger{grid-template-columns:auto 1fr;gap:4px;padding:4px 5px}
-      .slot.compact .chev{display:none}
-      .slot.compact .slot-label{min-width:25px;padding:3px 4px;font-size:9px}
-      .slot-team .chip{font-size:10px}.slot-team .chip .flag{width:13px}
-      .slot.compact .slot-dropdown{width:190px}
-    }
-
+    .card{border:1px solid var(--line);border-radius:16px;background:rgba(12,20,36,.9);padding:14px;margin:10px 0;box-shadow:var(--shadow)}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(205,220,245,.12);padding:8px;text-align:left}.input{width:100%;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#fff;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.bracket{grid-template-columns:1fr 18px 1fr;gap:3px;min-height:720px}.slot{height:34px;padding:3px 4px}.tag{min-width:27px;height:22px;font-size:9px}.flag{font-size:12px}.match:after{width:10px}.side.left .match:after{right:-11px}.side.right .match:after{left:-11px}.match-lines{width:9px}.title{font-size:19px}.lead{display:none}}
   </style>
 </head>
 <body>
-  <noscript><div style="padding:20px;color:white;background:#991b1b">JavaScriptを有効にしてください。</div></noscript>
   <div class="wrap">
     <header class="hero">
       <div class="eyebrow">FIFA WORLD CUP 2026</div>
-      <h1 class="title">北米中W杯 2026 観戦アプリ</h1>
-      <p class="lead">決勝トーナメントのシミュレーション、ランキング、速報、ニュースをまとめて見られるアプリです。まずはUIを整えつつ、決勝トーナメントを遊びやすくしています。</p>
+      <h1 class="title">北米中W杯 観戦アプリ</h1>
+      <p class="lead">決勝トーナメントを中心に、ランキング・速報・ニュースを確認するための軽量版です。</p>
     </header>
-
     <nav class="tabs" id="tabs"></nav>
     <main id="app"></main>
   </div>
-
+  <div class="sheet-backdrop" id="backdrop"></div>
+  <div class="sheet" id="sheet"></div>
 <script>
 (function(){
-  'use strict';
-  const STORAGE='wc2026-refined-v2';
-  const SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
-  const NEWS_RSS='https://news.google.com/rss/search';
-  const PROXY='https://api.allorigins.win/raw?url=';
-
-  const teams={
-    mx:['メキシコ','mx'], za:['南アフリカ','za'], kr:['韓国','kr'], cz:['チェコ','cz'],
-    ca:['カナダ','ca'], ba:['ボスニア・ヘルツェゴビナ','ba'], qa:['カタール','qa'], ch:['スイス','ch'],
-    br:['ブラジル','br'], ma:['モロッコ','ma'], ht:['ハイチ','ht'], sct:['スコットランド','gb-sct'],
-    us:['アメリカ','us'], py:['パラグアイ','py'], au:['オーストラリア','au'], tr:['トゥルキエ','tr'],
-    de:['ドイツ','de'], ci:['コートジボワール','ci'], ec:['エクアドル','ec'], cw:['キュラソー','cw'],
-    nl:['オランダ','nl'], jp:['日本','jp'], tn:['チュニジア','tn'], se:['スウェーデン','se'],
-    be:['ベルギー','be'], eg:['エジプト','eg'], ir:['イラン','ir'], nz:['ニュージーランド','nz'],
-    es:['スペイン','es'], sa:['サウジアラビア','sa'], cv:['カーボベルデ','cv'], uy:['ウルグアイ','uy'],
-    fr:['フランス','fr'], sn:['セネガル','sn'], iq:['イラク','iq'], no:['ノルウェー','no'],
-    ar:['アルゼンチン','ar'], dz:['アルジェリア','dz'], at:['オーストリア','at'], jo:['ヨルダン','jo'],
-    pt:['ポルトガル','pt'], uz:['ウズベキスタン','uz'], co:['コロンビア','co'], cd:['コンゴ民主共和国','cd'],
-    eng:['イングランド','gb-eng'], hr:['クロアチア','hr'], gh:['ガーナ','gh'], pa:['パナマ','pa']
-  };
-  const group={
-    A:['mx','za','kr','cz'],B:['ca','ba','qa','ch'],C:['br','ma','ht','sct'],D:['us','py','au','tr'],
-    E:['de','ci','ec','cw'],F:['nl','jp','tn','se'],G:['be','eg','ir','nz'],H:['es','sa','cv','uy'],
-    I:['fr','sn','iq','no'],J:['ar','dz','at','jo'],K:['pt','uz','co','cd'],L:['eng','hr','gh','pa']
-  };
-  const allIds=Object.keys(teams);
-  const uniq=a=>[...new Set(a)];
-  const groupTeams=letters=>uniq(letters.flatMap(g=>group[g]||[]));
-  const third={
-    'A/B/C/D/F':groupTeams(['A','B','C','D','F']),
-    'C/D/F/G/H':groupTeams(['C','D','F','G','H']),
-    'C/E/F/H/I':groupTeams(['C','E','F','H','I']),
-    'E/H/I/J/K':groupTeams(['E','H','I','J','K']),
-    'B/E/F/I/J':groupTeams(['B','E','F','I','J']),
-    'A/E/H/I/J':groupTeams(['A','E','H','I','J']),
-    'E/F/G/I/J':groupTeams(['E','F','G','I','J']),
-    'D/E/I/J/L':groupTeams(['D','E','I','J','L'])
-  };
-
-  const ro32=[
-    ['M73','M73','6/28｜LA',['A2','g','A'],['B2','g','B']],
-    ['M74','M74','6/29｜Foxborough',['E1','g','E'],['3位','t','A/B/C/D/F']],
-    ['M75','M75','6/30｜Guadalupe',['F1','g','F'],['C2','g','C']],
-    ['M76','M76','6/29｜Houston',['C1','g','C'],['F2','g','F']],
-    ['M77','M77','6/30｜New Jersey',['I1','g','I'],['3位','t','C/D/F/G/H']],
-    ['M78','M78','6/30｜Arlington',['E2','g','E'],['I2','g','I']],
-    ['M79','M79','7/1｜Mexico City',['A1','g','A'],['3位','t','C/E/F/H/I']],
-    ['M80','M80','7/1｜Atlanta',['L1','g','L'],['3位','t','E/H/I/J/K']],
-    ['M81','M81','7/2｜Santa Clara',['D1','g','D'],['3位','t','B/E/F/I/J']],
-    ['M82','M82','7/1｜Seattle',['G1','g','G'],['3位','t','A/E/H/I/J']],
-    ['M83','M83','7/3｜Toronto',['K2','g','K'],['L2','g','L']],
-    ['M84','M84','7/2｜LA',['H1','g','H'],['J2','g','J']],
-    ['M85','M85','7/3｜Vancouver',['B1','g','B'],['3位','t','E/F/G/I/J']],
-    ['M86','M86','7/3｜Miami',['J1','g','J'],['H2','g','H']],
-    ['M87','M87','7/4｜Kansas City',['K1','g','K'],['3位','t','D/E/I/J/L']],
-    ['M88','M88','7/3｜Arlington',['D2','g','D'],['G2','g','G']]
-  ];
-  const later=[
-    ['ベスト16',[['M89','M89','', '勝者 M73', '勝者 M75'],['M90','M90','', '勝者 M74', '勝者 M77'],['M91','M91','', '勝者 M76', '勝者 M78'],['M92','M92','', '勝者 M79', '勝者 M80'],['M93','M93','', '勝者 M83', '勝者 M84'],['M94','M94','', '勝者 M81', '勝者 M82'],['M95','M95','', '勝者 M86', '勝者 M88'],['M96','M96','', '勝者 M85', '勝者 M87']]],
-    ['準々決勝',[['M97','M97','', '勝者 M89', '勝者 M90'],['M98','M98','', '勝者 M93', '勝者 M94'],['M99','M99','', '勝者 M91', '勝者 M92'],['M100','M100','', '勝者 M95', '勝者 M96']]],
-    ['準決勝',[['M101','M101','', '勝者 M97', '勝者 M98'],['M102','M102','', '勝者 M99', '勝者 M100']]],
-    ['決勝',[['M104','決勝','', '勝者 M101', '勝者 M102']]],
-    ['優勝',[['CHAMPION','優勝予想','', '優勝国', '準優勝']]]
-  ];
-  const tabs=[['bracket','決勝トーナメント'],['goals','得点ランキング'],['assists','アシストランキング'],['flash','速報'],['news','最新ニュース']];
-
-  function slot(cfg){
-    if(Array.isArray(cfg)){
-      const [label,kind,key]=cfg;
-      const opts=kind==='g' ? (group[key]||[]) : kind==='t' ? (third[key]||[]) : allIds;
-      return {label,kind,key,opts:[...opts],selected:[]};
-    }
-    return {label:cfg,kind:'winner',key:cfg,opts:[...allIds],selected:[]};
-  }
-  function blankRows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}));}
-  function initialState(){
-    const bracket={};
-    ro32.forEach(m=>{bracket[m[0]]={id:m[0],title:m[1],venue:m[2],a:slot(m[3]),b:slot(m[4])};});
-    later.forEach(stage=>stage[1].forEach(m=>{bracket[m[0]]={id:m[0],title:m[1],venue:m[2],a:slot(m[3]),b:slot(m[4])};}));
-    return {
-      active:'bracket',
-      openSlot:'',
-      bracket,
-      goals:blankRows(),
-      assists:blankRows(),
-      goalsApi:'',
-      assistsApi:'',
-      flash:{results:[],upcoming:[],live:[],status:'未更新',last:''},
-      newsTarget:'all',
-      news:{items:[],status:'未更新',last:''}
-    };
-  }
-
-  let state=load();
-  function load(){try{return Object.assign(initialState(), JSON.parse(localStorage.getItem(STORAGE)||'{}'));}catch(e){return initialState();}}
-  function save(){localStorage.setItem(STORAGE, JSON.stringify(state));}
-  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-  function ymd(d){const x=new Date(d);return x.getFullYear()+String(x.getMonth()+1).padStart(2,'0')+String(x.getDate()).padStart(2,'0');}
-  function fmt(d){if(!d) return ''; const x=new Date(d); return x.toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});}
-  function flag(id){const code=(teams[id]&&teams[id][1])||''; return code?`<img class="flag" src="https://flagcdn.com/w40/${code.toLowerCase()}.png" alt="${esc(code)}">`:'';}
-  function pill(id){if(!teams[id]) return ''; return `<span class="chip ${id==='jp'?'jp':''}">${flag(id)}<span>${esc(teams[id][0])}</span></span>`;}
-
-  function render(){
-    const tabsEl=document.getElementById('tabs');
-    tabsEl.innerHTML=tabs.map(([id,label])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${label}</button>`).join('');
-    const app=document.getElementById('app');
-    if(state.active==='bracket') app.innerHTML=bracketHtml();
-    if(state.active==='goals') app.innerHTML=rankingHtml('goals');
-    if(state.active==='assists') app.innerHTML=rankingHtml('assists');
-    if(state.active==='flash') app.innerHTML=flashHtml();
-    if(state.active==='news') app.innerHTML=newsHtml();
-    bindCommon();
-  }
-
-  function bindCommon(){
-    document.querySelectorAll('[data-tab]').forEach(btn=>btn.onclick=()=>{state.active=btn.dataset.tab; state.openSlot=''; save(); render();});
-    if(state.active==='bracket') bindBracket();
-    if(state.active==='goals' || state.active==='assists') bindRanking();
-    if(state.active==='flash'){
-      const update=document.getElementById('updateFlash'); if(update) update.onclick=fetchFlash;
-    }
-    if(state.active==='news'){
-      const sel=document.getElementById('newsTarget'); if(sel) sel.onchange=()=>{state.newsTarget=sel.value; save();};
-      const update=document.getElementById('updateNews'); if(update) update.onclick=fetchNews;
-    }
-  }
-
-  function bindBracket(){
-    document.getElementById('resetBracket').onclick=()=>{
-      if(confirm('決勝トーナメントの選択を初期化しますか？')){ state.bracket=initialState().bracket; state.openSlot=''; save(); render(); }
-    };
-    document.getElementById('copyJson').onclick=async()=>{
-      try{ await navigator.clipboard.writeText(JSON.stringify(state.bracket,null,2)); alert('JSONをコピーしました。'); }
-      catch(e){ alert('コピーできませんでした。'); }
-    };
-    document.querySelectorAll('[data-slot-trigger]').forEach(btn=>{
-      btn.onclick=(e)=>{
-        e.stopPropagation();
-        const key=btn.dataset.slotTrigger;
-        state.openSlot = state.openSlot===key ? '' : key;
-        save(); render();
-      };
-    });
-    document.querySelectorAll('[data-slot-check]').forEach(inp=>{
-      inp.onchange=()=>{
-        const [mid,side,id]=inp.dataset.slotCheck.split('|');
-        const s=state.bracket[mid][side];
-        if(inp.checked){ if(!s.selected.includes(id)) s.selected.push(id); }
-        else{s.selected=s.selected.filter(x=>x!==id);}
-        save(); render();
-      };
-    });
-    document.onclick=(e)=>{
-      if(!e.target.closest('.slot') && state.openSlot){
-        state.openSlot='';
-        save();
-        render();
-      }
-    };
-  }
-
-  function bracketHtml(){
-    const leftMatches=ro32.slice(0,8).map(m=>state.bracket[m[0]]);
-    const rightMatches=ro32.slice(8,16).map(m=>state.bracket[m[0]]);
-    return `
-      <section class="panel bracket-panel">
-        <div class="bracket-toolbar">
-          <button class="btn secondary" id="resetBracket">初期化</button>
-          <button class="btn secondary" id="copyJson">JSONコピー</button>
-        </div>
-        <div class="bracket-stage">
-          ${bracketLinesHtml()}
-          <div class="center-dot"></div>
-          ${leftMatches.map((m,i)=>nodeHtml(m,'left',i+1)).join('')}
-          ${rightMatches.map((m,i)=>nodeHtml(m,'right',i+1)).join('')}
-        </div>
-      </section>`;
-  }
-  function bracketLinesHtml(){
-    const ys=[6.1,18.6,31.1,43.6,56.1,68.6,81.1,93.6];
-    const pair=[12.35,37.35,62.35,87.35];
-    const qf=[24.85,74.85];
-    const sf=49.85;
-    const lines=[];
-    const h=(x1,y,x2)=>lines.push(`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/>`);
-    const v=(x,y1,y2)=>lines.push(`<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}"/>`);
-    // left side
-    ys.forEach(y=>h(35.7,y,38.2));
-    for(let i=0;i<4;i++){v(38.2,ys[i*2],ys[i*2+1]);h(38.2,pair[i],41.7);} 
-    [0,1].forEach(i=>{v(41.7,pair[i*2],pair[i*2+1]);h(41.7,qf[i],45.5);});
-    v(45.5,qf[0],qf[1]);h(45.5,sf,49.5);
-    // right side
-    ys.forEach(y=>h(64.3,y,61.8));
-    for(let i=0;i<4;i++){v(61.8,ys[i*2],ys[i*2+1]);h(61.8,pair[i],58.3);} 
-    [0,1].forEach(i=>{v(58.3,pair[i*2],pair[i*2+1]);h(58.3,qf[i],54.5);});
-    v(54.5,qf[0],qf[1]);h(54.5,sf,50.5);
-    lines.push(`<line class="center-spine" x1="50" y1="44" x2="50" y2="56"/>`);
-    return `<svg class="bracket-lines" viewBox="0 0 100 100" preserveAspectRatio="none">${lines.join('')}</svg>`;
-  }
-  function nodeHtml(m,side,index){
-    return `<div class="match-node ${side} y${index}">${matchHtml(m)}</div>`;
-  }
-  function matchHtml(m){
-    return `<div class="match-card bracket-match"><div class="match-body">${slotHtml(m.id,'a',m.a)}${slotHtml(m.id,'b',m.b)}</div></div>`;
-  }
-  function slotHtml(mid,side,s){
-    const openKey=`${mid}|${side}`;
-    const isOpen=state.openSlot===openKey;
-    const jp=s.selected.includes('jp');
-    return `<div class="slot compact ${jp?'jp':''} ${isOpen?'open':''}">
-      <button class="slot-trigger" data-slot-trigger="${openKey}">
-        <span class="slot-label">${esc(s.label)}</span>
-        <span class="slot-team">${s.selected.length ? s.selected.map(pill).join('') : '<span class="placeholder">3位候補</span>'}</span>
-        <span class="chev">${isOpen?'▲':'▼'}</span>
-      </button>
-      <div class="slot-dropdown">
-        <div class="dropdown-title">候補国を選択</div>
-        ${s.opts.map(id=>`<label class="opt"> <input type="checkbox" data-slot-check="${mid}|${side}|${id}" ${s.selected.includes(id)?'checked':''}> ${flag(id)} <span>${esc(teams[id][0])}</span></label>`).join('')}
-      </div>
-    </div>`;
-  }
-
-  function rankingHtml(type){
-    const unit=type==='goals'?'得点数':'アシスト数';
-    const title=type==='goals'?'得点ランキング':'アシストランキング';
-    const api=state[type+'Api']||'';
-    return `<section class="panel"><div class="card"><div class="row" style="justify-content:space-between"><div><h2 style="margin:0">${title}</h2><p class="small">順位、${unit}、国旗、選手名（国名）を表示します。</p></div><button class="btn" id="updateRanking">更新</button></div><div style="margin-top:10px"><div class="small">API設定。未設定なら手入力で使えます。</div><input class="api-input" id="apiUrl" value="${esc(api)}" placeholder="https://example.com/worldcup/${type}.json"></div></div><div class="table-wrap"><table><thead><tr><th>順位</th><th>${unit}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${state[type].map((r,i)=>rowHtml(type,r,i)).join('')}</tbody></table></div><div class="row" style="margin-top:10px"><button class="btn secondary" id="addRow">行を追加</button><button class="btn secondary" id="clearRows">空欄に戻す</button></div></section>`;
-  }
-  function rowHtml(type,r,i){
-    return `<tr><td><input class="input" style="width:70px" data-rank="${type}|${i}|rank" value="${esc(r.rank)}"></td><td><input class="input" style="width:90px" data-rank="${type}|${i}|value" value="${esc(r.value)}"></td><td><div class="grid" style="grid-template-columns:1fr 180px"><input class="input" data-rank="${type}|${i}|player" value="${esc(r.player)}" placeholder="選手名"><select class="country-select" data-rank="${type}|${i}|team"><option value="">国を選択</option>${allIds.map(id=>`<option value="${id}" ${r.team===id?'selected':''}>${teams[id][0]}</option>`).join('')}</select></div><div class="selected-list" style="margin-top:8px">${r.team?pill(r.team):''}<span class="small">${esc(r.player||'選手名未入力')}${r.team?'（'+esc(teams[r.team][0])+'）':''}</span></div></td></tr>`;
-  }
-  function bindRanking(){
-    document.querySelectorAll('[data-rank]').forEach(el=>el.oninput=rankingInput);
-    const add=document.getElementById('addRow'); if(add) add.onclick=()=>{state[state.active].push({rank:state[state.active].length+1,value:'',player:'',team:''}); save(); render();};
-    const clear=document.getElementById('clearRows'); if(clear) clear.onclick=()=>{if(confirm('空欄に戻しますか？')){state[state.active]=blankRows(); save(); render();}};
-    const api=document.getElementById('apiUrl'); if(api) api.oninput=()=>{state[state.active+'Api']=api.value; save();};
-    const update=document.getElementById('updateRanking'); if(update) update.onclick=fetchRanking;
-  }
-  function rankingInput(e){const [type,i,field]=e.target.dataset.rank.split('|'); state[type][Number(i)][field]=e.target.value; save();}
-  async function fetchRanking(){
-    const type=state.active; const url=state[type+'Api'];
-    if(!url){alert('API URLが未設定です。現時点では手入力で利用してください。'); return;}
-    try{
-      const res=await fetch(url); if(!res.ok) throw new Error('HTTP '+res.status);
-      const json=await res.json();
-      const rows=(Array.isArray(json)?json:(json.items||json.data||json.leaders||[])).map((x,i)=>({rank:x.rank||i+1,value:String(x.value??x.goals??x.assists??x.count??''),player:x.player||x.playerName||x.name||'',team:resolveTeam(x.teamId||x.country||x.team||x.nation||'')}));
-      state[type]=rows.length?rows:state[type]; save(); render();
-    }catch(e){ alert('取得できませんでした：'+e.message); }
-  }
-  function resolveTeam(raw){const v=String(raw||'').toLowerCase(); if(teams[v]) return v; return allIds.find(id=>teams[id][0].toLowerCase()===v || v.includes(teams[id][0].toLowerCase())) || '';}
-
-  function flashHtml(){
-    const f=state.flash;
-    return `<section class="panel"><div class="card"><div class="row" style="justify-content:space-between"><div><h2 style="margin:0">速報</h2><p class="small">現在時刻を基準に、24時間前までの結果と24時間後までの試合予定を表示します。</p></div><button class="btn" id="updateFlash">更新</button></div><div class="status">状態：${esc(f.status)}${f.last?'｜最終更新 '+fmt(f.last):''}</div></div>${gameSection('試合中',f.live,true)}${gameSection('直近24時間の結果',f.results,true)}${gameSection('今後24時間の試合予定',f.upcoming,false)}</section>`;
-  }
-  function gameSection(title,items,score){return `<h2 class="section-title">${title}</h2><div class="grid">${items.length?items.map(g=>gameHtml(g,score)).join(''):'<div class="card small">まだ取得結果がありません。更新ボタンを押してください。</div>'}</div>`;}
-  function gameHtml(g,show){return `<div class="game"><div class="row" style="justify-content:space-between"><span class="small">${fmt(g.date)}</span><span class="small">${esc(g.status)}</span></div><div class="scoreline"><div class="right"><b>${esc(g.away.name||g.away.abbr)}</b></div><div class="score">${show?esc(g.away.score)+' - '+esc(g.home.score):'vs'}</div><div><b>${esc(g.home.name||g.home.abbr)}</b></div></div></div>`;}
-  async function fetchFlash(){
-    state.flash.status='更新中...'; save(); render();
-    try{
-      const now=new Date(), from=new Date(now-86400000), to=new Date(now.getTime()+86400000);
-      const dates=[...new Set([from,now,to].map(ymd))];
-      const payloads=await Promise.all(dates.map(d=>fetch(SCOREBOARD+'?dates='+d+'&limit=100').then(r=>r.json())));
-      const events=payloads.flatMap(p=>p.events||[]).map(parseEvent);
-      const unique=Object.values(events.reduce((a,e)=>(a[e.id]=e,a),{}));
-      const win=unique.filter(e=>{const d=new Date(e.date); return d>=from&&d<=to;}).sort((a,b)=>new Date(a.date)-new Date(b.date));
-      state.flash={
-        results:win.filter(e=>e.completed&&new Date(e.date)<=now).sort((a,b)=>new Date(b.date)-new Date(a.date)),
-        upcoming:win.filter(e=>!e.completed&&new Date(e.date)>=now),
-        live:win.filter(e=>!e.completed&&e.state==='in'),
-        status:'取得しました。',
-        last:new Date().toISOString()
-      };
-    }catch(e){ state.flash.status='取得できませんでした：'+e.message; }
-    save(); render();
-  }
-  function parseEvent(ev){
-    const c=(ev.competitions||[])[0]||{}, cs=c.competitors||[], home=cs.find(x=>x.homeAway==='home')||cs[0]||{}, away=cs.find(x=>x.homeAway==='away')||cs[1]||{}, st=(ev.status||{}).type||{};
-    return {id:ev.id,date:ev.date,status:st.shortDetail||st.description||st.name||'',completed:!!st.completed,state:st.state||'',home:{name:home.team?.displayName||home.team?.shortDisplayName||'',abbr:home.team?.abbreviation||'',score:home.score??''},away:{name:away.team?.displayName||away.team?.shortDisplayName||'',abbr:away.team?.abbreviation||'',score:away.score??''}};
-  }
-
-  function newsOptions(){return [{id:'all',label:'W杯全体',query:'サッカー ワールドカップ 2026'}].concat(allIds.map(id=>({id,label:teams[id][0],query:'サッカー ワールドカップ 2026 '+teams[id][0]})));}
-  function newsHtml(){
-    const opts=newsOptions();
-    return `<section class="panel"><div class="card"><h2 style="margin:0">最新ニュース</h2><p class="small">W杯全体、または国別に日本語記事を取得します。</p><div class="row"><select class="news-select" id="newsTarget" style="flex:1">${opts.map(o=>`<option value="${o.id}" ${state.newsTarget===o.id?'selected':''}>${o.label}</option>`).join('')}</select><button class="btn" id="updateNews">更新</button></div><div class="status">状態：${esc(state.news.status)}${state.news.last?'｜最終更新 '+fmt(state.news.last):''}</div></div><div class="grid">${state.news.items.length?state.news.items.map(n=>`<a class="news-item" href="${esc(n.link)}" target="_blank" rel="noreferrer"><div class="news-title">${esc(n.title)}${n.source?`<span class="source">${esc(n.source)}</span>`:''}</div><div class="small">${fmt(n.pubDate)}</div></a>`).join(''):'<div class="card small">まだニュースがありません。対象を選んで更新してください。</div>'}</div></section>`;
-  }
-  async function fetchNews(){
-    state.news.status='更新中...'; save(); render();
-    try{
-      const o=newsOptions().find(x=>x.id===state.newsTarget)||newsOptions()[0];
-      const params=new URLSearchParams({q:o.query,hl:'ja',gl:'JP',ceid:'JP:ja'});
-      const rss=NEWS_RSS+'?'+params.toString();
-      const text=await fetch(PROXY+encodeURIComponent(rss)).then(r=>r.text());
-      const doc=new DOMParser().parseFromString(text,'text/xml');
-      const items=[...doc.querySelectorAll('item')].slice(0,12).map(item=>({title:item.querySelector('title')?.textContent||'',link:item.querySelector('link')?.textContent||'',pubDate:item.querySelector('pubDate')?.textContent||'',source:item.querySelector('source')?.textContent||''})).filter(x=>x.title&&x.link);
-      if(!items.length) throw new Error('ニュースを読み取れませんでした。');
-      state.news={items,status:o.label+'のニュースを'+items.length+'件取得しました。',last:new Date().toISOString()};
-    }catch(e){ state.news.status='取得できませんでした：'+e.message; }
-    save(); render();
-  }
-
-  try{render();}catch(e){document.getElementById('app').innerHTML='<div class="card error"><b>画面表示エラー</b><p>'+esc(e.message)+'</p></div>'; console.error(e);}
+'use strict';
+const STORE='wc2026-light-bracket-v1';
+const T={
+ de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','🏴'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
+};
+const G={A:['mx','za','kr','cz'],B:['ca','ba','qa','ch'],C:['br','ma','ht','sct'],D:['us','py','au','tr'],E:['de','ci','ec','cw'],F:['nl','jp','tn','se'],G:['be','eg','ir','nz'],H:['es','sa','cv','uy'],I:['fr','sn','iq','no'],J:['ar','dz','at','jo'],K:['pt','uz','co','cd'],L:['eng','hr','gh','pa']};
+const ALL=Object.keys(T);
+const uniq=a=>[...new Set(a)];
+const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
+const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
+const tabs=[['bracket','決勝トーナメント'],['goals','得点ランキング'],['assists','アシストランキング'],['flash','速報'],['news','最新ニュース']];
+const initial={
+ left:[
+  [{id:'l1a',tag:'E1',sel:['de'],opts:G.E},{id:'l1b',tag:'3位',sel:[],opts:TH.t1}],
+  [{id:'l2a',tag:'I1',sel:['fr'],opts:G.I},{id:'l2b',tag:'3位',sel:['jp'],opts:TH.t2}],
+  [{id:'l3a',tag:'A2',sel:['kr','za'],opts:G.A},{id:'l3b',tag:'B2',sel:['ch','ca'],opts:G.B}],
+  [{id:'l4a',tag:'F1',sel:['jp'],opts:G.F},{id:'l4b',tag:'C2',sel:['br','ma'],opts:G.C}],
+  [{id:'l5a',tag:'K2',sel:['co','pt'],opts:G.K},{id:'l5b',tag:'L2',sel:['hr'],opts:G.L}],
+  [{id:'l6a',tag:'H1',sel:['es'],opts:G.H},{id:'l6b',tag:'J2',sel:['at'],opts:G.J}],
+  [{id:'l7a',tag:'D1',sel:['us'],opts:G.D},{id:'l7b',tag:'3位',sel:[],opts:TH.t5}],
+  [{id:'l8a',tag:'G1',sel:['be'],opts:G.G},{id:'l8b',tag:'3位',sel:[],opts:TH.t6}]
+ ],
+ right:[
+  [{id:'r1a',tag:'C1',sel:['br','ma'],opts:G.C},{id:'r1b',tag:'F2',sel:['jp'],opts:G.F}],
+  [{id:'r2a',tag:'E2',sel:['ci'],opts:G.E},{id:'r2b',tag:'I2',sel:['no'],opts:G.I}],
+  [{id:'r3a',tag:'A1',sel:['mx'],opts:G.A},{id:'r3b',tag:'3位',sel:[],opts:TH.t3}],
+  [{id:'r4a',tag:'L1',sel:['eng'],opts:G.L},{id:'r4b',tag:'3位',sel:[],opts:TH.t4}],
+  [{id:'r5a',tag:'J1',sel:['ar'],opts:G.J},{id:'r5b',tag:'H2',sel:['uy'],opts:G.H}],
+  [{id:'r6a',tag:'D2',sel:['au','py'],opts:G.D},{id:'r6b',tag:'G2',sel:['eg'],opts:G.G}],
+  [{id:'r7a',tag:'B1',sel:['ca','ch'],opts:G.B},{id:'r7b',tag:'3位',sel:[],opts:TH.t7}],
+  [{id:'r8a',tag:'K1',sel:['pt','co'],opts:G.K},{id:'r8b',tag:'3位',sel:[],opts:TH.t8}]
+ ]
+};
+let state=load();let editing=null;
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function load(){try{return Object.assign({active:'bracket',bracket:clone(initial),goals:rows('得点'),assists:rows('アシスト')},JSON.parse(localStorage.getItem(STORE)||'{}'))}catch(e){return {active:'bracket',bracket:clone(initial),goals:rows('得点'),assists:rows('アシスト')}}}
+function save(){localStorage.setItem(STORE,JSON.stringify(state))}
+function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function teamText(ids){if(!ids||!ids.length)return '<span class="muted">3位候補</span>';return ids.map(id=>T[id]?`<span class="flag">${T[id][1]}</span>${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
+function render(){document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():simpleTab(state.active);bind()}
+function bracketHTML(){return `<section class="panel"><div class="toolbar"><span class="small">各枠をタップして候補国を選択できます。</span><button class="btn" id="reset">初期表示に戻す</button></div><div class="bracket-card"><div class="bracket"><div class="side left">${state.bracket.left.map(matchHTML).join('')}</div><div class="spine"></div><div class="side right">${state.bracket.right.map(matchHTML).join('')}</div></div></div></section>`}
+function matchHTML(m){return `<div class="match"><span class="match-lines"></span>${m.map(slotHTML).join('')}</div>`}
+function slotHTML(s){return `<button class="slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'}" data-slot="${s.id}"><span class="tag">${esc(s.tag)}</span><span class="team-text">${teamText(s.sel)}</span></button>`}
+function simpleTab(tab){const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;let rowsData=state[tab];return `<div class="card"><h2>${title}</h2><table class="table"><thead><tr><th>順位</th><th>${tab==='goals'?'得点数':'アシスト数'}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank}</td><td><input class="input" data-r="${tab}|${i}|value" value="${esc(r.value)}"></td><td><input class="input" data-r="${tab}|${i}|player" placeholder="選手名" value="${esc(r.player)}"></td></tr>`).join('')}</tbody></table></div>`}
+function bind(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>openSheet(b.dataset.slot));const reset=document.getElementById('reset');if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);save();render()}};document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()})}
+function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
+function openSheet(id){const s=findSlot(id);if(!s)return;editing=id;document.getElementById('backdrop').classList.add('show');document.getElementById('sheet').classList.add('show');document.getElementById('sheet').innerHTML=`<div class="sheet-head"><div class="sheet-title">${esc(s.tag)} の候補国を選択</div><div class="small">複数選択できます。</div></div><div class="sheet-body">${s.opts.map(id=>`<label class="opt"><input type="checkbox" value="${id}" ${s.sel.includes(id)?'checked':''}><span class="flag">${T[id][1]}</span><b>${esc(T[id][0])}</b></label>`).join('')}</div><div class="sheet-actions"><button class="btn" id="clearSel">クリア</button><button class="btn primary" id="doneSel">反映</button></div>`;document.getElementById('doneSel').onclick=applySheet;document.getElementById('clearSel').onclick=()=>{document.querySelectorAll('#sheet input').forEach(x=>x.checked=false)}}
+function closeSheet(){document.getElementById('backdrop').classList.remove('show');document.getElementById('sheet').classList.remove('show');editing=null}
+function applySheet(){const s=findSlot(editing);if(s){s.sel=[...document.querySelectorAll('#sheet input:checked')].map(x=>x.value);save();closeSheet();render()}}
+document.getElementById('backdrop').onclick=closeSheet;
+render();
 })();
 </script>
 </body>

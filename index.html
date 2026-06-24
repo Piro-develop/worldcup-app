@@ -60,17 +60,37 @@
       background:linear-gradient(180deg,#14223a,#0d1728);
       display:flex;
       align-items:center;
-      gap:6px;
-      padding:3px 6px;
+      gap:0;
+      padding:0;
       box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
-      cursor:pointer;
       overflow:hidden;
     }
     .slot:hover{border-color:rgba(52,210,208,.62)}
     .slot.jp{background:linear-gradient(180deg,rgba(35,135,139,.95),rgba(16,89,96,.95));border-color:rgba(93,243,240,.64)}
     .slot.empty{color:#a4b3c9}
-    .slot.fixed{cursor:default;border-color:rgba(240,201,107,.56);box-shadow:inset 0 0 0 1px rgba(240,201,107,.12)}
-    .slot.fixed:hover{border-color:rgba(240,201,107,.56)}
+    .slot.fixed{border-color:rgba(240,201,107,.72);box-shadow:inset 0 0 0 1px rgba(240,201,107,.16)}
+    .slot.confirmed{
+      background:linear-gradient(180deg,#f6d87f,#c89933);
+      border-color:rgba(255,231,151,.95);
+      color:#15120a;
+      box-shadow:0 0 0 1px rgba(255,231,151,.35),0 0 18px rgba(240,201,107,.28);
+    }
+    .slot-main{
+      appearance:none;border:0;background:transparent;color:inherit;
+      flex:1 1 auto;min-width:0;height:100%;
+      display:flex;align-items:center;gap:6px;
+      padding:3px 4px 3px 6px;text-align:left;cursor:pointer;
+    }
+    .slot.fixed .slot-main{cursor:default}
+    .slot-main:disabled{opacity:1}
+    .confirm-btn{
+      appearance:none;flex:0 0 25px;height:calc(100% - 6px);margin-right:3px;
+      border:1px solid rgba(205,220,245,.18);border-radius:7px;
+      background:#1d2b44;color:#c8d6ea;font-size:10px;font-weight:900;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;
+    }
+    .confirm-btn.active{background:#7a5414;color:#fff3cf;border-color:rgba(255,225,135,.75)}
+    .slot.confirmed .confirm-btn{background:#17130a;color:#ffe79a;border-color:rgba(0,0,0,.24)}
     .tag{
       flex:0 0 31px;
       height:24px;
@@ -84,10 +104,11 @@
       font-weight:900;
     }
     .slot.jp .tag{background:#6ee7e5;color:#08212a}
+    .slot.confirmed .tag{background:#1d1608;color:#ffe79a}
     .team-text{
       flex:1 1 auto;
       min-width:0;
-      font-size:clamp(9px,1.35vw,14px);
+      font-size:clamp(9px,1.25vw,14px);
       font-weight:900;
       line-height:1.15;
       white-space:nowrap;
@@ -95,12 +116,19 @@
       text-overflow:ellipsis;
     }
     .team-text .muted{font-weight:700;color:#aab8cc}
+    .slot.confirmed .team-text .muted{color:#473811}
     .flag{font-size:14px;margin-right:3px}
+    .eng-flag{
+      position:relative;display:inline-block;width:18px;height:12px;margin-right:4px;
+      background:#fff;border:1px solid rgba(0,0,0,.28);border-radius:2px;vertical-align:-1px;flex:none;
+    }
+    .eng-flag:before{content:"";position:absolute;left:7px;top:0;width:3px;height:100%;background:#c8102e}
+    .eng-flag:after{content:"";position:absolute;left:0;top:4px;width:100%;height:3px;background:#c8102e}
     .toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px}
     .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px}.sheet-title{font-weight:900}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
 
     .card{border:1px solid var(--line);border-radius:16px;background:rgba(12,20,36,.9);padding:14px;margin:10px 0;box-shadow:var(--shadow)}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(205,220,245,.12);padding:8px;text-align:left}.input{width:100%;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#fff;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.slot{padding:2px 3px;border-radius:6px}.tag{flex-basis:25px;height:20px;font-size:9px}.flag{font-size:11px}.team-text{font-size:9px}.toolbar{display:none}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.slot{padding:2px 3px;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag{font-size:11px}.eng-flag{width:15px;height:10px;margin-right:2px}.team-text{font-size:9px}.toolbar{display:none}}
   </style>
 </head>
 <body>
@@ -118,33 +146,34 @@
 <script>
 (function(){
 'use strict';
-const STORE='wc2026-light-bracket-v2';
+const STORE='wc2026-light-bracket-v4';
 const T={
- de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','🏴'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
+ de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','ENG'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
 };
 const G={A:['mx','za','kr','cz'],B:['ca','ba','qa','ch'],C:['br','ma','ht','sct'],D:['us','py','au','tr'],E:['de','ci','ec','cw'],F:['nl','jp','tn','se'],G:['be','eg','ir','nz'],H:['es','sa','cv','uy'],I:['fr','sn','iq','no'],J:['ar','dz','at','jo'],K:['pt','uz','co','cd'],L:['eng','hr','gh','pa']};
 const ALL=Object.keys(T);
+const ELIMINATED=['tr','ht','tn','pa','jo'];
 const uniq=a=>[...new Set(a)];
 const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
 const tabs=[['bracket','決勝トーナメント'],['goals','得点ランキング'],['assists','アシストランキング'],['flash','速報'],['news','最新ニュース']];
 const initial={
  left:[
-  [{id:'l1a',tag:'E1',sel:['de'],opts:G.E,fixed:true},{id:'l1b',tag:'3位',sel:[],opts:TH.t1}],
+  [{id:'l1a',tag:'E1',sel:['de'],opts:G.E,fixed:true,confirmed:true},{id:'l1b',tag:'3位',sel:[],opts:TH.t1}],
   [{id:'l2a',tag:'I1',sel:['fr'],opts:G.I},{id:'l2b',tag:'3位',sel:['jp'],opts:TH.t2}],
   [{id:'l3a',tag:'A2',sel:['kr','za'],opts:G.A},{id:'l3b',tag:'B2',sel:['ch','ca'],opts:G.B}],
   [{id:'l4a',tag:'F1',sel:['jp'],opts:G.F},{id:'l4b',tag:'C2',sel:['br','ma'],opts:G.C}],
   [{id:'l5a',tag:'K2',sel:['co','pt'],opts:G.K},{id:'l5b',tag:'L2',sel:['hr'],opts:G.L}],
   [{id:'l6a',tag:'H1',sel:['es'],opts:G.H},{id:'l6b',tag:'J2',sel:['at'],opts:G.J}],
-  [{id:'l7a',tag:'D1',sel:['us'],opts:G.D,fixed:true},{id:'l7b',tag:'3位',sel:[],opts:TH.t5}],
+  [{id:'l7a',tag:'D1',sel:['us'],opts:G.D,fixed:true,confirmed:true},{id:'l7b',tag:'3位',sel:[],opts:TH.t5}],
   [{id:'l8a',tag:'G1',sel:['be'],opts:G.G},{id:'l8b',tag:'3位',sel:[],opts:TH.t6}]
  ],
  right:[
   [{id:'r1a',tag:'C1',sel:['br','ma'],opts:G.C},{id:'r1b',tag:'F2',sel:['jp'],opts:G.F}],
   [{id:'r2a',tag:'E2',sel:['ci'],opts:G.E},{id:'r2b',tag:'I2',sel:['no'],opts:G.I}],
-  [{id:'r3a',tag:'A1',sel:['mx'],opts:G.A,fixed:true},{id:'r3b',tag:'3位',sel:[],opts:TH.t3}],
+  [{id:'r3a',tag:'A1',sel:['mx'],opts:G.A,fixed:true,confirmed:true},{id:'r3b',tag:'3位',sel:[],opts:TH.t3}],
   [{id:'r4a',tag:'L1',sel:['eng'],opts:G.L},{id:'r4b',tag:'3位',sel:[],opts:TH.t4}],
-  [{id:'r5a',tag:'J1',sel:['ar'],opts:G.J,fixed:true},{id:'r5b',tag:'H2',sel:['uy'],opts:G.H}],
+  [{id:'r5a',tag:'J1',sel:['ar'],opts:G.J,fixed:true,confirmed:true},{id:'r5b',tag:'H2',sel:['uy'],opts:G.H}],
   [{id:'r6a',tag:'D2',sel:['au','py'],opts:G.D},{id:'r6b',tag:'G2',sel:['eg'],opts:G.G}],
   [{id:'r7a',tag:'B1',sel:['ca','ch'],opts:G.B},{id:'r7b',tag:'3位',sel:[],opts:TH.t7}],
   [{id:'r8a',tag:'K1',sel:['pt','co'],opts:G.K},{id:'r8b',tag:'3位',sel:[],opts:TH.t8}]
@@ -156,7 +185,8 @@ function load(){try{return Object.assign({active:'bracket',bracket:clone(initial
 function save(){localStorage.setItem(STORE,JSON.stringify(state))}
 function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function teamText(ids){if(!ids||!ids.length)return '<span class="muted">未選択</span>';return ids.map(id=>T[id]?`<span class="flag">${T[id][1]}</span>${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
+function teamFlag(id){return id==='eng'?'<span class="eng-flag" aria-label="England"></span>':`<span class="flag">${T[id]?.[1]||''}</span>`}
+function teamText(ids){if(!ids||!ids.length)return '<span class="muted">未選択</span>';return ids.map(id=>T[id]?`${teamFlag(id)}${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
 function render(){document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():simpleTab(state.active);bind()}
 function bracketHTML(){
   const leftSlots=state.bracket.left.flatMap((m,mi)=>m.map((slot,si)=>slotHTML(slot,'left',mi,si))).join('');
@@ -213,26 +243,68 @@ function linesSVG(){
 function slotHTML(s,side,mi,si){
   const top=4.2+(mi*12.2)+(si?5.9:0);
   const left=side==='left'?1.1:67.1;
-  const classes=`slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'} ${s.fixed?'fixed':''}`;
-  const attr=s.fixed?'aria-disabled="true"':`data-slot="${s.id}"`;
-  return `<button class="${classes}" style="left:${left}%;top:${top}%" ${attr}><span class="tag">${esc(s.tag)}</span><span class="team-text">${teamText(s.sel)}</span></button>`
+  const classes=`slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'} ${s.fixed?'fixed':''} ${s.confirmed||s.fixed?'confirmed':''}`;
+  const mainAttr=s.fixed?'disabled aria-disabled="true"':`data-slot="${s.id}"`;
+  const confirmAttr=s.fixed?'aria-label="確定済み"':`data-confirm="${s.id}" aria-label="確定"`;
+  return `<div class="${classes}" style="left:${left}%;top:${top}%">
+    <button class="slot-main" type="button" ${mainAttr}><span class="tag">${esc(s.tag)}</span><span class="team-text">${teamText(s.sel)}</span></button>
+    <button class="confirm-btn ${s.confirmed||s.fixed?'active':''}" type="button" ${confirmAttr}>確</button>
+  </div>`
 }
 function simpleTab(tab){const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;let rowsData=state[tab];return `<div class="card"><h2>${title}</h2><table class="table"><thead><tr><th>順位</th><th>${tab==='goals'?'得点数':'アシスト数'}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank}</td><td><input class="input" data-r="${tab}|${i}|value" value="${esc(r.value)}"></td><td><input class="input" data-r="${tab}|${i}|player" placeholder="選手名" value="${esc(r.player)}"></td></tr>`).join('')}</tbody></table></div>`}
-function bind(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>openSheet(b.dataset.slot));const reset=document.getElementById('reset');if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);save();render()}};document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()})}
+function bind(){
+  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});
+  document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>openSheet(b.dataset.slot));
+  document.querySelectorAll('[data-confirm]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();toggleConfirm(b.dataset.confirm)});
+  const reset=document.getElementById('reset');
+  if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);save();render()}};
+  document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()})
+}
+function toggleConfirm(id){
+  const s=findSlot(id);if(!s||s.fixed)return;
+  if(!s.sel.length){alert('先に国を選択してください。');return;}
+  s.confirmed=!s.confirmed;
+  if(s.confirmed)removeConfirmedFromOthers(s);
+  save();render();
+}
+function removeConfirmedFromOthers(source){
+  const ids=new Set(source.sel||[]);
+  for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m){
+    if(s===source||s.fixed)continue;
+    const before=(s.sel||[]).length;
+    s.sel=(s.sel||[]).filter(id=>!ids.has(id));
+    if(before && !s.sel.length)s.confirmed=false;
+  }
+}
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
+function confirmedIds(currentSlot){
+  const ids=[];
+  for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m){
+    if(s===currentSlot)continue;
+    if(s.fixed||s.confirmed)ids.push(...(s.sel||[]));
+  }
+  return [...new Set(ids)];
+}
+function availableOptions(s){
+  const locked=confirmedIds(s);
+  return s.opts.filter(id=>{
+    if(ELIMINATED.includes(id))return false;
+    if(locked.includes(id))return false;
+    return true;
+  });
+}
 function openSheet(id){
   const s=findSlot(id);if(!s||s.fixed)return;
-  const locked=['de','mx','ar','us'];
-  const options=s.opts.filter(id=>!locked.includes(id));
+  const options=availableOptions(s);
   editing=id;
   document.getElementById('backdrop').classList.add('show');
   document.getElementById('sheet').classList.add('show');
-  document.getElementById('sheet').innerHTML=`<div class="sheet-head"><div class="sheet-title">${esc(s.tag)} の候補国を選択</div><div class="small">複数選択できます。確定済みのドイツ・メキシコ・アルゼンチン・アメリカは選択肢から除外しています。</div></div><div class="sheet-body">${options.map(id=>`<label class="opt"><input type="checkbox" value="${id}" ${s.sel.includes(id)?'checked':''}><span class="flag">${T[id][1]}</span><b>${esc(T[id][0])}</b></label>`).join('')}</div><div class="sheet-actions"><button class="btn" id="clearSel">クリア</button><button class="btn primary" id="doneSel">反映</button></div>`;
+  document.getElementById('sheet').innerHTML=`<div class="sheet-head"><div class="sheet-title">${esc(s.tag)} の候補国を選択</div><div class="small">複数選択できます。確定済みのチーム、敗退決定チームは選択肢から除外されます。</div></div><div class="sheet-body">${options.length?options.map(id=>`<label class="opt"><input type="checkbox" value="${id}" ${s.sel.includes(id)?'checked':''}>${teamFlag(id)}<b>${esc(T[id][0])}</b></label>`).join(''):'<div class="small">選択可能な候補がありません。</div>'}</div><div class="sheet-actions"><button class="btn" id="clearSel">クリア</button><button class="btn primary" id="doneSel">反映</button></div>`;
   document.getElementById('doneSel').onclick=applySheet;
   document.getElementById('clearSel').onclick=()=>{document.querySelectorAll('#sheet input').forEach(x=>x.checked=false)}
 }
 function closeSheet(){document.getElementById('backdrop').classList.remove('show');document.getElementById('sheet').classList.remove('show');editing=null}
-function applySheet(){const s=findSlot(editing);if(s){s.sel=[...document.querySelectorAll('#sheet input:checked')].map(x=>x.value);save();closeSheet();render()}}
+function applySheet(){const s=findSlot(editing);if(s){s.sel=[...document.querySelectorAll('#sheet input:checked')].map(x=>x.value);s.confirmed=false;save();closeSheet();render()}}
 document.getElementById('backdrop').onclick=closeSheet;
 render();
 })();

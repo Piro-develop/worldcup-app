@@ -69,6 +69,8 @@
     .slot:hover{border-color:rgba(52,210,208,.62)}
     .slot.jp{background:linear-gradient(180deg,rgba(35,135,139,.95),rgba(16,89,96,.95));border-color:rgba(93,243,240,.64)}
     .slot.empty{color:#a4b3c9}
+    .slot.fixed{cursor:default;border-color:rgba(240,201,107,.56);box-shadow:inset 0 0 0 1px rgba(240,201,107,.12)}
+    .slot.fixed:hover{border-color:rgba(240,201,107,.56)}
     .tag{
       flex:0 0 31px;
       height:24px;
@@ -116,7 +118,7 @@
 <script>
 (function(){
 'use strict';
-const STORE='wc2026-light-bracket-v1';
+const STORE='wc2026-light-bracket-v2';
 const T={
  de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','🏴'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
 };
@@ -128,21 +130,21 @@ const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C
 const tabs=[['bracket','決勝トーナメント'],['goals','得点ランキング'],['assists','アシストランキング'],['flash','速報'],['news','最新ニュース']];
 const initial={
  left:[
-  [{id:'l1a',tag:'E1',sel:['de'],opts:G.E},{id:'l1b',tag:'3位',sel:[],opts:TH.t1}],
+  [{id:'l1a',tag:'E1',sel:['de'],opts:G.E,fixed:true},{id:'l1b',tag:'3位',sel:[],opts:TH.t1}],
   [{id:'l2a',tag:'I1',sel:['fr'],opts:G.I},{id:'l2b',tag:'3位',sel:['jp'],opts:TH.t2}],
   [{id:'l3a',tag:'A2',sel:['kr','za'],opts:G.A},{id:'l3b',tag:'B2',sel:['ch','ca'],opts:G.B}],
   [{id:'l4a',tag:'F1',sel:['jp'],opts:G.F},{id:'l4b',tag:'C2',sel:['br','ma'],opts:G.C}],
   [{id:'l5a',tag:'K2',sel:['co','pt'],opts:G.K},{id:'l5b',tag:'L2',sel:['hr'],opts:G.L}],
   [{id:'l6a',tag:'H1',sel:['es'],opts:G.H},{id:'l6b',tag:'J2',sel:['at'],opts:G.J}],
-  [{id:'l7a',tag:'D1',sel:['us'],opts:G.D},{id:'l7b',tag:'3位',sel:[],opts:TH.t5}],
+  [{id:'l7a',tag:'D1',sel:['us'],opts:G.D,fixed:true},{id:'l7b',tag:'3位',sel:[],opts:TH.t5}],
   [{id:'l8a',tag:'G1',sel:['be'],opts:G.G},{id:'l8b',tag:'3位',sel:[],opts:TH.t6}]
  ],
  right:[
   [{id:'r1a',tag:'C1',sel:['br','ma'],opts:G.C},{id:'r1b',tag:'F2',sel:['jp'],opts:G.F}],
   [{id:'r2a',tag:'E2',sel:['ci'],opts:G.E},{id:'r2b',tag:'I2',sel:['no'],opts:G.I}],
-  [{id:'r3a',tag:'A1',sel:['mx'],opts:G.A},{id:'r3b',tag:'3位',sel:[],opts:TH.t3}],
+  [{id:'r3a',tag:'A1',sel:['mx'],opts:G.A,fixed:true},{id:'r3b',tag:'3位',sel:[],opts:TH.t3}],
   [{id:'r4a',tag:'L1',sel:['eng'],opts:G.L},{id:'r4b',tag:'3位',sel:[],opts:TH.t4}],
-  [{id:'r5a',tag:'J1',sel:['ar'],opts:G.J},{id:'r5b',tag:'H2',sel:['uy'],opts:G.H}],
+  [{id:'r5a',tag:'J1',sel:['ar'],opts:G.J,fixed:true},{id:'r5b',tag:'H2',sel:['uy'],opts:G.H}],
   [{id:'r6a',tag:'D2',sel:['au','py'],opts:G.D},{id:'r6b',tag:'G2',sel:['eg'],opts:G.G}],
   [{id:'r7a',tag:'B1',sel:['ca','ch'],opts:G.B},{id:'r7b',tag:'3位',sel:[],opts:TH.t7}],
   [{id:'r8a',tag:'K1',sel:['pt','co'],opts:G.K},{id:'r8b',tag:'3位',sel:[],opts:TH.t8}]
@@ -154,7 +156,7 @@ function load(){try{return Object.assign({active:'bracket',bracket:clone(initial
 function save(){localStorage.setItem(STORE,JSON.stringify(state))}
 function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function teamText(ids){if(!ids||!ids.length)return '<span class="muted">3位候補</span>';return ids.map(id=>T[id]?`<span class="flag">${T[id][1]}</span>${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
+function teamText(ids){if(!ids||!ids.length)return '<span class="muted">未選択</span>';return ids.map(id=>T[id]?`<span class="flag">${T[id][1]}</span>${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
 function render(){document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():simpleTab(state.active);bind()}
 function bracketHTML(){
   const leftSlots=state.bracket.left.flatMap((m,mi)=>m.map((slot,si)=>slotHTML(slot,'left',mi,si))).join('');
@@ -171,20 +173,35 @@ function bracketHTML(){
   </section>`
 }
 function linesSVG(){
-  const ys=[4.2,16.4,28.6,40.8,53.0,65.2,77.4,89.6];
-  const y1=ys.map(y=>[y,y+5.9]);
-  const mid=ys.map(y=>y+2.95);
+  const slotTop=4.2;
+  const matchGap=12.2;
+  const slotGap=5.9;
+  const slotH=4.9;
+  const pairCenters=Array.from({length:8},(_,i)=>{
+    const first=slotTop+i*matchGap+slotH/2;
+    return [first, first+slotGap];
+  });
+  const mid=pairCenters.map(([a,b])=>(a+b)/2);
   const block=[(mid[0]+mid[1])/2,(mid[2]+mid[3])/2,(mid[4]+mid[5])/2,(mid[6]+mid[7])/2];
   const semi=[(block[0]+block[1])/2,(block[2]+block[3])/2];
   const final=(semi[0]+semi[1])/2;
   let p=[];
   const line=(x1,x2,y)=>p.push(`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/>`);
-  y1.forEach(([a,b],i)=>{line(32.8,35.0,a);line(32.8,35.0,b);p.push(`<line x1="35.0" y1="${a}" x2="35.0" y2="${b}"/>`);line(35.0,38.0,mid[i]);});
+  pairCenters.forEach(([a,b],i)=>{
+    line(32.9,35.0,a);line(32.9,35.0,b);
+    p.push(`<line x1="35.0" y1="${a}" x2="35.0" y2="${b}"/>`);
+    line(35.0,38.0,mid[i]);
+  });
   for(let i=0;i<4;i++){const a=mid[i*2],b=mid[i*2+1],m=block[i];p.push(`<line x1="38.0" y1="${a}" x2="38.0" y2="${b}"/>`);line(38.0,41.0,m);}
   for(let i=0;i<2;i++){const a=block[i*2],b=block[i*2+1],m=semi[i];p.push(`<line x1="41.0" y1="${a}" x2="41.0" y2="${b}"/>`);line(41.0,45.0,m);}
   p.push(`<line x1="45.0" y1="${semi[0]}" x2="45.0" y2="${semi[1]}"/>`);
   line(45.0,49.0,final);
-  y1.forEach(([a,b],i)=>{line(67.2,65.0,a);line(67.2,65.0,b);p.push(`<line x1="65.0" y1="${a}" x2="65.0" y2="${b}"/>`);line(65.0,62.0,mid[i]);});
+
+  pairCenters.forEach(([a,b],i)=>{
+    line(67.1,65.0,a);line(67.1,65.0,b);
+    p.push(`<line x1="65.0" y1="${a}" x2="65.0" y2="${b}"/>`);
+    line(65.0,62.0,mid[i]);
+  });
   for(let i=0;i<4;i++){const a=mid[i*2],b=mid[i*2+1],m=block[i];p.push(`<line x1="62.0" y1="${a}" x2="62.0" y2="${b}"/>`);line(62.0,59.0,m);}
   for(let i=0;i<2;i++){const a=block[i*2],b=block[i*2+1],m=semi[i];p.push(`<line x1="59.0" y1="${a}" x2="59.0" y2="${b}"/>`);line(59.0,55.0,m);}
   p.push(`<line x1="55.0" y1="${semi[0]}" x2="55.0" y2="${semi[1]}"/>`);
@@ -196,12 +213,24 @@ function linesSVG(){
 function slotHTML(s,side,mi,si){
   const top=4.2+(mi*12.2)+(si?5.9:0);
   const left=side==='left'?1.1:67.1;
-  return `<button class="slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'}" style="left:${left}%;top:${top}%" data-slot="${s.id}"><span class="tag">${esc(s.tag)}</span><span class="team-text">${teamText(s.sel)}</span></button>`
+  const classes=`slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'} ${s.fixed?'fixed':''}`;
+  const attr=s.fixed?'aria-disabled="true"':`data-slot="${s.id}"`;
+  return `<button class="${classes}" style="left:${left}%;top:${top}%" ${attr}><span class="tag">${esc(s.tag)}</span><span class="team-text">${teamText(s.sel)}</span></button>`
 }
 function simpleTab(tab){const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;let rowsData=state[tab];return `<div class="card"><h2>${title}</h2><table class="table"><thead><tr><th>順位</th><th>${tab==='goals'?'得点数':'アシスト数'}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank}</td><td><input class="input" data-r="${tab}|${i}|value" value="${esc(r.value)}"></td><td><input class="input" data-r="${tab}|${i}|player" placeholder="選手名" value="${esc(r.player)}"></td></tr>`).join('')}</tbody></table></div>`}
 function bind(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>openSheet(b.dataset.slot));const reset=document.getElementById('reset');if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);save();render()}};document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()})}
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
-function openSheet(id){const s=findSlot(id);if(!s)return;editing=id;document.getElementById('backdrop').classList.add('show');document.getElementById('sheet').classList.add('show');document.getElementById('sheet').innerHTML=`<div class="sheet-head"><div class="sheet-title">${esc(s.tag)} の候補国を選択</div><div class="small">複数選択できます。</div></div><div class="sheet-body">${s.opts.map(id=>`<label class="opt"><input type="checkbox" value="${id}" ${s.sel.includes(id)?'checked':''}><span class="flag">${T[id][1]}</span><b>${esc(T[id][0])}</b></label>`).join('')}</div><div class="sheet-actions"><button class="btn" id="clearSel">クリア</button><button class="btn primary" id="doneSel">反映</button></div>`;document.getElementById('doneSel').onclick=applySheet;document.getElementById('clearSel').onclick=()=>{document.querySelectorAll('#sheet input').forEach(x=>x.checked=false)}}
+function openSheet(id){
+  const s=findSlot(id);if(!s||s.fixed)return;
+  const locked=['de','mx','ar','us'];
+  const options=s.opts.filter(id=>!locked.includes(id));
+  editing=id;
+  document.getElementById('backdrop').classList.add('show');
+  document.getElementById('sheet').classList.add('show');
+  document.getElementById('sheet').innerHTML=`<div class="sheet-head"><div class="sheet-title">${esc(s.tag)} の候補国を選択</div><div class="small">複数選択できます。確定済みのドイツ・メキシコ・アルゼンチン・アメリカは選択肢から除外しています。</div></div><div class="sheet-body">${options.map(id=>`<label class="opt"><input type="checkbox" value="${id}" ${s.sel.includes(id)?'checked':''}><span class="flag">${T[id][1]}</span><b>${esc(T[id][0])}</b></label>`).join('')}</div><div class="sheet-actions"><button class="btn" id="clearSel">クリア</button><button class="btn primary" id="doneSel">反映</button></div>`;
+  document.getElementById('doneSel').onclick=applySheet;
+  document.getElementById('clearSel').onclick=()=>{document.querySelectorAll('#sheet input').forEach(x=>x.checked=false)}
+}
 function closeSheet(){document.getElementById('backdrop').classList.remove('show');document.getElementById('sheet').classList.remove('show');editing=null}
 function applySheet(){const s=findSlot(editing);if(s){s.sel=[...document.querySelectorAll('#sheet input:checked')].map(x=>x.value);save();closeSheet();render()}}
 document.getElementById('backdrop').onclick=closeSheet;

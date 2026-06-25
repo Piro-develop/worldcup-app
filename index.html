@@ -406,7 +406,7 @@ const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
 const tabs=[['bracket','決勝T表'],['knockout','決勝T日程'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ'],['news','ニュース']];
 const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Africa',ch:'Switzerland',ca:'Canada',br:'Brazil',ma:'Morocco',co:'Colombia',pt:'Portugal',hr:'Croatia',es:'Spain',at:'Austria',us:'United States',be:'Belgium',ci:'Ivory Coast',no:'Norway',mx:'Mexico',eng:'England',ar:'Argentina',uy:'Uruguay',au:'Australia',py:'Paraguay',eg:'Egypt',nl:'Netherlands',se:'Sweden',tn:'Tunisia',cz:'Czechia',qa:'Qatar',ba:'Bosnia and Herzegovina',ht:'Haiti',sct:'Scotland',tr:'Türkiye',ec:'Ecuador',cw:'Curaçao',ir:'Iran',nz:'New Zealand',sa:'Saudi Arabia',cv:'Cape Verde',sn:'Senegal',iq:'Iraq',dz:'Algeria',jo:'Jordan',uz:'Uzbekistan',cd:'DR Congo',gh:'Ghana',pa:'Panama'};
-const NEWS_COUNTRY_ORDER=['jp','us','dz','ar','eng','iq','ir','uz','uy','ec','eg','au','at','nl','gh','cv','qa','ca','kr','cw','hr','ci','co','cd','sa','ch','se','sct','es','sn','cz','tn','de','tr','nz','no','ht','pa','py','fr','br','be','pt','ba','za','mx','ma','jo'];
+const NEWS_COUNTRY_ORDER=['jp'].concat(Object.keys(T).filter(id=>id!=='jp').sort((a,b)=>String(T[a]?.[0]||a).localeCompare(String(T[b]?.[0]||b),'ja')));
 const GDELT_DOC_API='https://api.gdeltproject.org/api/v2/doc/doc';
 const GOOGLE_NEWS_RSS='https://news.google.com/rss/search';
 const RSS2JSON_API='https://api.rss2json.com/v1/api.json';
@@ -799,6 +799,8 @@ function load(){
   if(!merged.news||typeof merged.news!=='object')merged.news={target:'all',status:'',items:[]};
   if(merged.news.target!=='all'&&!NEWS_COUNTRY_ORDER.includes(merged.news.target))merged.news.target='all';
   if(!Array.isArray(merged.news.items))merged.news.items=[];
+  merged.news.items=merged.news.items.filter(item=>item&&hasJapaneseText(item.title));
+  if(!merged.news.items.length&&merged.news.status==='取得済')merged.news.status='';
   if(!['','取得中・・・','取得済','取得失敗'].includes(merged.news.status||''))merged.news.status='';
   if(!merged.ko||typeof merged.ko!=='object')merged.ko={status:'',results:{}};
   if(!merged.ko.results||typeof merged.ko.results!=='object')merged.ko.results={};
@@ -972,6 +974,8 @@ function knockoutLayout(){
   const titles=['ベスト32','ラウンド16','準々決勝','準決勝','3位決定戦','決勝'];
   const pos={};
   r32.forEach((no,i)=>{pos[no]={x:left,y:top+i*step,w:cardW,h:cardH,col:0}});
+
+  // まず通常のトーナメント表として、前ラウンド2試合の中央に次カードを置く。
   [r16,qf,sf,third,final].forEach((arr,idx)=>{
     const col=idx+1;
     arr.forEach(no=>{
@@ -982,8 +986,20 @@ function knockoutLayout(){
       pos[no]={x:left+col*colW,y:cy-cardH/2,w:cardW,h:cardH,col};
     });
   });
+
+  // スマホ横スクロール時に右側ラウンドの縦余白が大きくなりすぎるため、
+  // 右に進むほど縦方向だけを圧縮する。カード同士の勝ち上がり線は再計算後の座標で接続するため崩れない。
+  const verticalCompress={1:.58,2:.38,3:.25,4:.18,5:.18};
+  Object.values(pos).forEach(p=>{
+    if(!p || !p.col)return;
+    const factor=verticalCompress[p.col]||1;
+    p.y=top+(p.y-top)*factor;
+  });
+
   const boardW=left+titles.length*colW+20;
-  const boardH=top+r32.length*step+cardH;
+  const r32Bottom=Math.max(...r32.map(no=>pos[no].y+pos[no].h));
+  const laterBottom=Math.max(...Object.values(pos).map(p=>p.y+p.h));
+  const boardH=Math.max(r32Bottom,laterBottom)+40;
   return {pos,orders,titles,cardW,cardH,colW,left,boardW,boardH};
 }
 function knockoutScheduleHTML(){
@@ -1824,36 +1840,33 @@ function newsTargetLabel(target){
 function buildNewsKeywords(target){
   if(!target||target==='all')return ['ワールドカップ','W杯','サッカー','2026'];
   const jp=T[target]?.[0]||target;
-  const en=NEWS_EN[target]||jp;
-  return jp===en?[jp,'ワールドカップ','W杯','2026']:[jp,en,'ワールドカップ','W杯','2026'];
+  return [jp,'ワールドカップ','W杯','サッカー','2026'];
 }
 function buildNewsQuery(target){
-  const k=buildNewsKeywords(target);
-  if(!target||target==='all')return '(ワールドカップ OR W杯 OR "World Cup") (サッカー OR football)';
+  if(!target||target==='all')return '(ワールドカップ OR W杯) サッカー';
   const jp=T[target]?.[0]||target;
-  const en=NEWS_EN[target]||jp;
-  return jp===en?`${jp} (ワールドカップ OR W杯 OR "World Cup")`:`(${jp} OR "${en}") (ワールドカップ OR W杯 OR "World Cup")`;
+  return `${jp} (ワールドカップ OR W杯) サッカー`;
 }
 function buildGdeltQueries(target){
   if(!target||target==='all')return [
     'ワールドカップ サッカー',
     'W杯 サッカー',
-    'World Cup 2026 football'
+    'FIFAワールドカップ'
   ];
   const jp=T[target]?.[0]||target;
-  const en=NEWS_EN[target]||jp;
   return [
     `${jp} ワールドカップ`,
     `${jp} W杯`,
-    `${en} World Cup 2026`,
-    `${en} football World Cup`
+    `${jp} サッカー`
   ];
 }
 function buildGoogleNewsQuery(target){
-  if(!target||target==='all')return 'ワールドカップ 2026 サッカー OR W杯 サッカー';
+  if(!target||target==='all')return '(ワールドカップ OR W杯) サッカー 2026';
   const jp=T[target]?.[0]||target;
-  const en=NEWS_EN[target]||jp;
-  return `${jp} ワールドカップ OR ${jp} W杯 OR ${en} World Cup 2026`;
+  return `${jp} (ワールドカップ OR W杯 OR サッカー)`;
+}
+function hasJapaneseText(s){
+  return /[ぁ-んァ-ヶ一-龯]/.test(String(s||''));
 }
 function newsApiUrlForQuery(query){
   const params=new URLSearchParams({
@@ -1900,30 +1913,38 @@ async function fetchNews(){
 function fallbackNewsSearchItems(target){
   const label=newsTargetLabel(target);
   const jp=target==='all'?'ワールドカップ':(T[target]?.[0]||target);
-  const en=target==='all'?'World Cup':(NEWS_EN[target]||jp);
-  const base=[
-    `${jp} ワールドカップ 最新`,`${jp} W杯 最新`,`${jp} サッカー ニュース`,`${jp} 試合 結果`,`${jp} 決勝トーナメント`,
-    `${jp} 代表 メンバー`,`${jp} 監督 コメント`,`${jp} 怪我 情報`,`${jp} スタメン`,`${jp} ハイライト`,
-    `${en} World Cup 2026`,`${en} football news`,`${en} soccer news`,`${en} World Cup squad`,`${en} World Cup result`,
-    `${en} World Cup fixtures`,`${en} World Cup knockout`,`${en} World Cup highlights`,`${en} World Cup injury`,`${en} World Cup preview`
-  ];
+  const base=target==='all'?
+    [
+      'ワールドカップ サッカー 最新','W杯 サッカー 最新','FIFAワールドカップ 最新','ワールドカップ 決勝トーナメント',
+      'ワールドカップ 試合結果','ワールドカップ 日程','ワールドカップ 得点ランキング','ワールドカップ アシストランキング',
+      'ワールドカップ 日本時間','ワールドカップ 速報','ワールドカップ 代表 メンバー','ワールドカップ 監督 コメント',
+      'ワールドカップ 怪我 情報','ワールドカップ スタメン','ワールドカップ ハイライト','ワールドカップ 展望',
+      'ワールドカップ グループステージ','ワールドカップ ベスト32','ワールドカップ ラウンド16','ワールドカップ 決勝'
+    ]:
+    [
+      `${jp} ワールドカップ 最新`,`${jp} W杯 最新`,`${jp} サッカー ニュース`,`${jp} 試合 結果`,`${jp} 決勝トーナメント`,
+      `${jp} 代表 メンバー`,`${jp} 監督 コメント`,`${jp} 怪我 情報`,`${jp} スタメン`,`${jp} ハイライト`,
+      `${jp} ワールドカップ 日程`,`${jp} ワールドカップ 速報`,`${jp} W杯 展望`,`${jp} W杯 組み合わせ`,`${jp} ワールドカップ 得点者`,
+      `${jp} ワールドカップ アシスト`,`${jp} W杯 勝ち上がり`,`${jp} ワールドカップ 対戦相手`,`${jp} W杯 決勝トーナメント`,`${jp} サッカー代表 最新`
+    ];
   return base.slice(0,20).map((q,i)=>({
-    title:`${label}：${q} のニュースを開く`,
+    title:`${label}：${q} の日本語ニュースを開く`,
     url:`https://news.google.com/search?q=${encodeURIComponent(q)}&hl=ja&gl=JP&ceid=JP:ja`,
     image:newsPlaceholderImage(label),
     domain:'Google News',
     seen:''
   }));
 }
+
 async function fetchNewsItems(target){
   const errors=[];
   const loaders=[
-    ['GDELT',()=>fetchGdeltNewsItems(target)],
     ['Google News AllOrigins',()=>fetchGoogleNewsAllOriginsItems(target)],
     ['Google News AllOrigins Get',()=>fetchGoogleNewsAllOriginsGetItems(target)],
     ['Google News Codd Proxy',()=>fetchGoogleNewsCoddProxyItems(target)],
     ['Google News Reader',()=>fetchGoogleNewsItems(target)],
-    ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)]
+    ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
+    ['GDELT',()=>fetchGdeltNewsItems(target)]
   ];
   let combined=[];
   for(const [name,loader] of loaders){
@@ -2127,6 +2148,7 @@ function dedupeNews(items){
     if(!item.title||!item.url)continue;
     const clean=Object.assign({},item);
     clean.title=decodeHtml(stripMarkdownLinks(clean.title)).replace(/\s+-\s+[^-]{2,30}$/,'').trim()||clean.title;
+    if(!hasJapaneseText(clean.title))continue;
     clean.image=clean.image&&/^https?:\/\//.test(clean.image)?clean.image:'';
     if(out.some(x=>isSimilarNews(clean,x)))continue;
     out.push(clean);

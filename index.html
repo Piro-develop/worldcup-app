@@ -149,6 +149,61 @@
     .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.sheet-title{font-weight:900}.sheet-close{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--line);border-radius:999px;background:#111c30;color:#fff;font-size:20px;font-weight:900;line-height:1;display:inline-flex;align-items:center;justify-content:center}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
 
     .card{border:1px solid var(--line);border-radius:16px;background:rgba(12,20,36,.9);padding:14px;margin:10px 0;box-shadow:var(--shadow)}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(205,220,245,.12);padding:8px;text-align:left}.input{width:100%;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#fff;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}
+
+    .group-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .group-box{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(12,20,36,.92);
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .group-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:8px 9px;
+      background:linear-gradient(180deg,#12213a,#0d182b);
+      border-bottom:1px solid rgba(205,220,245,.14);
+      font-weight:900;
+      font-size:12px;
+    }
+    .group-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      font-size:9px;
+    }
+    .group-table th,.group-table td{
+      border-bottom:1px solid rgba(205,220,245,.10);
+      padding:4px 2px;
+      text-align:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .group-table th{color:#aebdd3;font-weight:800;background:rgba(7,17,31,.72)}
+    .group-table td.team-cell{text-align:left;font-weight:900}
+    .group-table .rank-col{width:16px}
+    .group-table .flag-col{width:20px}
+    .group-table .team-col{width:auto}
+    .group-table .rec-col{width:34px}
+    .group-table .num-col{width:20px}
+    .group-table .pts-col{width:22px;font-weight:900;color:#ffe79a}
+    .group-toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin:8px 2px 10px;
+    }
+    .group-status{font-size:11px;color:var(--muted);line-height:1.5}
+
     @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag{font-size:11px}.eng-flag{width:15px;height:10px;margin-right:2px}.team-text{font-size:9px}.toolbar{display:none}}
   </style>
 </head>
@@ -167,7 +222,7 @@
 <script>
 (function(){
 'use strict';
-const STORE='wc2026-light-bracket-v5';
+const STORE='wc2026-groups-v1';
 const T={
  de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','ENG'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
 };
@@ -177,7 +232,52 @@ const ELIMINATED=['tr','ht','tn','pa','jo'];
 const uniq=a=>[...new Set(a)];
 const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
-const tabs=[['bracket','決勝トーナメント'],['goals','得点ランキング'],['assists','アシストランキング'],['flash','速報'],['news','最新ニュース']];
+const tabs=[['bracket','決勝トーナメント'],['groups','グループリーグ'],['goals','得点ランキング'],['flash','速報'],['news','最新ニュース']];
+const GROUPS='ABCDEFGHIJKL'.split('');
+const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
+const TEAM_TO_GROUP={};
+Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
+const ESPN_MAP={
+  MEX:'mx',RSA:'za',KOR:'kr',CZE:'cz',CAN:'ca',BIH:'ba',QAT:'qa',SUI:'ch',
+  BRA:'br',MAR:'ma',HTI:'ht',SCO:'sct',USA:'us',PAR:'py',AUS:'au',TUR:'tr',
+  GER:'de',CUW:'cw',CIV:'ci',ECU:'ec',NED:'nl',JPN:'jp',SWE:'se',TUN:'tn',
+  BEL:'be',EGY:'eg',IRI:'ir',NZL:'nz',ESP:'es',CPV:'cv',KSA:'sa',URU:'uy',
+  FRA:'fr',SEN:'sn',IRQ:'iq',NOR:'no',ARG:'ar',DZA:'dz',AUT:'at',JOR:'jo',
+  POR:'pt',COD:'cd',UZB:'uz',COL:'co',ENG:'eng',CRO:'hr',GHA:'gh',PAN:'pa'
+};
+const NAME_MAP={
+  mexico:'mx','south africa':'za','korea republic':'kr','south korea':'kr',czechia:'cz',
+  canada:'ca','bosnia and herzegovina':'ba','bosnia-herzegovina':'ba',qatar:'qa',switzerland:'ch',
+  brazil:'br',morocco:'ma',haiti:'ht',scotland:'sct','united states':'us',usa:'us',
+  paraguay:'py',australia:'au',turkey:'tr',türkiye:'tr',germany:'de',curacao:'cw',curaçao:'cw',
+  'ivory coast':'ci','cote divoire':'ci',"côte d'ivoire":'ci',ecuador:'ec',netherlands:'nl',
+  japan:'jp',sweden:'se',tunisia:'tn',belgium:'be',egypt:'eg',iran:'ir','new zealand':'nz',
+  spain:'es','cape verde':'cv','saudi arabia':'sa',uruguay:'uy',france:'fr',senegal:'sn',
+  iraq:'iq',norway:'no',argentina:'ar',algeria:'dz',austria:'at',jordan:'jo',portugal:'pt',
+  'dr congo':'cd','congo dr':'cd','democratic republic of congo':'cd',uzbekistan:'uz',
+  colombia:'co',england:'eng',croatia:'hr',ghana:'gh',panama:'pa'
+};
+const initialGroups={
+ A:[['mx',3,0,0,6,0,9],['za',1,1,1,2,3,4],['kr',1,0,2,2,3,3],['cz',0,1,2,2,6,1]],
+ B:[['ch',2,1,0,7,3,7],['ca',1,1,1,8,3,4],['ba',1,1,1,5,6,4],['qa',0,1,2,2,10,1]],
+ C:[['br',2,1,0,7,1,7],['ma',2,1,0,6,3,7],['sct',1,0,2,1,4,3],['ht',0,0,3,2,8,0]],
+ D:[['us',2,0,0,6,1,6],['au',1,0,1,2,2,3],['py',1,0,1,2,4,3],['tr',0,0,2,0,3,0]],
+ E:[['de',2,0,0,9,2,6],['ci',1,0,1,2,2,3],['ec',0,1,1,0,1,1],['cw',0,1,1,1,7,1]],
+ F:[['nl',1,1,0,7,3,4],['jp',1,1,0,6,2,4],['se',1,0,1,6,6,3],['tn',0,0,2,1,9,0]],
+ G:[['eg',1,1,0,4,2,4],['ir',0,2,0,2,2,2],['be',0,2,0,1,1,2],['nz',0,1,1,3,5,1]],
+ H:[['es',1,1,0,4,0,4],['uy',0,2,0,3,3,2],['cv',0,2,0,2,2,2],['sa',0,1,1,1,5,1]],
+ I:[['fr',2,0,0,6,1,6],['no',2,0,0,7,3,6],['sn',0,0,2,3,6,0],['iq',0,0,2,1,7,0]],
+ J:[['ar',2,0,0,5,0,6],['at',1,0,1,3,3,3],['dz',1,0,1,2,4,3],['jo',0,0,2,2,5,0]],
+ K:[['co',2,0,0,4,1,6],['pt',1,1,0,6,1,4],['cd',0,1,1,1,2,1],['uz',0,0,2,1,8,0]],
+ L:[['eng',1,1,0,4,2,4],['gh',1,1,0,1,0,4],['hr',1,0,1,3,4,3],['pa',0,0,2,0,2,0]]
+};
+function buildGroupRows(src){
+  const out={};
+  GROUPS.forEach(g=>out[g]=(src[g]||[]).map((r,i)=>({team:r[0],w:r[1],d:r[2],l:r[3],gf:r[4],ga:r[5],pts:r[6],rank:i+1})));
+  return out;
+}
+
 const initial={
  left:[
   [{id:'l1a',tag:'E1',sel:['de'],opts:G.E,fixed:true,confirmed:true},{id:'l1b',tag:'3位',sel:[],opts:TH.t1}],
@@ -202,13 +302,26 @@ const initial={
 };
 let state=load();let editing=null;
 function clone(x){return JSON.parse(JSON.stringify(x))}
-function load(){try{return Object.assign({active:'bracket',bracket:clone(initial),goals:rows('得点'),assists:rows('アシスト')},JSON.parse(localStorage.getItem(STORE)||'{}'))}catch(e){return {active:'bracket',bracket:clone(initial),goals:rows('得点'),assists:rows('アシスト')}}}
+function load(){
+  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'初期データを表示中',goals:rows('得点')};
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORE)||'{}');
+    const merged=Object.assign(base,saved);
+    if(!merged.groups)merged.groups=buildGroupRows(initialGroups);
+    if(merged.active==='assists')merged.active='groups';
+    return merged;
+  }catch(e){return base}
+}
 function save(){localStorage.setItem(STORE,JSON.stringify(state))}
 function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function teamFlag(id){return id==='eng'?'<span class="eng-flag" aria-label="England"></span>':`<span class="flag">${T[id]?.[1]||''}</span>`}
 function teamText(ids){if(!ids||!ids.length)return '<span class="muted">未選択</span>';return ids.map(id=>T[id]?`${teamFlag(id)}${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
-function render(){document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():simpleTab(state.active);bind()}
+function render(){
+  document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');
+  document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():state.active==='groups'?groupsHTML():simpleTab(state.active);
+  bind()
+}
 function bracketHTML(){
   const leftSlots=state.bracket.left.flatMap((m,mi)=>m.map((slot,si)=>slotHTML(slot,'left',mi,si))).join('');
   const rightSlots=state.bracket.right.flatMap((m,mi)=>m.map((slot,si)=>slotHTML(slot,'right',mi,si))).join('');
@@ -276,14 +389,41 @@ function slotHTML(s,side,mi,si){
     <button class="confirm-btn ${s.confirmed||s.fixed?'active':''}" type="button" ${confirmAttr}>確</button>
   </div>`
 }
-function simpleTab(tab){const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;let rowsData=state[tab];return `<div class="card"><h2>${title}</h2><table class="table"><thead><tr><th>順位</th><th>${tab==='goals'?'得点数':'アシスト数'}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank}</td><td><input class="input" data-r="${tab}|${i}|value" value="${esc(r.value)}"></td><td><input class="input" data-r="${tab}|${i}|player" placeholder="選手名" value="${esc(r.player)}"></td></tr>`).join('')}</tbody></table></div>`}
+function groupsHTML(){
+  return `<section class="panel">
+    <div class="group-toolbar">
+      <div class="group-status">状態：${esc(state.groupStatus||'初期データを表示中')}</div>
+      <button class="btn primary" id="updateGroups">更新</button>
+    </div>
+    <div class="group-grid">
+      ${GROUPS.map(g=>groupBoxHTML(g,state.groups[g]||[])).join('')}
+    </div>
+  </section>`
+}
+function groupBoxHTML(g,rows){
+  return `<div class="group-box">
+    <div class="group-title"><span>Group ${g}</span><span>${rows.length}チーム</span></div>
+    <table class="group-table">
+      <thead><tr><th class="rank-col">順</th><th class="flag-col">国</th><th class="team-col">国名</th><th class="rec-col">勝敗</th><th class="num-col">得</th><th class="num-col">失</th><th class="num-col">差</th><th class="pts-col">点</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="team-cell">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.d}-${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>`
+}
+function simpleTab(tab){
+  const title={goals:'得点ランキング',flash:'速報',news:'最新ニュース'}[tab];
+  if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;
+  if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;
+  let rowsData=state.goals;
+  return `<div class="card"><h2>${title}</h2><p class="small">得点ランキングは、信頼できる取得元が確定した後に自動更新へ切り替えます。現在は表示枠のみです。</p><table class="table"><thead><tr><th>順位</th><th>得点数</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank}</td><td><input class="input" data-r="goals|${i}|value" value="${esc(r.value)}"></td><td><input class="input" data-r="goals|${i}|player" placeholder="選手名" value="${esc(r.player)}"></td></tr>`).join('')}</tbody></table></div>`
+}
 function bind(){
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});
   document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>openSheet(b.dataset.slot));
   document.querySelectorAll('[data-confirm]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();toggleConfirm(b.dataset.confirm)});
   const reset=document.getElementById('reset');
   if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);save();render()}};
-  document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()})
+  document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()});
+  const updateGroups=document.getElementById('updateGroups');if(updateGroups)updateGroups.onclick=updateGroupStandings
 }
 function toggleConfirm(id){
   const s=findSlot(id);if(!s||s.fixed)return;
@@ -300,6 +440,63 @@ function removeConfirmedFromOthers(source){
     s.sel=(s.sel||[]).filter(id=>!ids.has(id));
     if(before && !s.sel.length)s.confirmed=false;
   }
+}
+function resolveTeamFromESPN(team){
+  const abbr=(team?.abbreviation||team?.team?.abbreviation||'').toUpperCase();
+  if(ESPN_MAP[abbr])return ESPN_MAP[abbr];
+  const name=String(team?.displayName||team?.shortDisplayName||team?.name||team?.team?.displayName||team?.team?.shortDisplayName||'').toLowerCase().replace(/[’']/g,'').trim();
+  return NAME_MAP[name]||'';
+}
+function blankStats(){
+  const obj={};
+  Object.entries(G).forEach(([g,ids])=>{
+    ids.forEach(id=>obj[id]={team:id,w:0,d:0,l:0,gf:0,ga:0,pts:0,group:g});
+  });
+  return obj;
+}
+function standingsFromStats(stats){
+  const out={};
+  GROUPS.forEach(g=>{
+    out[g]=(G[g]||[]).map(id=>stats[id]).filter(Boolean).sort((a,b)=>
+      b.pts-a.pts || (b.gf-b.ga)-(a.gf-a.ga) || b.gf-a.gf || T[a.team][0].localeCompare(T[b.team][0],'ja')
+    ).map((r,i)=>Object.assign({},r,{rank:i+1}));
+  });
+  return out;
+}
+async function updateGroupStandings(){
+  state.groupStatus='更新中...';
+  save();render();
+  try{
+    const payloads=await Promise.all(ESPN_DATES.map(d=>fetch(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`).then(r=>r.ok?r.json():{events:[]})));
+    const stats=blankStats();
+    let count=0;
+    payloads.flatMap(p=>p.events||[]).forEach(ev=>{
+      const comp=(ev.competitions||[])[0]||{};
+      const st=(ev.status||{}).type||{};
+      if(!st.completed)return;
+      const cs=comp.competitors||[];
+      if(cs.length<2)return;
+      const a=cs[0],b=cs[1];
+      const idA=resolveTeamFromESPN(a.team||a),idB=resolveTeamFromESPN(b.team||b);
+      if(!idA||!idB||!stats[idA]||!stats[idB])return;
+      if(TEAM_TO_GROUP[idA]!==TEAM_TO_GROUP[idB])return;
+      const scoreA=Number(a.score),scoreB=Number(b.score);
+      if(Number.isNaN(scoreA)||Number.isNaN(scoreB))return;
+      stats[idA].gf+=scoreA;stats[idA].ga+=scoreB;
+      stats[idB].gf+=scoreB;stats[idB].ga+=scoreA;
+      if(scoreA>scoreB){stats[idA].w++;stats[idB].l++;stats[idA].pts+=3}
+      else if(scoreA<scoreB){stats[idB].w++;stats[idA].l++;stats[idB].pts+=3}
+      else{stats[idA].d++;stats[idB].d++;stats[idA].pts++;stats[idB].pts++}
+      count++;
+    });
+    if(count===0)throw new Error('試合結果を取得できませんでした。');
+    state.groups=standingsFromStats(stats);
+    state.groupStatus=`ESPNの試合結果から${count}試合を反映：${new Date().toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
+  }catch(e){
+    state.groupStatus='更新失敗：'+e.message+'。初期データを表示しています。';
+    if(!state.groups)state.groups=buildGroupRows(initialGroups);
+  }
+  save();render();
 }
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
 function confirmedIds(currentSlot){

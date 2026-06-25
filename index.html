@@ -273,8 +273,11 @@
       font-size:12px;
       font-weight:900;
     }
-    .match-team{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
+    .match-team{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;border-radius:10px;padding:5px 7px}
     .match-team.away{align-items:flex-end;text-align:right}
+    .match-team.winner{background:linear-gradient(90deg,rgba(129,216,208,.98),rgba(38,166,154,.92));color:#052523;box-shadow:0 0 0 1px rgba(129,216,208,.55),0 0 14px rgba(129,216,208,.22)}
+    .match-team.winner .match-team-name{color:#052523}
+    .match-team.winner .flag-img{border-color:rgba(5,37,35,.35);box-shadow:0 0 0 1px rgba(255,255,255,.38)}
     .match-team-name{display:flex;align-items:center;gap:4px;min-width:0;font-weight:900}
     .match-team.away .match-team-name{justify-content:flex-end}
     .team-scorers{font-size:10.5px;line-height:1.35;color:#d7e2f2;font-weight:700;max-width:100%}
@@ -302,7 +305,7 @@
     .scorer-empty{color:#8fa1bc}
     .group-detail-note{font-size:11px;color:#8fa1bc;line-height:1.45;margin-top:6px}
 
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:9px}.toolbar{display:none}.tabs{gap:4px;padding:6px}.tab{font-size:11px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:9px}.toolbar{display:none}.tabs{gap:4px;padding:6px}.tab{font-size:11px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
   </style>
 </head>
 <body>
@@ -346,6 +349,7 @@ const STAT_SOURCES={
     {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+scorers'}
   ],
   assists:[
+    {name:'Soccer King 得点ランキング表',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'},
     {name:'ESPN Stats',url:'https://www.espn.com/soccer/stats/_/league/fifa.world'},
     {name:'Google Search',url:'https://www.google.com/search?q=ワールドカップ+統計情報+アシストランキング'},
     {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+assists'}
@@ -1054,7 +1058,7 @@ async function fetchPlayerStats(kind){
   for(const src of sources){
     try{
       const txt=await fetchReaderText(src.url);
-      const rows=src.parser==='soccerking'?parseSoccerKingStats(txt,kind):parseStatsText(txt,kind);
+      const rows=src.parser==='soccerking'?parseSoccerKingStatsText(txt,kind):parseStatsText(txt,kind);
       if(rows.length)return {source:src.name,rows};
       last=src.name+' は取得できましたが、表を解析できませんでした。';
     }catch(e){last=src.name+' 取得失敗';}
@@ -1107,6 +1111,80 @@ function cleanPlayerName(name){
     .replace(/\s+/g,' ')
     .trim();
 }
+
+function normalizeArticleLine(line){
+  return String(line||'')
+    .replace(/^L\d+:\s*/,'')
+    .replace(/cite\d+†([^]+)/g,'$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g,'$1')
+    .replace(/[*`#]/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function cleanPlayerName(name){
+  return normalizeArticleLine(name)
+    .replace(/^[-–—・\s]+/,'')
+    .replace(/\s*\|.*$/,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function parseSoccerKingStatsText(text,kind){
+  const lines=String(text||'').replace(/\r/g,'').split(/\n+/).map(normalizeArticleLine).filter(Boolean);
+  const start=Math.max(0,lines.findIndex(l=>/FIFAワールドカップ\s*2026\s*得点ランキング|順位\s*選手／国\s*得点/.test(l)));
+  const scope=lines.slice(start,start+90);
+  const rows=[];
+  const seen=new Set();
+
+  for(let i=0;i<scope.length-1;i++){
+    const a=scope[i];
+    const b=scope[i+1];
+
+    // Reader形: "1 リオネル・メッシ" + "アルゼンチン 5 0 170′"
+    let m=a.match(/^(\d{1,2})\s+(.+?)$/);
+    let n=b.match(/^(.+?)\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,4})[′'’]?\s*$/);
+    if(m&&n){
+      const rank=Number(m[1]);
+      const player=cleanPlayerName(m[2]);
+      const teamName=normalizeArticleLine(n[1]);
+      const goals=Number(n[2]);
+      const assists=Number(n[3]);
+      const value=kind==='goals'?goals:assists;
+      const team=teamIdFromText(teamName);
+      if(player&&Number.isFinite(value)&&value>0){
+        const key=rank+'|'+player+'|'+teamName+'|'+value;
+        if(!seen.has(key)){
+          seen.add(key);
+          rows.push({rank,value,player,team});
+        }
+      }
+      continue;
+    }
+
+    // 1行にまとまっている場合にも対応
+    const joined=(a+' '+b).replace(/\s+/g,' ').trim();
+    m=joined.match(/^(\d{1,2})\s+(.+?)\s+(メキシコ|南アフリカ|韓国|チェコ|カナダ|ボスニア・ヘルツェゴビナ|カタール|スイス|ブラジル|モロッコ|ハイチ|スコットランド|アメリカ|パラグアイ|オーストラリア|トゥルキエ|ドイツ|キュラソー|コートジボワール|エクアドル|オランダ|日本|スウェーデン|チュニジア|ベルギー|エジプト|イラン|ニュージーランド|スペイン|カーボベルデ|サウジアラビア|ウルグアイ|フランス|セネガル|イラク|ノルウェー|アルゼンチン|アルジェリア|オーストリア|ヨルダン|ポルトガル|ウズベキスタン|コロンビア|コンゴ民主共和国|イングランド|クロアチア|ガーナ|パナマ)\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,4})[′'’]?/);
+    if(m){
+      const rank=Number(m[1]);
+      const player=cleanPlayerName(m[2]);
+      const teamName=m[3];
+      const goals=Number(m[4]);
+      const assists=Number(m[5]);
+      const value=kind==='goals'?goals:assists;
+      const team=teamIdFromText(teamName);
+      if(player&&value>0){
+        const key=rank+'|'+player+'|'+teamName+'|'+value;
+        if(!seen.has(key)){
+          seen.add(key);
+          rows.push({rank,value,player,team});
+        }
+      }
+    }
+  }
+  return rows
+    .filter(r=>r.player&&!/順位|選手|得点|アシスト|時間|INDEX|ランキング/.test(r.player))
+    .sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
+}
+
 function parseStatsText(text,kind){
   const cleaned=String(text||'').replace(/\r/g,'');
   if(/No Data Available/i.test(cleaned))return [];

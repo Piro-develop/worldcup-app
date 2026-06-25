@@ -459,7 +459,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=8500;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_PIPELINE_VERSION='jp-news-focused-editorial-v10';
+const NEWS_PIPELINE_VERSION='jp-news-focused-editorial-v11';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -2068,17 +2068,17 @@ function buildNewsQuery(target){
 }
 function buildGdeltQueries(target){
   if(!target||target==='all')return [
-    'ワールドカップ スタジアム 集客 大会',
-    'FIFAワールドカップ 大会運営 ルール 評価',
-    'ワールドカップ 世界 熱狂 盛り上がり',
-    'ワールドカップ 開催地 経済効果 課題'
+    '2026 北中米ワールドカップ スタジアム 集客 大会',
+    'FIFAワールドカップ2026 大会運営 ルール 評価',
+    '北中米W杯 2026 世界 熱狂 盛り上がり',
+    'ワールドカップ2026 開催地 経済効果 課題'
   ];
   const jp=T[target]?.[0]||target;
   return [
-    `${jp} W杯 監督 コメント`,
-    `${jp} W杯 選手 インタビュー`,
-    `${jp} W杯 怪我 コンディション`,
-    `${jp} W杯 スタメン予想 次戦`
+    `${jp} 2026 W杯 監督 コメント`,
+    `${jp} 北中米W杯 選手 インタビュー`,
+    `${jp} ワールドカップ2026 怪我 コンディション`,
+    `${jp} W杯 2026 スタメン予想 次戦`
   ];
 }
 function buildGoogleNewsQuery(target){
@@ -2086,21 +2086,44 @@ function buildGoogleNewsQuery(target){
 }
 function buildGoogleNewsQueries(target){
   if(!target||target==='all')return [
-    'ワールドカップ スタジアム 集客 大会',
-    'FIFAワールドカップ 大会運営 ルール 評価',
-    'ワールドカップ 世界 熱狂 盛り上がり',
-    'ワールドカップ 開催地 経済効果 課題'
+    '2026 北中米ワールドカップ スタジアム 集客 大会',
+    'FIFAワールドカップ2026 大会運営 ルール 評価',
+    '北中米W杯 2026 世界 熱狂 盛り上がり',
+    'ワールドカップ2026 開催地 経済効果 課題'
   ];
   const jp=T[target]?.[0]||target;
   return [
-    `${jp} W杯 監督 コメント`,
-    `${jp} W杯 選手 インタビュー`,
-    `${jp} W杯 怪我 コンディション`,
-    `${jp} W杯 スタメン予想 次戦`
+    `${jp} 2026 W杯 監督 コメント`,
+    `${jp} 北中米W杯 選手 インタビュー`,
+    `${jp} ワールドカップ2026 怪我 コンディション`,
+    `${jp} W杯 2026 スタメン予想 次戦`
   ];
 }
 function hasJapaneseText(s){
   return /[ぁ-んァ-ヶ一-龯]/.test(String(s||''));
+}
+function isImageOnlyNewsTitle(title){
+  const t=String(title||'').trim();
+  if(!t)return false;
+  // ニュースタブでは、本文記事ではなく画像・写真ギャラリーだけに誘導する項目は除外します。
+  if(/^(【?画像】?|【?写真】?|【?フォト】?|画像[:：]|写真[:：]|フォト[:：])/i.test(t))return true;
+  if(/(画像|写真|フォト|フォトギャラリー|ギャラリー|スライドショー).{0,12}(を見る|はこちら|まとめ|一覧|あり)/.test(t))return true;
+  if(/(を見る|はこちら).{0,12}(画像|写真|フォト|フォトギャラリー)/.test(t))return true;
+  if(/^(画像|写真|フォト|ギャラリー|フォトギャラリー|動画)$/.test(t))return true;
+  return false;
+}
+function hasExcludedWorldCupCategory(text){
+  const t=String(text||'');
+  // 今回のアプリは男子A代表のFIFAワールドカップ2026（北米中大会）用なので、別大会・予選・女子/年代別は除外します。
+  return /(クラブW杯|クラブワールドカップ|女子W杯|女子ワールドカップ|なでしこ|U[-－ ]?17|U[-－ ]?20|U[-－ ]?23|U17|U20|U23|ユース|五輪|オリンピック|W杯予選|ワールドカップ予選|最終予選|アジア予選|欧州予選|南米予選|アフリカ予選|北中米カリブ海予選|ACL|WEリーグ|女子サッカー|FIFAクラブ)/i.test(t);
+}
+function hasCurrentMensWorldCup2026Context(text){
+  const t=String(text||'');
+  if(hasExcludedWorldCupCategory(t))return false;
+  const hasWc=/(FIFAワールドカップ|ワールドカップ|W杯|World Cup|worldcup|wcup)/i.test(t);
+  if(!hasWc)return false;
+  const hasEdition=/(2026|北米中|北中米|カナダ|メキシコ|アメリカ|米国|開催地|開催都市|開催国|スタジアム|FIFAワールドカップ)/i.test(t);
+  return hasEdition;
 }
 function cleanNewsTitle(title){
   return decodeHtml(String(title||''))
@@ -2135,6 +2158,7 @@ function isUsableNewsTitle(title){
   const t=cleanNewsTitle(title);
   if(!hasJapaneseText(t))return false;
   if(t.length<8)return false;
+  if(isImageOnlyNewsTitle(t))return false;
   if(/(検索結果|ニュース検索|最新ニュース一覧|記事一覧|一覧|Google ニュースで確認|ニュースを開く|もっと見る)/.test(t))return false;
   return true;
 }
@@ -2488,7 +2512,7 @@ function titleMatchesNewsTarget(title,target){
 }
 function hasWorldCupNewsContext(text,url,source){
   const t=String(text||'')+' '+String(url||'')+' '+String(source&&source.name||source||'');
-  return /(ワールドカップ|W杯|ＦＩＦＡ|FIFA|北米中|決勝トーナメント|グループステージ|ベスト32|ラウンド16|準々決勝|準決勝|決勝|3位決定戦|３位決定戦|組み合わせ|勝ち上がり|大会|出場国|wcup|worldcup|world-cup|world cup)/i.test(t);
+  return hasCurrentMensWorldCup2026Context(t);
 }
 function hasUtilityOnlyNewsTopic(text){
   const t=String(text||'');
@@ -2521,7 +2545,8 @@ function mentionsAnyCountryAlias(text,targetToIgnore){
 }
 function isWholeTournamentNews(title,url,source){
   const text=cleanNewsTitle(title)+' '+String(url||'')+' '+String(source&&source.name||source||'');
-  if(!hasWorldCupNewsContext(text,url,source))return false;
+  if(isImageOnlyNewsTitle(title))return false;
+  if(!hasCurrentMensWorldCup2026Context(text))return false;
   if(hasUtilityOnlyNewsTopic(text))return false;
   if(!hasWholeTournamentEditorialTopic(text))return false;
   // W杯全体では、個別国の次戦・選手・監督中心の記事は除外します。
@@ -2533,7 +2558,8 @@ function newsMatchesRequestedScope(item,target,source){
   const url=String(item&&item.url||'');
   const text=title+' '+url+' '+String(source&&source.name||source||'');
   if(!isUsableNewsTitle(title))return false;
-  if(!hasWorldCupNewsContext(text,url,source))return false;
+  if(isImageOnlyNewsTitle(title))return false;
+  if(!hasCurrentMensWorldCup2026Context(text))return false;
   if(!target||target==='all')return isWholeTournamentNews(title,url,source);
   if(!titleMatchesNewsTarget(text,target))return false;
   if(hasUtilityOnlyNewsTopic(text)&&!hasCountryEditorialTopic(text))return false;
@@ -2612,6 +2638,7 @@ function parseCuratedNewsLinks(text,source,target,sourceIndex){
     if(!isLikelyArticlePath(url))return;
     const candidate={title,url,image:'',seen:'',domain:source.name,_order:(Number(sourceIndex)||0)*1000+(order++)};
     if(!newsMatchesRequestedScope(candidate,target,source))return;
+    if(isImageOnlyNewsTitle(title))return;
     if(/^(画像|動画|写真|一覧|もっと見る|続きを読む|Google|ニュース|詳細|その他|ログイン|ホーム|トップ)$/.test(title))return;
     if(/記事一覧|ニュース一覧|特設ページ|出場国一覧|試合日程・結果|ルール変更|順位表$/.test(title))return;
     seen.add(url);

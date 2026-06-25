@@ -2224,7 +2224,7 @@ async function fetchNews(){
       enhanceNewsImagesInBackground(target);
     }else{
       state.news.items=[];
-      state.news.status='直接記事なし';
+      state.news.status='取得失敗';
     }
   }catch(e){
     console.warn('news fetch failed',e);
@@ -2281,6 +2281,7 @@ async function fetchNewsItems(target){
     ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
     ['Google News AllOrigins',()=>fetchGoogleNewsAllOriginsItems(target)],
     ['Google News AllOrigins GET',()=>fetchGoogleNewsAllOriginsGetItems(target)],
+    ['Google News Codetabs',()=>fetchGoogleNewsCoddProxyItems(target)],
     ['Google News Reader',()=>fetchGoogleNewsItems(target)],
     ['Yahoo News Search Reader',()=>fetchYahooNewsSearchReaderItems(target)]
   ];
@@ -2311,23 +2312,45 @@ function toNewsArticleFromGdelt(a){
     domain:a.domain||''
   };
 }
+function extractJsonFromText(text){
+  const raw=String(text||'').trim();
+  if(!raw)return null;
+  try{return JSON.parse(raw)}catch(e){}
+  const fenced=raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if(fenced){try{return JSON.parse(fenced[1].trim())}catch(e){}}
+  const firstObj=raw.indexOf('{');
+  const lastObj=raw.lastIndexOf('}');
+  if(firstObj>=0&&lastObj>firstObj){
+    try{return JSON.parse(raw.slice(firstObj,lastObj+1))}catch(e){}
+  }
+  const firstArr=raw.indexOf('[');
+  const lastArr=raw.lastIndexOf(']');
+  if(firstArr>=0&&lastArr>firstArr){
+    try{return JSON.parse(raw.slice(firstArr,lastArr+1))}catch(e){}
+  }
+  return null;
+}
+
 async function fetchJsonWithFallbacks(url){
   let lastErr=null;
+  const tryJson=async loader=>{
+    const text=await loader();
+    const json=extractJsonFromText(text);
+    if(!json)throw new Error('JSON parse failed');
+    return json;
+  };
   try{
     const res=await fetch(url,{cache:'no-store'});
     if(res.ok)return await res.json();
     lastErr=new Error('direct HTTP '+res.status);
   }catch(e){lastErr=e;}
-  try{
-    const text=await fetchAllOriginsText(url);
-    return JSON.parse(text);
-  }catch(e){lastErr=e;}
-  try{
-    const text=await fetchAllOriginsGetText(url);
-    return JSON.parse(text);
-  }catch(e){lastErr=e;}
+  try{return await tryJson(()=>fetchAllOriginsText(url));}catch(e){lastErr=e;}
+  try{return await tryJson(()=>fetchAllOriginsGetText(url));}catch(e){lastErr=e;}
+  try{return await tryJson(()=>fetchTextViaCoddProxy(url));}catch(e){lastErr=e;}
+  try{return await tryJson(()=>fetchReaderText(url));}catch(e){lastErr=e;}
   throw lastErr||new Error('JSON取得失敗');
 }
+
 async function fetchGdeltNewsItems(target){
   const out=[];
   for(const q of buildGdeltQueries(target)){
@@ -2446,6 +2469,8 @@ function normalizeGoogleNewsMaybeRelativeUrl(url){
   if(/^https?:\/\//i.test(raw))return raw;
   if(raw.startsWith('//'))return 'https:'+raw;
   if(raw.startsWith('/'))return 'https://news.google.com'+raw;
+  if(raw.startsWith('./'))return 'https://news.google.com/'+raw.slice(2);
+  if(/^articles\//i.test(raw)||/^rss\/articles\//i.test(raw))return 'https://news.google.com/'+raw;
   return raw;
 }
 function cleanRssText(text){
@@ -2462,7 +2487,8 @@ function parseGoogleNewsRssRegex(text){
   const out=[];
   const itemRe=/<item[\s\S]*?<\/item>/gi;
   const tag=(block,name)=>{
-    const m=block.match(new RegExp('<'+name+'(?:\s[^>]*)?>([\s\S]*?)<\/'+name+'>','i'));
+    const re=new RegExp('<'+name+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/'+name+'>','i');
+    const m=block.match(re);
     return m?decodeHtml(m[1].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()):'';
   };
   let m;

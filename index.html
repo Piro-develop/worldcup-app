@@ -344,14 +344,12 @@
     .ko-stage .ko-board.ko-static{position:relative}
     .ko-board.ko-current{z-index:2}
     .ko-board.ko-prev{z-index:1}
-    .ko-board.ko-slide-in-next{animation:koSlideInNext 1.18s cubic-bezier(.16,.88,.20,1) both}
-    .ko-board.ko-slide-in-prev{animation:koSlideInPrev 1.18s cubic-bezier(.16,.88,.20,1) both}
-    .ko-board.ko-slide-out-next{animation:koSlideOutNext 1.18s cubic-bezier(.16,.88,.20,1) both}
-    .ko-board.ko-slide-out-prev{animation:koSlideOutPrev 1.18s cubic-bezier(.16,.88,.20,1) both}
-    @keyframes koSlideInNext{from{transform:translateX(34%);opacity:1}to{transform:translateX(0);opacity:1}}
-    @keyframes koSlideOutNext{from{transform:translateX(0);opacity:1}to{transform:translateX(-34%);opacity:1}}
-    @keyframes koSlideInPrev{from{transform:translateX(-34%);opacity:1}to{transform:translateX(0);opacity:1}}
-    @keyframes koSlideOutPrev{from{transform:translateX(0);opacity:1}to{transform:translateX(34%);opacity:1}}
+    .ko-board.ko-slide-in-next{animation:koSlideInNext .92s cubic-bezier(.20,.84,.24,1) both}
+    .ko-board.ko-slide-in-prev{animation:koSlideInPrev .92s cubic-bezier(.20,.84,.24,1) both}
+    .ko-board.ko-slide-out-next{display:none}
+    .ko-board.ko-slide-out-prev{display:none}
+    @keyframes koSlideInNext{from{transform:translateX(14%);opacity:.98}to{transform:translateX(0);opacity:1}}
+    @keyframes koSlideInPrev{from{transform:translateX(-14%);opacity:.98}to{transform:translateX(0);opacity:1}}
     .ko-lines{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
     .ko-lines path{fill:none;stroke:rgba(205,220,245,.34);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
     .ko-round-title{position:absolute;top:0;z-index:3;text-align:center;font-weight:900;font-size:13px;color:#eef5ff;background:rgba(12,20,36,.98);border:1px solid rgba(205,220,245,.16);border-radius:12px;padding:8px;white-space:nowrap}
@@ -993,14 +991,32 @@ function newsFallbackImage(target){
   if(code)return `https://flagcdn.com/w160/${code}.png`;
   return newsPlaceholderImage(newsTargetLabel(t));
 }
+function newsDomainIcon(url){
+  try{
+    const u=new URL(String(url||''));
+    if(!/^https?:$/i.test(u.protocol))return '';
+    return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(u.origin)}&sz=128`;
+  }catch(e){return ''}
+}
+function newsInitialImage(item,target){
+  if(item&&isHttpNewsImage(item.image))return item.image;
+  return newsDomainIcon(item&&item.url)||newsFallbackImage(target);
+}
+function isNewsPlaceholderImage(img,item,target){
+  const u=String(img||'');
+  if(!isHttpNewsImage(u))return true;
+  if(u===newsFallbackImage(target))return true;
+  const icon=newsDomainIcon(item&&item.url);
+  return !!icon&&u===icon;
+}
 function newsItemHTML(item){
   const target=(state.news&&state.news.target)||'all';
   const label=target==='all'?'W杯':(T[target]?.[0]||'W杯');
   const fallback=newsFallbackImage(target);
   const emergency=newsPlaceholderImage(label);
-  const img=item.image||fallback;
-  const title=item.title||'タイトルなし';
-  const url=item.url||'#';
+  const img=newsInitialImage(item,target);
+  const title=cleanNewsTitle(item.title||'タイトルなし');
+  const url=normalizeNewsArticleUrl(item.url||'')||'#';
   return `<a class="news-item" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="news-thumb" src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-fallback="${esc(fallback)}" data-emergency="${esc(emergency)}" onerror="if(!this.dataset.usedFallback){this.dataset.usedFallback='1';this.src=this.dataset.fallback;}else{this.onerror=null;this.src=this.dataset.emergency;}"><span class="news-title">${esc(title)}</span></a>`;
 }
 
@@ -1096,10 +1112,8 @@ function knockoutScheduleHTML(){
   let boardHtml='';
   let stageH=layout.boardH;
   if(dir&&prevView!==null&&prevView!==view){
-    const prevLayout=knockoutLayout(prevView);
-    stageH=Math.max(layout.boardH,prevLayout.boardH);
+    stageH=layout.boardH;
     boardHtml=`<div class="ko-stage" style="height:${stageH}px;">
-      <div class="ko-board ko-prev ko-slide-out-${dir}" data-ko-view="${prevLayout.viewCol}" style="height:${stageH}px;">${koBoardInnerHTML(prevLayout)}</div>
       <div class="ko-board ko-current ko-slide-in-${dir}" data-ko-view="${layout.viewCol}" style="height:${stageH}px;">${koBoardInnerHTML(layout)}</div>
     </div>`;
   }else{
@@ -2127,9 +2141,24 @@ async function fetchTextViaCoddProxy(url){
   if(!res.ok)throw new Error('Codetabs article HTTP '+res.status);
   return await res.text();
 }
+function isGoogleNewsArticleUrl(url){
+  try{
+    const u=new URL(String(url||''));
+    return u.hostname.replace(/^www\./,'').toLowerCase()==='news.google.com'&&/\/articles\//i.test(u.pathname);
+  }catch(e){return false}
+}
+async function resolveGoogleNewsArticleUrl(url){
+  if(!isGoogleNewsArticleUrl(url))return '';
+  const txt=await promiseWithSoftTimeout(fetchReaderText(url),2600);
+  const links=parseMarkdownNewsLinks(txt,'Google News');
+  const direct=links.find(x=>x&&x.url&&!isGoogleNewsArticleUrl(x.url)&&!isListingNewsUrl(x.url));
+  return direct?direct.url:'';
+}
 async function fetchArticleImage(url){
-  const target=normalizeGoogleNewsLink(url);
+  let target=normalizeGoogleNewsLink(url);
   if(!/^https?:\/\//i.test(target))return '';
+  const resolved=await resolveGoogleNewsArticleUrl(target).catch(()=>'');
+  if(resolved)target=resolved;
   const loaders=[
     ()=>fetchAllOriginsText(target),
     ()=>fetchAllOriginsGetText(target),
@@ -2165,7 +2194,7 @@ async function fetchNews(){
     const items=await promiseWithSoftTimeout(fetchNewsItems(target),NEWS_FAST_LIMIT_MS);
     const deduped=dedupeNews(Array.isArray(items)?items:[]).slice(0,20);
     if(deduped.length){
-      state.news.items=deduped.map(item=>Object.assign({},item,{image:isHttpNewsImage(item.image)?item.image:newsFallbackImage(target)}));
+      state.news.items=deduped.map(item=>Object.assign({},item,{image:newsInitialImage(item,target)}));
       state.news.status=`取得済 ${deduped.length}件`;
       save();render();
       // 記事一覧の表示を待たせないため、画像補完は最大6件だけバックグラウンドで軽く実行する。
@@ -2184,7 +2213,7 @@ async function fetchNews(){
 async function enhanceNewsImagesInBackground(target){
   const current=(state.news&&state.news.target)||'all';
   if(current!==target||!Array.isArray(state.news.items)||!state.news.items.length)return;
-  const targets=state.news.items.map((item,idx)=>({item,idx})).filter(x=>!isHttpNewsImage(x.item.image)||x.item.image===newsFallbackImage(target)).slice(0,NEWS_BG_IMAGE_LIMIT);
+  const targets=state.news.items.map((item,idx)=>({item,idx})).filter(x=>isNewsPlaceholderImage(x.item.image,x.item,target)).slice(0,NEWS_BG_IMAGE_LIMIT);
   if(!targets.length)return;
   const results=await Promise.all(targets.map(x=>promiseWithSoftTimeout(fetchArticleImage(x.item.url),3500).then(img=>({idx:x.idx,img})).catch(()=>({idx:x.idx,img:''}))));
   if(!state.news||state.news.target!==target||!Array.isArray(state.news.items))return;

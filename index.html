@@ -138,13 +138,20 @@
     }
     .team-text .muted{font-weight:700;color:#aab8cc}
     .slot.confirmed .team-text .muted{color:#473811}
-    .flag{font-size:14px;margin-right:3px}
-    .eng-flag{
-      position:relative;display:inline-block;width:18px;height:12px;margin-right:4px;
-      background:#fff;border:1px solid rgba(0,0,0,.28);border-radius:2px;vertical-align:-1px;flex:none;
+    .flag-img{
+      width:18px;
+      height:12px;
+      margin-right:4px;
+      border-radius:2px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.22);
+      flex:0 0 auto;
+      vertical-align:-1px;
+      background:#fff;
     }
-    .eng-flag:before{content:"";position:absolute;left:7px;top:0;width:3px;height:100%;background:#c8102e}
-    .eng-flag:after{content:"";position:absolute;left:0;top:4px;width:100%;height:3px;background:#c8102e}
+    .group-table .flag-img{width:18px;height:12px;margin:0}
+    .opt .flag-img{width:22px;height:15px;margin-right:0}
+
     .toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px}
     .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.sheet-title{font-weight:900}.sheet-close{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--line);border-radius:999px;background:#111c30;color:#fff;font-size:20px;font-weight:900;line-height:1;display:inline-flex;align-items:center;justify-content:center}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
 
@@ -190,11 +197,20 @@
     .group-table th{color:#aebdd3;font-weight:800;background:rgba(7,17,31,.72)}
     .group-table td.team-cell{text-align:left;font-weight:900}
     .group-table .rank-col{width:16px}
-    .group-table .flag-col{width:20px}
+    .group-table .flag-col{width:22px}
     .group-table .team-col{width:auto}
     .group-table .rec-col{width:34px}
     .group-table .num-col{width:20px}
     .group-table .pts-col{width:22px;font-weight:900;color:#ffe79a}
+    .group-table tr.qualified-row{
+      background:linear-gradient(90deg,rgba(246,216,127,.94),rgba(200,153,51,.92));
+      color:#15120a;
+      font-weight:900;
+    }
+    .group-table tr.qualified-row td{border-bottom-color:rgba(76,54,9,.18)}
+    .group-table tr.qualified-row .pts-col{color:#15120a}
+    .group-table tr.qualified-row .flag-img{border-color:rgba(40,30,10,.34);box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+    .qualified-note{display:inline-flex;align-items:center;gap:4px;margin-left:6px;padding:2px 6px;border-radius:999px;background:#f6d87f;color:#15120a;font-size:10px;font-weight:900}
     .group-toolbar{
       display:flex;
       align-items:center;
@@ -204,7 +220,7 @@
     }
     .group-status{font-size:11px;color:var(--muted);line-height:1.5}
 
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag{font-size:11px}.eng-flag{width:15px;height:10px;margin-right:2px}.team-text{font-size:9px}.toolbar{display:none}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:9px}.toolbar{display:none}}
   </style>
 </head>
 <body>
@@ -222,9 +238,12 @@
 <script>
 (function(){
 'use strict';
-const STORE='wc2026-groups-v1';
+const STORE='wc2026-groups-flags-v2';
 const T={
  de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','ENG'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
+};
+const FLAG_CODE={
+  de:'de',jp:'jp',fr:'fr',kr:'kr',za:'za',ch:'ch',ca:'ca',br:'br',ma:'ma',co:'co',pt:'pt',hr:'hr',es:'es',at:'at',us:'us',be:'be',ci:'ci',no:'no',mx:'mx',eng:'gb-eng',ar:'ar',uy:'uy',au:'au',py:'py',eg:'eg',nl:'nl',se:'se',tn:'tn',cz:'cz',qa:'qa',ba:'ba',ht:'ht',sct:'gb-sct',tr:'tr',ec:'ec',cw:'cw',ir:'ir',nz:'nz',sa:'sa',cv:'cv',sn:'sn',iq:'iq',dz:'dz',jo:'jo',uz:'uz',cd:'cd',gh:'gh',pa:'pa'
 };
 const G={A:['mx','za','kr','cz'],B:['ca','ba','qa','ch'],C:['br','ma','ht','sct'],D:['us','py','au','tr'],E:['de','ci','ec','cw'],F:['nl','jp','tn','se'],G:['be','eg','ir','nz'],H:['es','sa','cv','uy'],I:['fr','sn','iq','no'],J:['ar','dz','at','jo'],K:['pt','uz','co','cd'],L:['eng','hr','gh','pa']};
 const ALL=Object.keys(T);
@@ -315,7 +334,11 @@ function load(){
 function save(){localStorage.setItem(STORE,JSON.stringify(state))}
 function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function teamFlag(id){return id==='eng'?'<span class="eng-flag" aria-label="England"></span>':`<span class="flag">${T[id]?.[1]||''}</span>`}
+function teamFlag(id){
+  const code=FLAG_CODE[id];
+  const name=esc(T[id]?.[0]||id);
+  return code?`<img class="flag-img" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="${name}" loading="lazy">`:''
+}
 function teamText(ids){if(!ids||!ids.length)return '<span class="muted">未選択</span>';return ids.map(id=>T[id]?`${teamFlag(id)}${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
 function render(){
   document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');
@@ -389,10 +412,19 @@ function slotHTML(s,side,mi,si){
     <button class="confirm-btn ${s.confirmed||s.fixed?'active':''}" type="button" ${confirmAttr}>確</button>
   </div>`
 }
+function isGroupComplete(rows){return rows&&rows.length===4&&rows.every(r=>(r.w+r.d+r.l)>=3)}
+function isQualifiedTeam(id){
+  const rows=state.groups?.[TEAM_TO_GROUP[id]]||[];
+  if(!rows.length)return false;
+  const r=rows.find(x=>x.team===id);
+  if(!r)return false;
+  if(isGroupComplete(rows))return r.rank<=2;
+  return r.pts>=6;
+}
 function groupsHTML(){
   return `<section class="panel">
     <div class="group-toolbar">
-      <div class="group-status">状態：${esc(state.groupStatus||'初期データを表示中')}</div>
+      <div class="group-status">状態：${esc(state.groupStatus||'初期データを表示中')}<span class="qualified-note">黄色＝進出確定</span></div>
       <button class="btn primary" id="updateGroups">更新</button>
     </div>
     <div class="group-grid">
@@ -405,7 +437,7 @@ function groupBoxHTML(g,rows){
     <div class="group-title"><span>Group ${g}</span><span>${rows.length}チーム</span></div>
     <table class="group-table">
       <thead><tr><th class="rank-col">順</th><th class="flag-col">国</th><th class="team-col">国名</th><th class="rec-col">勝敗</th><th class="num-col">得</th><th class="num-col">失</th><th class="num-col">差</th><th class="pts-col">点</th></tr></thead>
-      <tbody>${rows.map(r=>`<tr><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="team-cell">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.d}-${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
+      <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="team-cell">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.d}-${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
     </table>
   </div>`
 }

@@ -220,7 +220,89 @@
     }
     .group-status{font-size:11px;color:var(--muted);line-height:1.5}
 
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:9px}.toolbar{display:none}}
+
+    .group-box{cursor:pointer}
+    .group-box:active{transform:scale(.992)}
+    .sheet.group-detail{
+      top:50%;
+      bottom:auto;
+      transform:translate(-50%,-50%);
+      width:min(780px,calc(100vw - 16px));
+      max-height:88vh;
+      border-radius:20px;
+    }
+    .group-detail .sheet-head{align-items:center}
+    .group-detail-title{font-size:18px;font-weight:900}
+    .detail-section{padding:10px 10px 2px}
+    .detail-section h3{margin:0 0 8px;font-size:14px}
+    .detail-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:auto;
+      font-size:12px;
+      margin-bottom:12px;
+    }
+    .detail-table th,.detail-table td{
+      border-bottom:1px solid rgba(205,220,245,.12);
+      padding:7px 4px;
+      text-align:center;
+      white-space:normal;
+      overflow:visible;
+      text-overflow:clip;
+      line-height:1.25;
+    }
+    .detail-table th{color:#aebdd3;background:rgba(7,17,31,.72)}
+    .detail-table .detail-team{
+      text-align:left;
+      font-weight:900;
+      min-width:88px;
+    }
+    .match-list{display:flex;flex-direction:column;gap:8px}
+    .match-card{
+      border:1px solid rgba(205,220,245,.16);
+      border-radius:13px;
+      background:rgba(13,23,40,.95);
+      padding:9px;
+    }
+    .match-date{font-size:11px;color:#9fb0ca;margin-bottom:5px}
+    .match-main{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      gap:7px;
+      font-size:12px;
+      font-weight:900;
+    }
+    .match-team{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
+    .match-team.away{align-items:flex-end;text-align:right}
+    .match-team-name{display:flex;align-items:center;gap:4px;min-width:0;font-weight:900}
+    .match-team.away .match-team-name{justify-content:flex-end}
+    .team-scorers{font-size:10.5px;line-height:1.35;color:#d7e2f2;font-weight:700;max-width:100%}
+    .team-scorers div{white-space:normal;overflow:visible;text-overflow:clip}
+    .match-team.away .team-scorers{text-align:right}
+    .match-score{
+      min-width:42px;
+      text-align:center;
+      border-radius:999px;
+      padding:3px 6px;
+      background:#17243a;
+      color:#fff;
+      font-weight:900;
+    }
+    .match-score.done{background:#f6d87f;color:#15120a}
+    .scorers{
+      margin-top:7px;
+      padding-top:7px;
+      border-top:1px dashed rgba(205,220,245,.15);
+      color:#c9d6e8;
+      font-size:11px;
+      line-height:1.5;
+    }
+    .scorers b{color:#fff}
+    .scorer-empty{color:#8fa1bc}
+    .group-detail-note{font-size:11px;color:#8fa1bc;line-height:1.45;margin-top:6px}
+
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:9px}.toolbar{display:none}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
   </style>
 </head>
 <body>
@@ -238,7 +320,9 @@
 <script>
 (function(){
 'use strict';
-const STORE='wc2026-groups-flags-v2';
+const STORE='wc2026-group-detail-v1';
+const BRACKET_STORE='wc2026-bracket-user-v1';
+const LEGACY_STORES=['wc2026-light-bracket-v1','wc2026-light-bracket-v2','wc2026-light-bracket-v3','wc2026-light-bracket-v4','wc2026-light-bracket-v5','wc2026-groups-v1','wc2026-group-detail-v1'];
 const T={
  de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','ENG'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
 };
@@ -291,6 +375,106 @@ const initialGroups={
  K:[['co',2,0,0,4,1,6],['pt',1,1,0,6,1,4],['cd',0,1,1,1,2,1],['uz',0,0,2,1,8,0]],
  L:[['eng',1,1,0,4,2,4],['gh',1,1,0,1,0,4],['hr',1,0,1,3,4,3],['pa',0,0,2,0,2,0]]
 };
+
+const GROUP_MATCHES={
+ A:[
+  {id:'66456904',date:'2026-06-11T15:00:00-04:00',home:'mx',away:'za',status:'done',hs:2,as:0},
+  {id:'66456906',date:'2026-06-11T22:00:00-04:00',home:'kr',away:'cz',status:'done',hs:2,as:1},
+  {id:'66456910',date:'2026-06-18T12:00:00-04:00',home:'cz',away:'za',status:'done',hs:1,as:1},
+  {id:'66456908',date:'2026-06-18T21:00:00-04:00',home:'mx',away:'kr',status:'done',hs:1,as:0},
+  {id:'66456912',date:'2026-06-24T21:00:00-04:00',home:'cz',away:'mx',status:'done',hs:0,as:3},
+  {id:'66456914',date:'2026-06-24T21:00:00-04:00',home:'za',away:'kr',status:'done',hs:1,as:0}
+ ],
+ B:[
+  {id:'66456916',date:'2026-06-12T15:00:00-04:00',home:'ca',away:'ba',status:'done',hs:1,as:1},
+  {id:'66456918',date:'2026-06-13T15:00:00-04:00',home:'qa',away:'ch',status:'done',hs:1,as:1},
+  {id:'66456922',date:'2026-06-18T15:00:00-04:00',home:'ch',away:'ba',status:'done',hs:4,as:1},
+  {id:'66456920',date:'2026-06-18T18:00:00-04:00',home:'ca',away:'qa',status:'done',hs:6,as:0},
+  {id:'66456924',date:'2026-06-24T15:00:00-04:00',home:'ch',away:'ca',status:'done',hs:2,as:1},
+  {id:'66456926',date:'2026-06-24T15:00:00-04:00',home:'ba',away:'qa',status:'done',hs:3,as:1}
+ ],
+ C:[
+  {id:'66456928',date:'2026-06-13T18:00:00-04:00',home:'br',away:'ma',status:'done',hs:1,as:1},
+  {id:'66456930',date:'2026-06-13T21:00:00-04:00',home:'ht',away:'sct',status:'done',hs:0,as:1},
+  {id:'66456934',date:'2026-06-19T18:00:00-04:00',home:'sct',away:'ma',status:'done',hs:0,as:1},
+  {id:'66456932',date:'2026-06-19T20:30:00-04:00',home:'br',away:'ht',status:'done',hs:3,as:0},
+  {id:'66456936',date:'2026-06-24T18:00:00-04:00',home:'sct',away:'br',status:'done',hs:0,as:3},
+  {id:'66456938',date:'2026-06-24T18:00:00-04:00',home:'ma',away:'ht',status:'done',hs:4,as:2}
+ ],
+ D:[
+  {id:'66456940',date:'2026-06-12T21:00:00-04:00',home:'us',away:'py',status:'done',hs:4,as:1},
+  {id:'66456942',date:'2026-06-14T00:00:00-04:00',home:'au',away:'tr',status:'done',hs:2,as:0},
+  {id:'66456944',date:'2026-06-19T15:00:00-04:00',home:'us',away:'au',status:'done',hs:2,as:0},
+  {id:'66456946',date:'2026-06-19T23:00:00-04:00',home:'tr',away:'py',status:'done',hs:0,as:1},
+  {id:'66456948',date:'2026-06-25T22:00:00-04:00',home:'tr',away:'us',status:'scheduled'},
+  {id:'66456950',date:'2026-06-25T22:00:00-04:00',home:'py',away:'au',status:'scheduled'}
+ ],
+ E:[
+  {id:'66457070',date:'2026-06-14T13:00:00-04:00',home:'de',away:'cw',status:'done',hs:7,as:1},
+  {id:'66457072',date:'2026-06-14T19:00:00-04:00',home:'ci',away:'ec',status:'done',hs:1,as:0},
+  {id:'66457074',date:'2026-06-20T16:00:00-04:00',home:'de',away:'ci',status:'done',hs:2,as:1},
+  {id:'66457076',date:'2026-06-20T20:00:00-04:00',home:'ec',away:'cw',status:'done',hs:0,as:0},
+  {id:'66457078',date:'2026-06-25T16:00:00-04:00',home:'ec',away:'de',status:'scheduled'},
+  {id:'66457080',date:'2026-06-25T16:00:00-04:00',home:'cw',away:'ci',status:'scheduled'}
+ ],
+ F:[
+  {id:'66456968',date:'2026-06-14T16:00:00-04:00',home:'nl',away:'jp',status:'done',hs:2,as:2},
+  {id:'66456970',date:'2026-06-14T22:00:00-04:00',home:'se',away:'tn',status:'done',hs:5,as:1},
+  {id:'66456972',date:'2026-06-20T13:00:00-04:00',home:'nl',away:'se',status:'done',hs:5,as:1},
+  {id:'66456974',date:'2026-06-21T00:00:00-04:00',home:'tn',away:'jp',status:'done',hs:0,as:4},
+  {id:'66456976',date:'2026-06-25T19:00:00-04:00',home:'tn',away:'nl',status:'scheduled'},
+  {id:'66456978',date:'2026-06-25T19:00:00-04:00',home:'jp',away:'se',status:'scheduled'}
+ ],
+ G:[
+  {id:'66456982',date:'2026-06-15T15:00:00-04:00',home:'be',away:'eg',status:'done',hs:1,as:1},
+  {id:'66456984',date:'2026-06-15T21:00:00-04:00',home:'ir',away:'nz',status:'done',hs:2,as:2},
+  {id:'66456986',date:'2026-06-21T15:00:00-04:00',home:'be',away:'ir',status:'done',hs:0,as:0},
+  {id:'66456988',date:'2026-06-21T21:00:00-04:00',home:'nz',away:'eg',status:'done',hs:1,as:3},
+  {id:'66456990',date:'2026-06-26T23:00:00-04:00',home:'nz',away:'be',status:'scheduled'},
+  {id:'66456992',date:'2026-06-26T23:00:00-04:00',home:'eg',away:'ir',status:'scheduled'}
+ ],
+ H:[
+  {id:'66456994',date:'2026-06-15T12:00:00-04:00',home:'es',away:'cv',status:'done',hs:0,as:0},
+  {id:'66456996',date:'2026-06-15T18:00:00-04:00',home:'sa',away:'uy',status:'done',hs:1,as:1},
+  {id:'66456998',date:'2026-06-21T12:00:00-04:00',home:'es',away:'sa',status:'done',hs:4,as:0},
+  {id:'66457000',date:'2026-06-21T18:00:00-04:00',home:'uy',away:'cv',status:'done',hs:2,as:2},
+  {id:'66457002',date:'2026-06-26T20:00:00-04:00',home:'uy',away:'es',status:'scheduled'},
+  {id:'66457004',date:'2026-06-26T20:00:00-04:00',home:'cv',away:'sa',status:'scheduled'}
+ ],
+ I:[
+  {id:'66457006',date:'2026-06-16T15:00:00-04:00',home:'fr',away:'sn',status:'done',hs:3,as:1},
+  {id:'66457008',date:'2026-06-16T18:00:00-04:00',home:'iq',away:'no',status:'done',hs:1,as:4},
+  {id:'66457010',date:'2026-06-22T17:00:00-04:00',home:'fr',away:'iq',status:'done',hs:3,as:0},
+  {id:'66457012',date:'2026-06-22T20:00:00-04:00',home:'no',away:'sn',status:'done',hs:3,as:2},
+  {id:'66457014',date:'2026-06-26T15:00:00-04:00',home:'no',away:'fr',status:'scheduled'},
+  {id:'66457016',date:'2026-06-26T15:00:00-04:00',home:'sn',away:'iq',status:'scheduled'}
+ ],
+ J:[
+  {id:'66457018',date:'2026-06-16T21:00:00-04:00',home:'ar',away:'dz',status:'done',hs:3,as:0},
+  {id:'66457020',date:'2026-06-17T00:00:00-04:00',home:'at',away:'jo',status:'done',hs:3,as:1},
+  {id:'66457022',date:'2026-06-22T13:00:00-04:00',home:'ar',away:'at',status:'done',hs:2,as:0},
+  {id:'66457024',date:'2026-06-22T23:00:00-04:00',home:'jo',away:'dz',status:'done',hs:1,as:2},
+  {id:'66457026',date:'2026-06-27T22:00:00-04:00',home:'jo',away:'ar',status:'scheduled'},
+  {id:'66457028',date:'2026-06-27T22:00:00-04:00',home:'dz',away:'at',status:'scheduled'}
+ ],
+ K:[
+  {id:'66457030',date:'2026-06-17T13:00:00-04:00',home:'pt',away:'cd',status:'done',hs:1,as:1},
+  {id:'66457032',date:'2026-06-17T22:00:00-04:00',home:'uz',away:'co',status:'done',hs:1,as:3},
+  {id:'66457034',date:'2026-06-23T13:00:00-04:00',home:'pt',away:'uz',status:'done',hs:5,as:0},
+  {id:'66457036',date:'2026-06-23T22:00:00-04:00',home:'co',away:'cd',status:'done',hs:1,as:0},
+  {id:'66457038',date:'2026-06-27T19:30:00-04:00',home:'co',away:'pt',status:'scheduled'},
+  {id:'66457040',date:'2026-06-27T19:30:00-04:00',home:'cd',away:'uz',status:'scheduled'}
+ ],
+ L:[
+  {id:'66457042',date:'2026-06-17T16:00:00-04:00',home:'eng',away:'hr',status:'done',hs:4,as:2},
+  {id:'66457044',date:'2026-06-17T19:00:00-04:00',home:'gh',away:'pa',status:'done',hs:1,as:0},
+  {id:'66457046',date:'2026-06-23T16:00:00-04:00',home:'eng',away:'gh',status:'done',hs:0,as:0},
+  {id:'66457048',date:'2026-06-23T19:00:00-04:00',home:'pa',away:'hr',status:'done',hs:0,as:1},
+  {id:'66457050',date:'2026-06-27T17:00:00-04:00',home:'pa',away:'eng',status:'scheduled'},
+  {id:'66457052',date:'2026-06-27T17:00:00-04:00',home:'hr',away:'gh',status:'scheduled'}
+ ]
+};
+
 function buildGroupRows(src){
   const out={};
   GROUPS.forEach(g=>out[g]=(src[g]||[]).map((r,i)=>({team:r[0],w:r[1],d:r[2],l:r[3],gf:r[4],ga:r[5],pts:r[6],rank:i+1})));
@@ -321,17 +505,32 @@ const initial={
 };
 let state=load();let editing=null;
 function clone(x){return JSON.parse(JSON.stringify(x))}
-function load(){
-  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'初期データを表示中',goals:rows('得点')};
-  try{
-    const saved=JSON.parse(localStorage.getItem(STORE)||'{}');
-    const merged=Object.assign(base,saved);
-    if(!merged.groups)merged.groups=buildGroupRows(initialGroups);
-    if(merged.active==='assists')merged.active='groups';
-    return merged;
-  }catch(e){return base}
+function readSaved(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(e){return {}}}
+function migrateSavedBracket(){
+  const direct=readSaved(BRACKET_STORE);
+  if(direct&&direct.left&&direct.right)return direct;
+  for(const key of LEGACY_STORES){
+    const v=readSaved(key);
+    if(v&&v.bracket&&v.bracket.left&&v.bracket.right)return v.bracket;
+    if(v&&v.left&&v.right)return v;
+  }
+  return null;
 }
-function save(){localStorage.setItem(STORE,JSON.stringify(state))}
+function load(){
+  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'初期データを表示中',goals:rows('得点'),matchCache:{}};
+  const saved=readSaved(STORE);
+  const merged=Object.assign(base,saved||{});
+  const preserved=migrateSavedBracket();
+  if(preserved)merged.bracket=preserved;
+  if(!merged.groups)merged.groups=buildGroupRows(initialGroups);
+  if(!merged.matchCache)merged.matchCache={};
+  if(merged.active==='assists')merged.active='groups';
+  return merged;
+}
+function save(){
+  localStorage.setItem(STORE,JSON.stringify(state));
+  if(state&&state.bracket)localStorage.setItem(BRACKET_STORE,JSON.stringify(state.bracket));
+}
 function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function teamFlag(id){
@@ -433,7 +632,7 @@ function groupsHTML(){
   </section>`
 }
 function groupBoxHTML(g,rows){
-  return `<div class="group-box">
+  return `<div class="group-box" data-group="${g}" role="button" tabindex="0" aria-label="Group ${g} 詳細">
     <div class="group-title"><span>Group ${g}</span><span>${rows.length}チーム</span></div>
     <table class="group-table">
       <thead><tr><th class="rank-col">順</th><th class="flag-col">国</th><th class="team-col">国名</th><th class="rec-col">勝敗</th><th class="num-col">得</th><th class="num-col">失</th><th class="num-col">差</th><th class="pts-col">点</th></tr></thead>
@@ -455,7 +654,8 @@ function bind(){
   const reset=document.getElementById('reset');
   if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);save();render()}};
   document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()});
-  const updateGroups=document.getElementById('updateGroups');if(updateGroups)updateGroups.onclick=updateGroupStandings
+  const updateGroups=document.getElementById('updateGroups');if(updateGroups)updateGroups.onclick=updateGroupStandings;
+  document.querySelectorAll('[data-group]').forEach(b=>{b.onclick=()=>openGroupDetail(b.dataset.group);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openGroupDetail(b.dataset.group)}}})
 }
 function toggleConfirm(id){
   const s=findSlot(id);if(!s||s.fixed)return;
@@ -547,18 +747,230 @@ function availableOptions(s){
     return true;
   });
 }
+
+let currentGroup=null;
+function dateText(iso){
+  return new Date(iso).toLocaleString('ja-JP',{month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit'});
+}
+function teamNameLine(id){
+  return `<span class="match-team-name">${teamFlag(id)}<span>${esc(T[id]?.[0]||id)}</span></span>`;
+}
+function groupDetailTable(g){
+  const rows=state.groups?.[g]||buildGroupRows(initialGroups)[g]||[];
+  return `<table class="detail-table">
+    <thead><tr><th>順位</th><th>国</th><th>国名</th><th>勝敗</th><th>得点</th><th>失点</th><th>差</th><th>勝点</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="detail-team">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.d}-${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
+  </table>`
+}
+function openGroupDetail(g){
+  currentGroup=g;
+  editing=null;
+  const sh=document.getElementById('sheet');
+  document.getElementById('backdrop').classList.add('show');
+  sh.classList.add('show','group-detail');
+  renderGroupDetail(g);
+  loadGroupMatchDetails(g);
+}
+function renderGroupDetail(g){
+  const sh=document.getElementById('sheet');
+  sh.innerHTML=`<div class="sheet-head"><div><div class="group-detail-title">Group ${g}</div><div class="small">国名を省略せず表示し、下に試合結果・予定を日付順で表示します。</div></div><button class="sheet-close" id="closeSheetBtn" type="button" aria-label="閉じる">×</button></div>
+    <div class="detail-section">
+      <h3>順位表</h3>
+      ${groupDetailTable(g)}
+      <h3>試合結果・予定</h3>
+      <div class="match-list">${(GROUP_MATCHES[g]||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).map(matchCardHTML).join('')}</div>
+      <div class="group-detail-note">得点者と得点時間は、外部データから取得できた場合に表示します。取得元の仕様・通信状況により表示されない場合があります。</div>
+    </div>`;
+  const closeBtn=document.getElementById('closeSheetBtn');if(closeBtn)closeBtn.onclick=closeSheet;
+}
+function matchCardHTML(m){
+  const cached=(state.matchCache||{})[m.id]||{};
+  const done=cached.completed ?? (m.status==='done');
+  const hs=cached.hs ?? m.hs;
+  const as=cached.as ?? m.as;
+  const score=done?`${hs ?? '-'} - ${as ?? '-'}`:'予定';
+  const byTeam=normalizeScorers(cached.scorers,m);
+  const homeScorers=scorerLines(byTeam.home);
+  const awayScorers=scorerLines(byTeam.away);
+  const hasGoals=done&&Number(hs||0)+Number(as||0)>0;
+  const loading=cached.loading;
+  const missing=hasGoals&&!loading&&!homeScorers&&!awayScorers;
+  const note=loading?'得点者を取得中...':(missing?'得点者情報は未取得です。':'');
+  return `<div class="match-card">
+    <div class="match-date">${dateText(m.date)}</div>
+    <div class="match-main">
+      <div class="match-team home">${teamNameLine(m.home)}${homeScorers?`<div class="team-scorers">${homeScorers}</div>`:''}</div>
+      <div class="match-score ${done?'done':''}">${score}</div>
+      <div class="match-team away">${teamNameLine(m.away)}${awayScorers?`<div class="team-scorers">${awayScorers}</div>`:''}</div>
+    </div>
+    ${note?`<div class="scorers"><span class="scorer-empty">${note}</span></div>`:''}
+  </div>`
+}
+function normalizeScorers(scorers,m){
+  const out={home:[],away:[]};
+  if(!scorers)return out;
+  if(Array.isArray(scorers)){
+    scorers.forEach(x=>{
+      if(typeof x==='string'){
+        const team=scoreStringTeam(x,m);
+        const label=stripTeamFromScorerLabel(x);
+        if(team===m.home)out.home.push(label);else if(team===m.away)out.away.push(label);
+      }else if(x&&typeof x==='object'){
+        const team=x.team;
+        const label=formatScorerLabel(x.name||x.player||x.label||'得点',x.minute);
+        if(team===m.home)out.home.push(label);else if(team===m.away)out.away.push(label);
+      }
+    });
+  }else if(typeof scorers==='object'){
+    ['home','away'].forEach(side=>(scorers[side]||[]).forEach(x=>{
+      out[side].push(typeof x==='string'?x:formatScorerLabel(x.name||x.player||x.label||'得点',x.minute));
+    }));
+  }
+  out.home=[...new Set(out.home.filter(Boolean))];
+  out.away=[...new Set(out.away.filter(Boolean))];
+  return out;
+}
+function scorerLines(items){return (items||[]).map(x=>`<div>${esc(x)}</div>`).join('')}
+function formatScorerLabel(name,minute){return `${name||'得点'}${minute?` ${minute}`:''}`.trim()}
+function stripTeamFromScorerLabel(label){return String(label).replace(/（[^）]+）/g,'').replace(/\([^)]*\)/g,'').trim()}
+function scoreStringTeam(label,m){
+  const txt=String(label);
+  for(const t of [m.home,m.away]){const n=T[t]?.[0];if(n&&txt.includes(n))return t}
+  return '';
+}
+async function loadGroupMatchDetails(g){
+  state.matchCache=state.matchCache||{};
+  const matches=(GROUP_MATCHES[g]||[]).filter(m=>m.status==='done');
+  let changed=false;
+  matches.forEach(m=>{if(!state.matchCache[m.id]){state.matchCache[m.id]={loading:true};changed=true}});
+  if(changed){save();if(currentGroup===g)renderGroupDetail(g)}
+  await Promise.all(matches.map(async m=>{
+    if(state.matchCache[m.id]&&!state.matchCache[m.id].loading&&state.matchCache[m.id].fetched)return;
+    try{
+      const data=await fetchESPNEventSummary(m.id);
+      state.matchCache[m.id]=Object.assign({fetched:true},parseMatchSummary(data,m));
+    }catch(e){
+      state.matchCache[m.id]=Object.assign({fetched:true,completed:true,hs:m.hs,as:m.as,scorers:[]});
+    }
+  }));
+  save();if(currentGroup===g)renderGroupDetail(g);
+}
+async function fetchESPNEventSummary(eventId){
+  const urls=[
+    `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event=${eventId}`,
+    `https://site.web.api.espn.com/apis/site/v2/sports/soccer/fifa.world/summary?event=${eventId}`
+  ];
+  let lastErr;
+  for(const url of urls){
+    try{const r=await fetch(url);if(r.ok)return await r.json();lastErr=new Error('HTTP '+r.status)}catch(e){lastErr=e}
+  }
+  throw lastErr||new Error('summary取得失敗');
+}
+function parseMatchSummary(data,m){
+  const comp=(data.header?.competitions?.[0])||(data.competitions?.[0])||{};
+  const competitors=comp.competitors||[];
+  let hs=m.hs,as=m.as,completed=m.status==='done';
+  competitors.forEach(c=>{
+    const id=resolveTeamFromESPN(c.team||c);
+    if(id===m.home)hs=Number(c.score);
+    if(id===m.away)as=Number(c.score);
+  });
+  if(comp.status?.type)completed=!!comp.status.type.completed||completed;
+  const scorers=extractScorers(data,m);
+  return {completed,hs,as,scorers};
+}
+function extractScorers(data,m){
+  const candidates=[];
+  const pushArray=a=>{if(Array.isArray(a))a.forEach(x=>candidates.push(x))};
+  pushArray(data.scoringPlays);
+  pushArray(data.competitions?.[0]?.details);
+  pushArray(data.header?.competitions?.[0]?.details);
+  pushArray(data.details);
+  pushArray(data.plays);
+  pushArray(data.commentary);
+  pushArray(data.gameInfo?.scoringPlays);
+  collectGoalLikeObjects(data,candidates,new Set(),0);
+  const out={home:[],away:[]};
+  candidates.forEach(item=>{
+    if(!isGoalEvent(item))return;
+    const minute=goalMinute(item);
+    const athlete=goalAthlete(item);
+    const team=goalTeam(item,m);
+    const rawText=String(item.text||item.displayText||item.shortText||item.commentary||item.description||'').replace(/\s+/g,' ').trim();
+    const label=formatScorerLabel(athlete||rawText||'得点',minute);
+    if(team===m.home && !out.home.includes(label))out.home.push(label);
+    if(team===m.away && !out.away.includes(label))out.away.push(label);
+  });
+  return out;
+}
+function collectGoalLikeObjects(obj,out,seen,depth){
+  if(!obj||typeof obj!=='object'||depth>5||seen.has(obj))return;
+  seen.add(obj);
+  if(isGoalEvent(obj))out.push(obj);
+  Object.keys(obj).forEach(k=>{
+    const v=obj[k];
+    if(Array.isArray(v))v.forEach(x=>collectGoalLikeObjects(x,out,seen,depth+1));
+    else if(v&&typeof v==='object')collectGoalLikeObjects(v,out,seen,depth+1);
+  });
+}
+function isGoalEvent(item){
+  if(!item||typeof item!=='object')return false;
+  const rawType=String(item.type?.text||item.type?.displayName||item.type?.name||item.type||item.scoringType||'');
+  const rawText=String(item.text||item.displayText||item.shortText||item.commentary||item.description||item.summary||rawType||'');
+  const all=(rawType+' '+rawText).toLowerCase();
+  if(!/(^|\b)goal\b|ゴール/.test(all))return false;
+  if(/penalty shootout|shootout|missed|saved|post|woodwork|offside|var overturned|ruled out|disallowed|substitution|yellow card|red card/.test(all))return false;
+  return true;
+}
+function goalMinute(item){
+  const v=item.clock?.displayValue||item.time?.displayValue||item.displayTime||item.minute||item.clock;
+  if(v==null)return '';
+  const s=String(v).replace(' minute','').replace('min','').trim();
+  if(/^\d+(:\d+)?$/.test(s))return s.includes(':')?s:`${s}'`;
+  return s;
+}
+function goalAthlete(item){
+  const pools=[item.athletesInvolved,item.participants,item.athletes,item.players].filter(Array.isArray);
+  for(const arr of pools){
+    for(const p of arr){
+      const a=p.athlete||p.player||p;
+      const n=a.displayName||a.fullName||a.name||p.displayName||p.name;
+      if(n&&!Object.values(T).some(v=>v[0]===n))return String(n);
+    }
+  }
+  const direct=item.athlete?.displayName||item.player?.displayName||item.scorer?.displayName||item.participant?.displayName||'';
+  if(direct)return String(direct);
+  const txt=String(item.text||item.displayText||item.shortText||item.commentary||item.description||'').replace(/\s+/g,' ').trim();
+  const m=txt.match(/(?:Goal!|Goal by|goal by)\s*([^.,;]+)/i);
+  if(m)return m[1].trim();
+  return '';
+}
+function goalTeam(item,m){
+  const id=resolveTeamFromESPN(item.team||item.teamInfo||item.competitor||{});
+  if(id)return id;
+  const txt=String(item.text||item.displayText||item.commentary||item.description||item.shortText||'').toLowerCase();
+  for(const t of [m.home,m.away]){
+    const name=String(T[t]?.[0]||'').toLowerCase();
+    const code=String(FLAG_CODE[t]||'').toLowerCase();
+    if(name&&txt.includes(name))return t;
+    if(code&&txt.includes(code))return t;
+  }
+  return '';
+}
+
 function openSheet(id){
   const s=findSlot(id);if(!s||s.fixed)return;
   const options=availableOptions(s);
   editing=id;
   document.getElementById('backdrop').classList.add('show');
+  document.getElementById('sheet').classList.remove('group-detail');
   document.getElementById('sheet').classList.add('show');
   document.getElementById('sheet').innerHTML=`<div class="sheet-head"><div><div class="sheet-title">${esc(s.tag)} の候補国を選択</div><div class="small">複数選択できます。確定済みのチーム、敗退決定チームは選択肢から除外されます。</div></div><button class="sheet-close" id="closeSheetBtn" type="button" aria-label="閉じる">×</button></div><div class="sheet-body">${options.length?options.map(id=>`<label class="opt"><input type="checkbox" value="${id}" ${s.sel.includes(id)?'checked':''}>${teamFlag(id)}<b>${esc(T[id][0])}</b></label>`).join(''):'<div class="small">選択可能な候補がありません。</div>'}</div><div class="sheet-actions"><button class="btn" id="clearSel">クリア</button><button class="btn primary" id="doneSel">反映</button></div>`;
   document.getElementById('doneSel').onclick=applySheet;
   document.getElementById('clearSel').onclick=()=>{document.querySelectorAll('#sheet input').forEach(x=>x.checked=false)};
   document.getElementById('closeSheetBtn').onclick=closeSheet;
 }
-function closeSheet(){document.getElementById('backdrop').classList.remove('show');document.getElementById('sheet').classList.remove('show');editing=null}
+function closeSheet(){document.getElementById('backdrop').classList.remove('show');const sh=document.getElementById('sheet');sh.classList.remove('show','group-detail');editing=null;currentGroup=null}
 function applySheet(){const s=findSlot(editing);if(s){s.sel=[...document.querySelectorAll('#sheet input:checked')].map(x=>x.value);s.confirmed=false;save();closeSheet();render()}}
 document.getElementById('backdrop').onclick=closeSheet;
 render();

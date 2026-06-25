@@ -63,8 +63,8 @@
       position:absolute;
       z-index:2;
       width:38%;
-      height:4.1%;
-      min-height:24px;
+      height:5.1%;
+      min-height:32px;
       border:1px solid var(--line);
       border-radius:8px;
       background:linear-gradient(180deg,#14223a,#0d1728);
@@ -88,8 +88,8 @@
     .slot-main{
       appearance:none;border:0;background:transparent;color:inherit;
       flex:1 1 auto;min-width:0;height:100%;
-      display:flex;align-items:center;gap:6px;
-      padding:3px 4px 3px 6px;text-align:left;cursor:pointer;
+      display:flex;align-items:center;gap:5px;
+      padding:2px 4px 2px 5px;text-align:left;cursor:pointer;
     }
     .slot.fixed .slot-main{cursor:default}
     .slot-main:disabled{opacity:1}
@@ -118,13 +118,26 @@
     .team-text{
       flex:1 1 auto;
       min-width:0;
-      font-size:clamp(8.5px,1.1vw,12px);
+      max-height:100%;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:1px;
+      font-size:clamp(7px,.9vw,10px);
       font-weight:900;
-      line-height:1.15;
-      white-space:nowrap;
+      line-height:1.05;
       overflow:hidden;
-      text-overflow:ellipsis;
+      letter-spacing:-.03em;
     }
+    .team-line{
+      display:flex;
+      align-items:center;
+      min-width:0;
+      white-space:nowrap;
+      overflow:visible;
+    }
+    .team-line .flag-img{width:14px;height:9px;margin-right:2px}
+    .team-name{display:inline-block;min-width:0;overflow:visible;text-overflow:clip}
     .team-text .muted{font-weight:700;color:#aab8cc}
     .slot.confirmed .team-text .muted{color:#473811}
     .flag-img{
@@ -259,12 +272,12 @@
     .match-main{
       display:grid;
       grid-template-columns:1fr auto 1fr;
-      align-items:center;
+      align-items:flex-start;
       gap:7px;
       font-size:12px;
       font-weight:900;
     }
-    .match-team{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;border-radius:10px;padding:5px 7px}
+    .match-team{display:flex;flex-direction:column;align-items:flex-start;align-self:flex-start;gap:3px;min-width:0;border-radius:10px;padding:5px 7px}
     .match-team.away{align-items:flex-end;text-align:right}
     .match-team-name.winner{background:linear-gradient(90deg,rgba(129,216,208,.98),rgba(38,166,154,.92));color:#052523;box-shadow:0 0 0 1px rgba(129,216,208,.55),0 0 14px rgba(129,216,208,.22)}
     .match-team-name.winner .flag-img{border-color:rgba(5,37,35,.35);box-shadow:0 0 0 1px rgba(255,255,255,.38)}
@@ -274,6 +287,8 @@
     .team-scorers div{white-space:normal;overflow:visible;text-overflow:clip}
     .match-team.away .team-scorers{text-align:right}
     .match-score{
+      align-self:flex-start;
+      margin-top:4px;
       min-width:42px;
       text-align:center;
       border-radius:999px;
@@ -295,7 +310,7 @@
     .scorer-empty{color:#8fa1bc}
     .group-detail-note{font-size:11px;color:#8fa1bc;line-height:1.45;margin-top:6px}
 
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:9px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:11px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:11px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
   </style>
 </head>
 <body>
@@ -318,7 +333,7 @@ function showBootError(err){
     const app=document.getElementById('app');
     if(!app)return;
     const msg=(err&&(err.message||err.reason||err.toString()))||'原因不明の表示エラー';
-    app.innerHTML='<div class="boot-error"><h2>表示エラー</h2><p class="small">初期表示でエラーが出ました。URL末尾に ?v=23 を付けて再読み込みしてください。</p><code>'+String(msg).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})+'</code></div>';
+    app.innerHTML='<div class="boot-error"><h2>表示エラー</h2><p class="small">初期表示でエラーが出ました。URL末尾に ?v=25 を付けて再読み込みしてください。</p><code>'+String(msg).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})+'</code></div>';
   }catch(e){}
 }
 window.addEventListener('error',function(e){showBootError(e.error||e.message||e)});
@@ -359,7 +374,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=4;
+const SCORER_CACHE_VERSION=5;
 const MATCH_SCORER_FALLBACKS={
   '66456912':{home:[],away:["マテオ チャベス 後 10'","フリアン キニョーネス 後 16'","アルバロ フィダルゴ 後 49'"]},
   '66456938':{home:["アクラフ ハキミ 前 39'","イスマエル サイバリ 前 46'","ソフィアン ラヒミ 後 33'","ジェシム ヤシン 後 44'"],away:["オウンゴール 前 10'","ウィルソン イシドール 前 43'"]},
@@ -367,8 +382,72 @@ const MATCH_SCORER_FALLBACKS={
   '66456974':{home:[],away:["鎌田 大地 前 4'","上田 綺世 前 31'","伊東 純也 後 24'","上田 綺世 後 38'"]}
 };
 const YAHOO_MATCH_URLS={
+  // Group A
+  '66456904':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061101/summary?gk=18',
+  '66456906':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061102/summary?gk=18',
+  '66456910':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061801/summary?gk=18',
+  '66456908':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061804/summary?gk=18',
+  '66456912':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062405/summary?gk=18',
+  '66456914':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062406/summary?gk=18',
+  // Group B
+  '66456916':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061201/summary?gk=18',
+  '66456918':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061303/summary?gk=18',
+  '66456922':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061802/summary?gk=18',
+  '66456920':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061803/summary?gk=18',
+  '66456924':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062403/summary?gk=18',
+  '66456926':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062404/summary?gk=18',
+  // Group C
+  '66456928':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061302/summary?gk=18',
+  '66456930':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061301/summary?gk=18',
+  '66456934':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061902/summary?gk=18',
+  '66456932':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061901/summary?gk=18',
+  '66456936':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062401/summary?gk=18',
+  '66456938':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062402/summary?gk=18',
+  // Group D
+  '66456940':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061202/summary?gk=18',
+  '66456942':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061313/summary?gk=18',
+  '66456944':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061904/summary?gk=18',
+  '66456946':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061903/summary?gk=18',
+  // Group E
+  '66457070':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061403/summary?gk=18',
+  '66457072':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061402/summary?gk=18',
+  '66457074':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062002/summary?gk=18',
+  '66457076':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062003/summary?gk=18',
+  // Group F
+  '66456968':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061404/summary?gk=18',
+  '66456970':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061405/summary?gk=18',
   '66456972':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062004/summary?gk=18',
-  '66456974':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062005/summary?gk=18'
+  '66456974':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062005/summary?gk=18',
+  // Group G
+  '66456982':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061504/summary?gk=18',
+  '66456984':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061503/summary?gk=18',
+  '66456986':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062104/summary?gk=18',
+  '66456988':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062105/summary?gk=18',
+  // Group H
+  '66456994':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061502/summary?gk=18',
+  '66456996':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061501/summary?gk=18',
+  '66456998':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062103/summary?gk=18',
+  '66457000':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062102/summary?gk=18',
+  // Group I
+  '66457006':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061601/summary?gk=18',
+  '66457008':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061602/summary?gk=18',
+  '66457010':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062202/summary?gk=18',
+  '66457012':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062201/summary?gk=18',
+  // Group J
+  '66457018':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061603/summary?gk=18',
+  '66457020':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061604/summary?gk=18',
+  '66457022':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062203/summary?gk=18',
+  '66457024':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062204/summary?gk=18',
+  // Group K
+  '66457030':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061704/summary?gk=18',
+  '66457032':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061705/summary?gk=18',
+  '66457034':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062303/summary?gk=18',
+  '66457036':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062304/summary?gk=18',
+  // Group L
+  '66457042':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061703/summary?gk=18',
+  '66457044':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061702/summary?gk=18',
+  '66457046':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062301/summary?gk=18',
+  '66457048':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062302/summary?gk=18'
 };
 
 
@@ -582,7 +661,16 @@ const initial={
   [{id:'r8a',tag:'K1',sel:['pt','co'],opts:G.K},{id:'r8b',tag:'3位',sel:[],opts:TH.t8}]
  ]
 };
+
+// 決勝トーナメント表で進出枠が確定しているものは、保存済み入力より優先して固定します。
+// ここに含めない未確定枠は、ユーザーの前回入力を保持します。
+const BRACKET_CONFIRMED_BY_TAG={
+  A1:'mx',A2:'za',B1:'ch',B2:'ca',C1:'br',C2:'ma',
+  D1:'us',E1:'de',J1:'ar'
+};
+
 let state=load();let editing=null;
+applyConfirmedBracketSlots();
 function clone(x){return JSON.parse(JSON.stringify(x))}
 function readSaved(key){try{return JSON.parse(localStorage.getItem(key)||'{}')}catch(e){return {}}}
 function migrateSavedBracket(){
@@ -629,7 +717,13 @@ function teamFlag(id){
   const name=esc(T[id]?.[0]||id);
   return code?`<img class="flag-img" src="https://flagcdn.com/w40/${code}.png" srcset="https://flagcdn.com/w80/${code}.png 2x" alt="${name}" loading="lazy">`:''
 }
-function teamText(ids){if(!ids||!ids.length)return '<span class="muted">未選択</span>';return ids.map(id=>T[id]?`${teamFlag(id)}${esc(T[id][0])}`:esc(id)).join(' <span class="muted">/</span> ')}
+function teamText(ids){
+  if(!ids||!ids.length)return '<span class="muted">未選択</span>';
+  return ids.slice(0,3).map(id=>T[id]
+    ?`<span class="team-line">${teamFlag(id)}<span class="team-name">${esc(T[id][0])}</span></span>`
+    :`<span class="team-line"><span class="team-name">${esc(id)}</span></span>`
+  ).join('');
+}
 function render(){
   document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');
   document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():state.active==='groups'?groupsHTML():simpleTab(state.active);
@@ -653,7 +747,7 @@ function linesSVG(){
   const slotTop=3.5;
   const matchGap=11.8;
   const slotGap=5.5;
-  const slotH=4.1;
+  const slotH=5.1;
   const pairCenters=Array.from({length:8},(_,i)=>{
     const first=slotTop+i*matchGap+slotH/2;
     return [first, first+slotGap];
@@ -731,11 +825,17 @@ function groupBoxHTML(g,rows){
     </table>
   </div>`
 }
+function topTwentyRows(list){
+  const out=(Array.isArray(list)?list:[]).slice(0,20).map((r,i)=>Object.assign({rank:i+1,value:'',player:'',team:''},r||{}));
+  while(out.length<20)out.push({rank:out.length+1,value:'',player:'',team:''});
+  return out;
+}
 function simpleTab(tab){
   const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];
   if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;
   if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;
-  const rowsData=((state[tab]||[]).some(r=>r.player||r.value)?state[tab]:fallbackStatRows(tab)).slice(0,20);
+  const sourceRows=((state[tab]||[]).some(r=>r.player||r.value)?state[tab]:fallbackStatRows(tab));
+  const rowsData=topTwentyRows(sourceRows);
   const label=tab==='goals'?'得点数':'アシスト数';
   const status=(state.statStatus&&state.statStatus[tab])||'';
   return `<div class="card"><h2>${title}</h2>
@@ -799,28 +899,42 @@ function groupRowsComplete(g){
   const rows=state.groups?.[g]||[];
   return rows.length===4&&rows.every(r=>(Number(r.w||0)+Number(r.d||0)+Number(r.l||0))>=3);
 }
+function setBracketSlotConfirmed(slot,team,locked){
+  if(!slot||!team)return false;
+  slot.sel=[team];
+  slot.confirmed=true;
+  slot.fixed=true;
+  slot.autoLocked=true;
+  if(locked)locked.add(team);
+  return true;
+}
 function applyConfirmedBracketSlots(){
   const slots=allBracketSlots();
   const applied=[];
+  const locked=new Set();
+
+  // 公式・手元データ上ですでに進出枠が確定しているものは、保存済み入力より優先して固定します。
   slots.forEach(s=>{
+    const team=BRACKET_CONFIRMED_BY_TAG[String(s.tag||'')];
+    if(team&&setBracketSlotConfirmed(s,team,locked))applied.push(s);
+  });
+
+  // グループ全試合が完了した枠は、順位表から1位/2位を自動反映します。
+  slots.forEach(s=>{
+    if(applied.includes(s))return;
     const m=String(s.tag||'').match(/^([A-L])([12])$/);
     if(!m)return;
     const g=m[1], rank=Number(m[2]);
     const rows=state.groups?.[g]||[];
     if(!groupRowsComplete(g))return;
     const row=rows.find(r=>Number(r.rank)===rank)||rows[rank-1];
-    if(row&&row.team)applied.push({slot:s,team:row.team});
+    if(row&&row.team&&setBracketSlotConfirmed(s,row.team,locked))applied.push(s);
   });
-  const locked=new Set();
-  applied.forEach(({slot,team})=>{
-    slot.sel=[team];
-    slot.confirmed=true;
-    slot.fixed=true;
-    slot.autoLocked=true;
-    locked.add(team);
-  });
+
+  // 確定済みチームが他の未確定枠に残っていた場合だけ除外します。
+  // 未確定枠のユーザー入力そのものは残します。
   slots.forEach(s=>{
-    if(applied.some(x=>x.slot===s)||s.fixed)return;
+    if(applied.includes(s)||s.fixed)return;
     const before=(s.sel||[]).length;
     s.sel=(s.sel||[]).filter(id=>!locked.has(id));
     if(before&&!s.sel.length)s.confirmed=false;
@@ -1140,12 +1254,12 @@ function expandYahooScorerLine(line){
   const times=s.slice(firstHalf).trim();
   const out=[];
   let currentHalf='';
-  const re=/(前|後)?\s*(\d{1,3})'/g;
+  const re=/(前|後)?\s*(\d{1,3})'\s*(\(PK\))?/g;
   let match;
   while((match=re.exec(times))){
     if(match[1])currentHalf=match[1];
     if(!currentHalf)continue;
-    out.push(`${name} ${currentHalf} ${match[2]}'`);
+    out.push(`${name} ${currentHalf} ${match[2]}'${match[3]||''}`);
   }
   return out;
 }
@@ -1539,7 +1653,7 @@ function boot(){
   }catch(e){
     console.error('初期表示エラー',e);
     const app=document.getElementById('app');
-    if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=23 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
+    if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=25 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
   }
 }
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot,{once:true});}else{boot();}

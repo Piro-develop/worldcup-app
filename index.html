@@ -337,7 +337,7 @@
     .news-list{display:flex;flex-direction:column;gap:9px}
     .news-item{display:grid;grid-template-columns:74px 1fr;gap:10px;align-items:center;border:1px solid rgba(205,220,245,.13);border-radius:13px;background:#0d1728;padding:8px;text-decoration:none;color:inherit}
     .news-item:hover{border-color:rgba(52,210,208,.48)}
-    .news-thumb{width:74px;height:52px;border-radius:9px;object-fit:cover;background:#14233a;border:1px solid rgba(255,255,255,.12)}
+    .news-thumb{width:74px;height:52px;border-radius:9px;object-fit:contain;background:#f7fbff;border:1px solid rgba(255,255,255,.12);padding:6px;box-sizing:border-box}
     .news-title{font-size:12.5px;line-height:1.42;font-weight:900;color:#eef5ff}
     .news-empty{font-size:12px;color:var(--muted);line-height:1.6;padding:12px;border:1px dashed rgba(205,220,245,.22);border-radius:12px;background:rgba(13,23,40,.72)}
 
@@ -437,7 +437,19 @@ const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
 const tabs=[['bracket','決勝T表'],['knockout','決勝T日程'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ'],['news','ニュース']];
 const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Africa',ch:'Switzerland',ca:'Canada',br:'Brazil',ma:'Morocco',co:'Colombia',pt:'Portugal',hr:'Croatia',es:'Spain',at:'Austria',us:'United States',be:'Belgium',ci:'Ivory Coast',no:'Norway',mx:'Mexico',eng:'England',ar:'Argentina',uy:'Uruguay',au:'Australia',py:'Paraguay',eg:'Egypt',nl:'Netherlands',se:'Sweden',tn:'Tunisia',cz:'Czechia',qa:'Qatar',ba:'Bosnia and Herzegovina',ht:'Haiti',sct:'Scotland',tr:'Türkiye',ec:'Ecuador',cw:'Curaçao',ir:'Iran',nz:'New Zealand',sa:'Saudi Arabia',cv:'Cape Verde',sn:'Senegal',iq:'Iraq',dz:'Algeria',jo:'Jordan',uz:'Uzbekistan',cd:'DR Congo',gh:'Ghana',pa:'Panama'};
-const NEWS_COUNTRY_ORDER=['jp'].concat(Object.keys(T).filter(id=>id!=='jp').sort((a,b)=>String(T[a]?.[0]||a).localeCompare(String(T[b]?.[0]||b),'ja')));
+const NEWS_COUNTRY_ORDER=(()=>{
+  const order=Object.keys(T).filter(id=>id!=='jp').sort((a,b)=>String(T[a]?.[0]||a).localeCompare(String(T[b]?.[0]||b),'ja'));
+  const moveAfter=(id,after)=>{
+    const i=order.indexOf(id), j=order.indexOf(after);
+    if(i<0||j<0)return;
+    order.splice(i,1);
+    const pos=order.indexOf(after);
+    order.splice(pos+1,0,id);
+  };
+  moveAfter('kr','ca'); // 韓国はカナダの後ろ
+  moveAfter('za','pt'); // 南アフリカはポルトガルの後ろ
+  return ['jp'].concat(order);
+})();
 const GDELT_DOC_API='https://api.gdeltproject.org/api/v2/doc/doc';
 const GOOGLE_NEWS_RSS='https://news.google.com/rss/search';
 const JINA_SEARCH_API='https://s.jina.ai/';
@@ -1019,17 +1031,35 @@ function newsFallbackImage(target){
   if(code)return `https://flagcdn.com/w160/${code}.png`;
   return newsPlaceholderImage(newsTargetLabel(t));
 }
+function newsProviderDomain(item){
+  const src=String(item&&item.domain||'').toLowerCase();
+  if(/soccer\s*king|サッカーキング/.test(src))return 'soccer-king.jp';
+  if(/gekisaka|ゲキサカ/.test(src))return 'web.gekisaka.jp';
+  try{
+    const u=new URL(String(item&&item.url||''));
+    const host=u.hostname.replace(/^www\./,'').toLowerCase();
+    if(host==='news.google.com')return '';
+    return host;
+  }catch(e){return ''}
+}
 function newsDomainIcon(url){
   try{
     const u=new URL(String(url||''));
     if(!/^https?:$/i.test(u.protocol))return '';
-    return `https://www.google.com/s2/favicons?domain_url=${encodeURIComponent(u.origin)}&sz=128`;
+    const host=u.hostname.replace(/^www\./,'').toLowerCase();
+    if(!host||host==='news.google.com')return '';
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`;
   }catch(e){return ''}
 }
-function newsInitialImage(item,target){
-  // 速度と安定性を優先するため、記事本文の画像解析は行わない。
-  // 国別は国旗、W杯全体はアプリアイコンを基本サムネイルにする。
+function newsProviderLogo(item,target){
+  const host=newsProviderDomain(item);
+  if(host)return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`;
   return newsFallbackImage(target);
+}
+function newsInitialImage(item,target){
+  // 記事本文の画像解析は行わず、軽量な提供元ロゴを優先表示する。
+  // ロゴが取れない場合は、国旗またはW杯アイコンへ自動フォールバックする。
+  return newsProviderLogo(item,target);
 }
 function isNewsPlaceholderImage(img,item,target){
   const u=String(img||'');

@@ -26,7 +26,7 @@
     body{background:radial-gradient(circle at 50% -10%,rgba(58,98,150,.32),transparent 34%),linear-gradient(180deg,#070c16 0%,#050913 100%)}
     .wrap{max-width:1180px;margin:0 auto;padding:12px 8px 28px}
     .hero{padding:8px 6px 4px}.eyebrow{font-size:10px;letter-spacing:.22em;color:#78c7ff;font-weight:800}.title{font-size:22px;margin:5px 0 2px;font-weight:900}.lead{font-size:12px;color:var(--muted);margin:0;line-height:1.55}
-    .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;overflow:visible;position:sticky;top:0;z-index:50;margin-top:10px;padding:7px;border:1px solid var(--line);border-radius:14px;background:rgba(7,12,22,.82);backdrop-filter:blur(14px)}
+    .tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;overflow:visible;position:sticky;top:0;z-index:50;margin-top:10px;padding:7px;border:1px solid var(--line);border-radius:14px;background:rgba(7,12,22,.82);backdrop-filter:blur(14px)}
     .tab{width:100%;min-width:0;border:1px solid transparent;border-radius:10px;padding:8px 2px;background:transparent;color:#c8d6ea;font-size:12px;font-weight:800;white-space:nowrap;text-align:center}.tab.active{background:rgba(52,210,208,.16);border-color:rgba(52,210,208,.45);color:#fff}
     .panel{margin-top:10px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 2px}.btn{border:1px solid var(--line);border-radius:10px;background:#111c30;color:#eaf3ff;padding:8px 10px;font-weight:800;font-size:12px}.btn.primary{background:linear-gradient(180deg,#1b8a94,#155c66);border-color:rgba(52,210,208,.44)}
 
@@ -325,6 +325,28 @@
     .news-thumb{width:74px;height:52px;border-radius:9px;object-fit:cover;background:#14233a;border:1px solid rgba(255,255,255,.12)}
     .news-title{font-size:12.5px;line-height:1.42;font-weight:900;color:#eef5ff}
     .news-empty{font-size:12px;color:var(--muted);line-height:1.6;padding:12px;border:1px dashed rgba(205,220,245,.22);border-radius:12px;background:rgba(13,23,40,.72)}
+
+    .ko-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .ko-head h2{margin:0;font-size:20px}
+    .ko-board-wrap{overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
+    .ko-board{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:10px;min-width:1320px;align-items:start}
+    .ko-round{display:flex;flex-direction:column;gap:9px}
+    .ko-round-title{position:sticky;top:46px;z-index:2;text-align:center;font-weight:900;font-size:13px;color:#eef5ff;background:rgba(12,20,36,.96);border:1px solid rgba(205,220,245,.16);border-radius:12px;padding:8px}
+    .ko-card{position:relative;border:1px solid rgba(205,220,245,.18);border-radius:15px;background:linear-gradient(180deg,#111c30,#0d1728);padding:9px;min-height:104px;box-shadow:var(--shadow)}
+    .ko-card.done{border-color:rgba(52,210,208,.45)}
+    .ko-card.live{border-color:rgba(255,231,151,.58)}
+    .ko-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;color:#9fb0ca;font-size:11px;font-weight:800}
+    .ko-match-no{color:#78c7ff;font-size:10px;white-space:nowrap}
+    .ko-teams{display:flex;flex-direction:column;gap:6px}
+    .ko-team{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:10px;padding:5px 6px;color:#eef5ff;font-weight:900;font-size:12.5px;line-height:1.25}
+    .ko-team.winner{background:linear-gradient(90deg,rgba(129,216,208,.98),rgba(38,166,154,.92));color:#052523;box-shadow:0 0 0 1px rgba(129,216,208,.55)}
+    .ko-team-main{display:flex;align-items:center;gap:5px;min-width:0}
+    .ko-team-main span:last-child{white-space:normal;overflow:visible;text-overflow:clip}
+    .ko-score{flex:0 0 auto;min-width:22px;text-align:center;font-weight:900;color:#ffe79a}
+    .ko-team.winner .ko-score{color:#052523}
+    .ko-placeholder{color:#aebdd3;font-weight:900}
+    .ko-note{margin-top:10px;font-size:11px;color:#8fa1bc;line-height:1.55}
+    @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-board{min-width:1180px;grid-template-columns:repeat(6,190px)}.ko-round-title{top:86px}.ko-head h2{font-size:18px}.ko-card{min-height:96px}.ko-team{font-size:12px}}
     @media (max-width:430px){.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}}
     @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
   </style>
@@ -369,10 +391,11 @@ const ELIMINATED=['tr','ht','tn','pa','jo'];
 const uniq=a=>[...new Set(a)];
 const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
-const tabs=[['bracket','決勝T表'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ'],['news','ニュース']];
+const tabs=[['bracket','決勝T表'],['knockout','決勝T日程'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ'],['news','ニュース']];
 const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Africa',ch:'Switzerland',ca:'Canada',br:'Brazil',ma:'Morocco',co:'Colombia',pt:'Portugal',hr:'Croatia',es:'Spain',at:'Austria',us:'United States',be:'Belgium',ci:'Ivory Coast',no:'Norway',mx:'Mexico',eng:'England',ar:'Argentina',uy:'Uruguay',au:'Australia',py:'Paraguay',eg:'Egypt',nl:'Netherlands',se:'Sweden',tn:'Tunisia',cz:'Czechia',qa:'Qatar',ba:'Bosnia and Herzegovina',ht:'Haiti',sct:'Scotland',tr:'Türkiye',ec:'Ecuador',cw:'Curaçao',ir:'Iran',nz:'New Zealand',sa:'Saudi Arabia',cv:'Cape Verde',sn:'Senegal',iq:'Iraq',dz:'Algeria',jo:'Jordan',uz:'Uzbekistan',cd:'DR Congo',gh:'Ghana',pa:'Panama'};
-const NEWS_COUNTRY_ORDER=['jp','ar','es','fr','eng','pt','br','ma','nl','be','de','hr','co','mx','sn','uy','us','ch','ir','tr','ec','at','kr','au','dz','eg','ca','no','ci','pa','se','cz','py','sct','tn','cd','uz','qa','iq','za','sa','jo','ba','cv','gh','cw','ht','nz'];
+const NEWS_COUNTRY_ORDER=['jp','us','dz','ar','eng','iq','ir','uz','uy','ec','eg','au','at','nl','gh','cv','qa','ca','kr','cw','hr','ci','co','cd','sa','ch','se','sct','es','sn','cz','tn','de','tr','nz','no','ht','pa','py','fr','br','be','pt','ba','za','mx','ma','jo'];
 const GDELT_DOC_API='https://api.gdeltproject.org/api/v2/doc/doc';
+const GOOGLE_NEWS_RSS='https://news.google.com/rss/search';
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -687,6 +710,42 @@ const BRACKET_CONFIRMED_BY_TAG={
   A1:'mx',A2:'za',B1:'ch',B2:'ca',C1:'br',C2:'ma',
   D1:'us',E1:'de',J1:'ar'
 };
+const KNOCKOUT_ESPN_DATES=['20260628','20260629','20260630','20260701','20260702','20260703','20260704','20260705','20260706','20260707','20260709','20260710','20260711','20260714','20260715','20260718','20260719'];
+const KNOCKOUT_ROUNDS=['ベスト32','ラウンド16','準々決勝','準決勝','3位決定戦','決勝'];
+const KNOCKOUT_MATCHES=[
+  {no:73,id:'53452545',round:'ベスト32',date:'2026-06-28T12:00:00-07:00',venue:'ロサンゼルス',a:'A2',b:'B2'},
+  {no:76,id:'53452557',round:'ベスト32',date:'2026-06-29T12:00:00-05:00',venue:'ヒューストン',a:'C1',b:'F2'},
+  {no:74,id:'53452541',round:'ベスト32',date:'2026-06-29T16:30:00-04:00',venue:'フォックスボロ',a:'E1',b:'3ABCDF'},
+  {no:75,id:'53452547',round:'ベスト32',date:'2026-06-29T19:00:00-06:00',venue:'グアダラハラ',a:'F1',b:'C2'},
+  {no:78,id:'53452561',round:'ベスト32',date:'2026-06-30T12:00:00-05:00',venue:'ダラス',a:'E2',b:'I2'},
+  {no:77,id:'53452543',round:'ベスト32',date:'2026-06-30T17:00:00-04:00',venue:'ニュージャージー',a:'I1',b:'3CDFGH'},
+  {no:79,id:'53452563',round:'ベスト32',date:'2026-06-30T19:00:00-06:00',venue:'メキシコシティ',a:'A1',b:'3CEFHI'},
+  {no:80,id:'53452565',round:'ベスト32',date:'2026-07-01T12:00:00-04:00',venue:'アトランタ',a:'L1',b:'3EHIJK'},
+  {no:82,id:'53452555',round:'ベスト32',date:'2026-07-01T13:00:00-07:00',venue:'シアトル',a:'G1',b:'3AEHIJ'},
+  {no:81,id:'53452553',round:'ベスト32',date:'2026-07-01T17:00:00-07:00',venue:'サンタクララ',a:'D1',b:'3BEFIJ'},
+  {no:84,id:'53452551',round:'ベスト32',date:'2026-07-02T12:00:00-07:00',venue:'ロサンゼルス',a:'H1',b:'J2'},
+  {no:83,id:'53452549',round:'ベスト32',date:'2026-07-02T19:00:00-04:00',venue:'トロント',a:'K2',b:'L2'},
+  {no:85,id:'53452505',round:'ベスト32',date:'2026-07-02T20:00:00-07:00',venue:'バンクーバー',a:'B1',b:'3EFGIJ'},
+  {no:88,id:'53452503',round:'ベスト32',date:'2026-07-03T13:00:00-05:00',venue:'ダラス',a:'D2',b:'G2'},
+  {no:86,id:'53452569',round:'ベスト32',date:'2026-07-03T18:00:00-04:00',venue:'マイアミ',a:'J1',b:'H2'},
+  {no:87,id:'53452507',round:'ベスト32',date:'2026-07-03T20:30:00-05:00',venue:'カンザスシティ',a:'K1',b:'3DEIJL'},
+  {no:90,id:'53452511',round:'ラウンド16',date:'2026-07-04T12:00:00-05:00',venue:'ヒューストン',a:'W73',b:'W75'},
+  {no:89,id:'53452509',round:'ラウンド16',date:'2026-07-04T17:00:00-04:00',venue:'フィラデルフィア',a:'W74',b:'W77'},
+  {no:91,id:'53452517',round:'ラウンド16',date:'2026-07-05T16:00:00-04:00',venue:'ニュージャージー',a:'W76',b:'W78'},
+  {no:92,id:'53452519',round:'ラウンド16',date:'2026-07-05T18:00:00-06:00',venue:'メキシコシティ',a:'W79',b:'W80'},
+  {no:93,id:'53452513',round:'ラウンド16',date:'2026-07-06T14:00:00-05:00',venue:'ダラス',a:'W83',b:'W84'},
+  {no:94,id:'53452515',round:'ラウンド16',date:'2026-07-06T17:00:00-07:00',venue:'シアトル',a:'W81',b:'W82'},
+  {no:95,id:'53452521',round:'ラウンド16',date:'2026-07-07T12:00:00-04:00',venue:'アトランタ',a:'W86',b:'W88'},
+  {no:96,id:'53452523',round:'ラウンド16',date:'2026-07-07T13:00:00-07:00',venue:'バンクーバー',a:'W85',b:'W87'},
+  {no:97,round:'準々決勝',date:'2026-07-09T16:00:00-04:00',venue:'フォックスボロ',a:'W89',b:'W90'},
+  {no:98,round:'準々決勝',date:'2026-07-10T12:00:00-07:00',venue:'ロサンゼルス',a:'W93',b:'W94'},
+  {no:99,round:'準々決勝',date:'2026-07-11T17:00:00-04:00',venue:'マイアミ',a:'W91',b:'W92'},
+  {no:100,round:'準々決勝',date:'2026-07-11T20:00:00-05:00',venue:'カンザスシティ',a:'W95',b:'W96'},
+  {no:101,round:'準決勝',date:'2026-07-14T14:00:00-05:00',venue:'ダラス',a:'W97',b:'W98'},
+  {no:102,round:'準決勝',date:'2026-07-15T15:00:00-04:00',venue:'アトランタ',a:'W99',b:'W100'},
+  {no:103,round:'3位決定戦',date:'2026-07-18T17:00:00-04:00',venue:'マイアミ',a:'L101',b:'L102'},
+  {no:104,round:'決勝',date:'2026-07-19T15:00:00-04:00',venue:'ニュージャージー',a:'W101',b:'W102'}
+];
 
 let state=load();let editing=null;
 applyConfirmedBracketSlots();
@@ -703,7 +762,7 @@ function migrateSavedBracket(){
   return null;
 }
 function load(){
-  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{},news:{target:'all',status:'',items:[]}};
+  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{},news:{target:'all',status:'',items:[]},ko:{status:'',results:{}}};
   const saved=readSaved(STORE);
   const merged=Object.assign(base,saved||{});
   if(!String(merged.statStatus?.assists||'').includes('スポーツナビ')&&!String(merged.statStatus?.assists||'').includes('Yahoo')){
@@ -724,6 +783,9 @@ function load(){
   if(merged.news.target!=='all'&&!NEWS_COUNTRY_ORDER.includes(merged.news.target))merged.news.target='all';
   if(!Array.isArray(merged.news.items))merged.news.items=[];
   if(!['','取得中・・・','取得済','取得失敗'].includes(merged.news.status||''))merged.news.status='';
+  if(!merged.ko||typeof merged.ko!=='object')merged.ko={status:'',results:{}};
+  if(!merged.ko.results||typeof merged.ko.results!=='object')merged.ko.results={};
+  if(!['','更新中・・・','更新済','更新失敗'].includes(merged.ko.status||''))merged.ko.status='';
   return merged;
 }
 function save(){
@@ -749,7 +811,7 @@ function teamText(ids){
 }
 function render(){
   document.getElementById('tabs').innerHTML=tabs.map(([id,n])=>`<button class="tab ${state.active===id?'active':''}" data-tab="${id}">${n}</button>`).join('');
-  document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():state.active==='groups'?groupsHTML():simpleTab(state.active);
+  document.getElementById('app').innerHTML=state.active==='bracket'?bracketHTML():state.active==='knockout'?knockoutScheduleHTML():state.active==='groups'?groupsHTML():simpleTab(state.active);
   bind()
 }
 function bracketHTML(){
@@ -872,6 +934,144 @@ function newsItemHTML(item){
   const url=item.url||'#';
   return `<a class="news-item" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="news-thumb" src="${esc(img)}" alt="" loading="lazy" onerror="this.src='./worldcup-icon.png';this.onerror=null;"><span class="news-title">${esc(title)}</span></a>`;
 }
+
+function knockoutScheduleHTML(){
+  const ko=state.ko||{status:'',results:{}};
+  return `<section class="panel"><div class="card"><div class="ko-head"><h2>決勝T日程</h2><div class="stat-actions"><div class="stat-status">${esc(ko.status||'')}</div><button class="btn primary" id="updateKnockout">更新</button></div></div>
+    <div class="ko-board-wrap"><div class="ko-board">${KNOCKOUT_ROUNDS.map(round=>`<div class="ko-round"><div class="ko-round-title">${esc(round)}</div>${KNOCKOUT_MATCHES.filter(m=>m.round===round).map(koMatchCardHTML).join('')}</div>`).join('')}</div></div>
+    <div class="ko-note">日時は日本時間で表示しています。未確定カードは「未定」または「M73勝者」のように表示します。</div>
+  </div></section>`;
+}
+function koMatchCardHTML(m){
+  const result=getKoResult(m);
+  const done=!!result.completed;
+  const live=!!result.live;
+  const aSide=result.home?{type:'team',id:result.home}:resolveKoSide(m.a);
+  const bSide=result.away?{type:'team',id:result.away}:resolveKoSide(m.b);
+  const aScore=scoreText(result.hs,result.homePens);
+  const bScore=scoreText(result.as,result.awayPens);
+  const aWin=done&&isKoWinner(result,'home');
+  const bWin=done&&isKoWinner(result,'away');
+  return `<div class="ko-card ${done?'done':''} ${live?'live':''}">
+    <div class="ko-meta"><span>${esc(dateText(m.date))}</span><span class="ko-match-no">M${m.no}</span></div>
+    <div class="ko-teams">${koTeamHTML(aSide,aScore,aWin)}${koTeamHTML(bSide,bScore,bWin)}</div>
+  </div>`;
+}
+function getKoResult(m){
+  const results=(state.ko&&state.ko.results)||{};
+  return results[String(m.id||m.no)]||results[String(m.no)]||{};
+}
+function scoreText(score,pens){
+  if(score===undefined||score===null||score==='')return '';
+  return `${score}${pens!==undefined&&pens!==null&&pens!==''?` (${pens})`:''}`;
+}
+function isKoWinner(result,side){
+  if(result.winner===side)return true;
+  const hs=Number(result.hs),as=Number(result.as);
+  if(Number.isNaN(hs)||Number.isNaN(as))return false;
+  if(side==='home'&&hs>as)return true;
+  if(side==='away'&&as>hs)return true;
+  const hp=Number(result.homePens),ap=Number(result.awayPens);
+  if(!Number.isNaN(hp)&&!Number.isNaN(ap))return side==='home'?hp>ap:ap>hp;
+  return false;
+}
+function koTeamHTML(side,score,winner){
+  const main=side.type==='team'?`${teamFlag(side.id)}<span>${esc(T[side.id]?.[0]||side.id)}</span>`:`<span class="ko-placeholder">${esc(side.label||'未定')}</span>`;
+  return `<div class="ko-team ${winner?'winner':''}"><span class="ko-team-main">${main}</span>${score?`<span class="ko-score">${esc(score)}</span>`:''}</div>`;
+}
+function resolveKoSide(token){
+  const t=String(token||'');
+  if(T[t])return {type:'team',id:t};
+  const g=t.match(/^([A-L])([12])$/);
+  if(g){
+    const team=confirmedTeamByGroupRank(g[1],Number(g[2]));
+    if(team)return {type:'team',id:team};
+    return {type:'label',label:`${g[1]}組${g[2]}位`};
+  }
+  const third=t.match(/^3([A-L]+)$/);
+  if(third)return {type:'label',label:`3位（${third[1].split('').join('/')}）`};
+  const win=t.match(/^W(\d+)$/);
+  if(win){
+    const winner=winnerOfMatch(Number(win[1]));
+    if(winner)return {type:'team',id:winner};
+    return {type:'label',label:`M${win[1]}勝者`};
+  }
+  const lose=t.match(/^L(\d+)$/);
+  if(lose){
+    const loser=loserOfMatch(Number(lose[1]));
+    if(loser)return {type:'team',id:loser};
+    return {type:'label',label:`M${lose[1]}敗者`};
+  }
+  return {type:'label',label:t||'未定'};
+}
+function confirmedTeamByGroupRank(g,rank){
+  const byTag=BRACKET_CONFIRMED_BY_TAG[`${g}${rank}`];
+  if(byTag)return byTag;
+  const rows=state.groups?.[g]||[];
+  if(groupRowsComplete(g)){
+    const row=rows.find(r=>Number(r.rank)===rank)||rows[rank-1];
+    if(row&&row.team)return row.team;
+  }
+  const slot=allBracketSlots().find(s=>String(s.tag||'')===`${g}${rank}`&&(s.fixed||s.confirmed)&&(s.sel||[]).length===1);
+  return slot?slot.sel[0]:'';
+}
+function winnerOfMatch(no){
+  const m=KNOCKOUT_MATCHES.find(x=>Number(x.no)===Number(no));
+  if(!m)return '';
+  const r=getKoResult(m);
+  if(!r.completed)return '';
+  if(isKoWinner(r,'home'))return r.home||resolveKoSide(m.a).id||'';
+  if(isKoWinner(r,'away'))return r.away||resolveKoSide(m.b).id||'';
+  return '';
+}
+function loserOfMatch(no){
+  const m=KNOCKOUT_MATCHES.find(x=>Number(x.no)===Number(no));
+  if(!m)return '';
+  const r=getKoResult(m);
+  if(!r.completed)return '';
+  if(isKoWinner(r,'home'))return r.away||resolveKoSide(m.b).id||'';
+  if(isKoWinner(r,'away'))return r.home||resolveKoSide(m.a).id||'';
+  return '';
+}
+async function updateKnockoutSchedule(){
+  state.ko=state.ko||{status:'',results:{}};
+  state.ko.status='更新中・・・';
+  save();render();
+  try{
+    const results=await fetchKnockoutResults();
+    state.ko.results=Object.assign({},state.ko.results||{},results);
+    state.ko.status='更新済';
+  }catch(e){
+    console.warn('決勝T日程更新失敗',e);
+    state.ko.status='更新失敗';
+  }
+  save();render();
+}
+async function fetchKnockoutResults(){
+  const ids=new Set(KNOCKOUT_MATCHES.map(m=>String(m.id||''))); 
+  const payloads=await Promise.all(KNOCKOUT_ESPN_DATES.map(d=>fetch(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`).then(r=>r.ok?r.json():{events:[]}).catch(()=>({events:[]}))));
+  const out={};
+  payloads.flatMap(p=>p.events||[]).forEach(ev=>{
+    const eid=String(ev.id||'');
+    if(!ids.has(eid))return;
+    const comp=(ev.competitions||[])[0]||{};
+    const cs=comp.competitors||[];
+    if(cs.length<2)return;
+    const home=cs.find(c=>c.homeAway==='home')||cs[0];
+    const away=cs.find(c=>c.homeAway==='away')||cs[1];
+    const hId=resolveTeamFromESPN(home.team||home);
+    const aId=resolveTeamFromESPN(away.team||away);
+    const st=(ev.status||{}).type||{};
+    const rec={completed:!!st.completed,live:!!st.inProgress,home:hId,away:aId,hs:home.score,as:away.score};
+    if(home.winner)rec.winner='home';
+    if(away.winner)rec.winner='away';
+    const hp=home.curatedRank?.current||home.penaltyScore||home.shootoutScore;
+    const ap=away.curatedRank?.current||away.penaltyScore||away.shootoutScore;
+    if(hp!==undefined&&ap!==undefined){rec.homePens=hp;rec.awayPens=ap;}
+    out[eid]=rec;
+  });
+  return out;
+}
 function simpleTab(tab){
   const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'ニュース'}[tab];
   if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;
@@ -893,6 +1093,7 @@ function bind(){
   if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);state.bracketStatus='';save();render()}};
   document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()});
   const updateGroups=document.getElementById('updateGroups');if(updateGroups)updateGroups.onclick=updateGroupStandings;
+  const updateKnockout=document.getElementById('updateKnockout');if(updateKnockout)updateKnockout.onclick=updateKnockoutSchedule;
   document.querySelectorAll('[data-stat-update]').forEach(b=>b.onclick=()=>updatePlayerStats(b.dataset.statUpdate));
   const newsTarget=document.getElementById('newsTarget');
   if(newsTarget){
@@ -1465,47 +1666,133 @@ function goalTeam(item,m){
 }
 
 function buildNewsQuery(target){
-  if(!target||target==='all')return '("FIFA World Cup 2026" OR "World Cup 2026" OR "ワールドカップ" OR "W杯")';
+  const wc='("FIFA World Cup 2026" OR "World Cup 2026" OR ワールドカップ OR W杯)';
+  if(!target||target==='all')return `${wc} (soccer OR football OR サッカー)`;
   const jp=T[target]?.[0]||target;
   const en=NEWS_EN[target]||jp;
   const country=jp===en?`"${en}"`:`("${jp}" OR "${en}")`;
-  return `${country} ("FIFA World Cup 2026" OR "World Cup 2026" OR "ワールドカップ" OR "W杯")`;
+  return `${country} ${wc}`;
+}
+function buildGoogleNewsQuery(target){
+  if(!target||target==='all')return 'ワールドカップ 2026 OR W杯 2026 サッカー';
+  const jp=T[target]?.[0]||target;
+  const en=NEWS_EN[target]||jp;
+  return `${jp} ワールドカップ 2026 OR ${en} World Cup 2026 football`;
 }
 function newsApiUrl(target){
   const params=new URLSearchParams({
     query:buildNewsQuery(target),
     mode:'ArtList',
     format:'json',
-    maxrecords:'100',
+    maxrecords:'250',
     sort:'DateDesc',
-    timespan:'7d'
+    timespan:'14d'
   });
   return `${GDELT_DOC_API}?${params.toString()}`;
+}
+function googleNewsRssUrl(target){
+  const params=new URLSearchParams({
+    q:buildGoogleNewsQuery(target),
+    hl:'ja',
+    gl:'JP',
+    ceid:'JP:ja'
+  });
+  return `${GOOGLE_NEWS_RSS}?${params.toString()}`;
 }
 async function fetchNews(){
   state.news=state.news||{target:'all',status:'',items:[]};
   const sel=document.getElementById('newsTarget');
   if(sel)state.news.target=sel.value||'all';
   state.news.status='取得中・・・';
+  state.news.items=[];
   save();render();
   try{
-    const res=await fetch(newsApiUrl(state.news.target),{cache:'no-store'});
-    if(!res.ok)throw new Error('ニュース取得HTTP '+res.status);
-    const data=await res.json();
-    const articles=Array.isArray(data.articles)?data.articles:[];
-    state.news.items=dedupeNews(articles.map(a=>({
-      title:a.title||'',
-      url:a.url||a.url_mobile||'',
-      image:a.socialimage||a.image||'',
-      seen:a.seendate||'',
-      domain:a.domain||''
-    })).filter(a=>a.title&&a.url)).slice(0,20);
+    const items=await fetchNewsItems(state.news.target);
+    state.news.items=dedupeNews(items).slice(0,20);
     state.news.status='取得済';
   }catch(e){
     console.warn('news fetch failed',e);
     state.news.status='取得失敗';
+    state.news.items=[];
   }
   save();render();
+}
+async function fetchNewsItems(target){
+  const errors=[];
+  try{
+    const gdelt=await fetchGdeltNewsItems(target);
+    if(gdelt.length)return gdelt;
+  }catch(e){errors.push(e)}
+  try{
+    const google=await fetchGoogleNewsItems(target);
+    if(google.length)return google;
+  }catch(e){errors.push(e)}
+  if(errors.length)throw errors[errors.length-1];
+  return [];
+}
+async function fetchGdeltNewsItems(target){
+  const res=await fetch(newsApiUrl(target),{cache:'no-store'});
+  if(!res.ok)throw new Error('GDELT HTTP '+res.status);
+  const data=await res.json();
+  const articles=Array.isArray(data.articles)?data.articles:[];
+  return articles.map(a=>({
+    title:a.title||'',
+    url:a.url||a.url_mobile||'',
+    image:a.socialimage||a.image||'',
+    seen:a.seendate||'',
+    domain:a.domain||''
+  })).filter(a=>a.title&&a.url);
+}
+async function fetchGoogleNewsItems(target){
+  const url=googleNewsRssUrl(target);
+  let text='';
+  try{
+    const direct=await fetch(url,{cache:'no-store'});
+    if(direct.ok)text=await direct.text();
+  }catch(e){}
+  if(!text)text=await fetchReaderText(url);
+  const fromXml=parseGoogleNewsRssXml(text);
+  if(fromXml.length)return fromXml;
+  return parseGoogleNewsReaderText(text);
+}
+function decodeHtml(s){
+  const txt=document.createElement('textarea');
+  txt.innerHTML=String(s||'');
+  return txt.value;
+}
+function parseGoogleNewsRssXml(text){
+  const raw=String(text||'').trim();
+  if(!raw||!/[<]item[>]/i.test(raw))return [];
+  try{
+    const doc=new DOMParser().parseFromString(raw,'text/xml');
+    if(doc.querySelector('parsererror'))return [];
+    return Array.from(doc.querySelectorAll('item')).map(item=>{
+      const get=tag=>item.getElementsByTagName(tag)[0]?.textContent?.trim()||'';
+      const desc=get('description');
+      const imgNode=item.getElementsByTagName('media:content')[0]||item.getElementsByTagName('media:thumbnail')[0];
+      const img=imgNode?.getAttribute('url')||((desc.match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
+      return {title:decodeHtml(get('title')),url:get('link'),image:img,seen:get('pubDate'),domain:get('source')};
+    }).filter(a=>a.title&&a.url);
+  }catch(e){return []}
+}
+function parseGoogleNewsReaderText(text){
+  const out=[];
+  const seen=new Set();
+  const lines=String(text||'').replace(/\r/g,'').split('\n');
+  const linkRe=/\[([^\]]{8,220})\]\((https?:\/\/[^)]+)\)/g;
+  lines.forEach(line=>{
+    let m;
+    while((m=linkRe.exec(line))){
+      const title=stripMarkdownLinks(m[1]).replace(/\s+-\s+Google ニュース$/,'').trim();
+      const url=m[2].trim();
+      if(!title||!url||seen.has(url))continue;
+      if(/^(画像|動画|Google|ニュース|詳細|その他)$/.test(title))continue;
+      if(!/news\.google\.|https?:\/\//.test(url))continue;
+      seen.add(url);
+      out.push({title,url,image:'./worldcup-icon.png',seen:'',domain:'Google News'});
+    }
+  });
+  return out;
 }
 function normalizeNewsTitle(t){
   return String(t||'')

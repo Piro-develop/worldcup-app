@@ -283,9 +283,13 @@
     .match-team-name.winner .flag-img{border-color:rgba(5,37,35,.35);box-shadow:0 0 0 1px rgba(255,255,255,.38)}
     .match-team-name{display:flex;align-items:center;gap:4px;min-width:0;font-weight:900;border-radius:10px;padding:4px 6px}
     .match-team.away .match-team-name{justify-content:flex-end}
-    .team-scorers{font-size:10.5px;line-height:1.35;color:#d7e2f2;font-weight:700;max-width:100%}
-    .team-scorers div{white-space:normal;overflow:visible;text-overflow:clip}
-    .match-team.away .team-scorers{text-align:right}
+    .team-scorers{font-size:10.5px;line-height:1.35;color:#d7e2f2;font-weight:700;max-width:100%;display:inline-flex;flex-direction:column;gap:1px;align-items:stretch;text-align:left}
+    .match-team.home .team-scorers{align-self:flex-start}
+    .match-team.away .team-scorers{align-self:flex-end;text-align:left}
+    .scorer-line{display:grid;grid-template-columns:6.9em 2.1em 2.0em;column-gap:2px;align-items:start;white-space:normal;text-align:left}
+    .scorer-line span{min-width:0;overflow:visible;text-overflow:clip}
+    .scorer-name{font-weight:800;word-break:keep-all;overflow-wrap:anywhere}
+    .scorer-period,.scorer-minute{color:#b9c8dc;font-weight:800;white-space:nowrap}
     .match-score{
       align-self:flex-start;
       margin-top:4px;
@@ -328,18 +332,27 @@
 
     .ko-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
     .ko-head h2{margin:0;font-size:20px}
-    .ko-board-wrap{overflow-x:auto;padding:8px 2px 12px;-webkit-overflow-scrolling:touch}
-    .ko-board{position:relative;min-width:1520px;height:1960px;border-radius:16px;background:linear-gradient(180deg,rgba(7,17,31,.22),rgba(5,9,19,.08));overflow:hidden;transform:translateY(var(--ko-shift-y,0px));will-change:transform}
+    .ko-viewbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 8px}
+    .ko-nav-btn{appearance:none;width:38px;height:38px;border:1px solid rgba(205,220,245,.24);border-radius:999px;background:#111c30;color:#eef5ff;font-size:24px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.22)}
+    .ko-nav-btn:disabled{opacity:.35;cursor:not-allowed}
+    .ko-view-label{flex:1;text-align:center;font-size:12px;font-weight:900;color:#c8d6ea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ko-board-wrap{overflow:hidden;padding:8px 2px 12px}
+    .ko-board{position:relative;width:100%;min-width:0;height:1200px;border-radius:16px;background:linear-gradient(180deg,rgba(7,17,31,.22),rgba(5,9,19,.08));overflow:hidden;will-change:transform,opacity}
+    .ko-board.ko-slide-next{animation:koSlideNext .34s cubic-bezier(.2,.8,.2,1) both}
+    .ko-board.ko-slide-prev{animation:koSlidePrev .34s cubic-bezier(.2,.8,.2,1) both}
+    @keyframes koSlideNext{from{transform:translateX(42px);opacity:.45}to{transform:translateX(0);opacity:1}}
+    @keyframes koSlidePrev{from{transform:translateX(-42px);opacity:.45}to{transform:translateX(0);opacity:1}}
     .ko-lines{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
     .ko-lines path{fill:none;stroke:rgba(205,220,245,.34);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
-    .ko-lines path.ko-dashed{stroke-dasharray:5 5;stroke:rgba(205,220,245,.22)}
     .ko-round-title{position:absolute;top:0;z-index:3;text-align:center;font-weight:900;font-size:13px;color:#eef5ff;background:rgba(12,20,36,.98);border:1px solid rgba(205,220,245,.16);border-radius:12px;padding:8px;white-space:nowrap}
     .ko-card{position:absolute;z-index:2;width:196px;border:1px solid rgba(205,220,245,.18);border-radius:15px;background:linear-gradient(180deg,#111c30,#0d1728);padding:9px;min-height:96px;box-shadow:var(--shadow);cursor:pointer}
     .ko-card:hover{border-color:rgba(52,210,208,.50)}
     .ko-card:active{transform:scale(.992)}
     .ko-card.done{border-color:rgba(52,210,208,.45)}
     .ko-card.live{border-color:rgba(255,231,151,.58)}
-    .ko-meta{display:flex;align-items:center;justify-content:flex-start;gap:6px;margin-bottom:8px;color:#9fb0ca;font-size:11px;font-weight:800}
+    .ko-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;color:#9fb0ca;font-size:11px;font-weight:800}
+    .ko-card-label{flex:0 0 auto;border:1px solid rgba(52,210,208,.36);border-radius:999px;padding:2px 6px;background:rgba(52,210,208,.12);color:#dffefd;font-size:10px;font-weight:900}
+    .ko-card-label.third{border-color:rgba(240,201,107,.38);background:rgba(240,201,107,.12);color:#ffe79a}
     .ko-teams{display:flex;flex-direction:column;gap:6px}
     .ko-team{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:10px;padding:5px 6px;color:#eef5ff;font-weight:900;font-size:12.5px;line-height:1.25}
     .ko-team.winner{background:linear-gradient(90deg,rgba(129,216,208,.98),rgba(38,166,154,.92));color:#052523;box-shadow:0 0 0 1px rgba(129,216,208,.55)}
@@ -359,9 +372,9 @@
     .ko-detail-score-pill{min-width:54px;text-align:center;border-radius:999px;padding:5px 8px;background:#17243a;color:#fff;font-weight:900}
     .ko-detail-scorers{font-size:11px;line-height:1.45;color:#d7e2f2;font-weight:700}
     .ko-detail-empty{color:#8fa1bc;font-size:11px;font-weight:700}
-    @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-board{min-width:1380px;height:1900px}.ko-head h2{font-size:18px}.ko-card{width:180px;min-height:94px}.ko-team{font-size:12px}.ko-round-title{font-size:12px}}
-    @media (max-width:430px){.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}}
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
+    @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-head h2{font-size:18px}.ko-card{min-height:90px;padding:7px}.ko-team{font-size:11px;padding:5px 4px}.ko-round-title{font-size:11px;padding:7px 3px}.ko-meta{font-size:10px}.ko-card-label{font-size:9px;padding:2px 5px}}
+    @media (max-width:430px){.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-label{font-size:11px}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.scorer-line{grid-template-columns:6.4em 2.1em 1.9em;column-gap:1px}.match-score{min-width:36px;padding:3px 4px}}
   </style>
 </head>
 <body>
@@ -413,6 +426,8 @@ const RSS2JSON_API='https://api.rss2json.com/v1/api.json';
 const ALLORIGINS_RAW='https://api.allorigins.win/raw?url=';
 const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
+const NEWS_FAST_LIMIT_MS=10000;
+const NEWS_BG_IMAGE_LIMIT=6;
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -779,7 +794,7 @@ function migrateSavedBracket(){
   return null;
 }
 function load(){
-  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{},news:{target:'all',status:'',items:[]},ko:{status:'',results:{}}};
+  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{},news:{target:'all',status:'',items:[]},ko:{status:'',results:{},viewCol:0}};
   const saved=readSaved(STORE);
   const merged=Object.assign(base,saved||{});
   if(!String(merged.statStatus?.assists||'').includes('スポーツナビ')&&!String(merged.statStatus?.assists||'').includes('Yahoo')){
@@ -801,10 +816,11 @@ function load(){
   if(!Array.isArray(merged.news.items))merged.news.items=[];
   merged.news.items=merged.news.items.filter(item=>item&&hasJapaneseText(item.title));
   if(!merged.news.items.length&&merged.news.status==='取得済')merged.news.status='';
-  if(!['','取得中・・・','取得済','取得失敗'].includes(merged.news.status||''))merged.news.status='';
+  if(!['','取得中・・・','取得済','取得失敗','ニュース取得失敗'].includes(merged.news.status||''))merged.news.status='';
   if(!merged.ko||typeof merged.ko!=='object')merged.ko={status:'',results:{}};
   if(!merged.ko.results||typeof merged.ko.results!=='object')merged.ko.results={};
   if(!['','更新中・・・','更新済','更新失敗'].includes(merged.ko.status||''))merged.ko.status='';
+  merged.ko.viewCol=Number.isFinite(Number(merged.ko.viewCol))?Math.max(0,Math.min(3,Number(merged.ko.viewCol))):0;
   return merged;
 }
 function save(){
@@ -944,75 +960,130 @@ function newsHTML(){
   return `<div class="card"><div class="news-head"><h2>ニュース</h2></div>
     <div class="news-controls"><select class="input" id="newsTarget">${newsOptionsHTML()}</select><button class="btn primary" id="fetchNews">取得</button></div>
     <div class="news-status">${esc(news.status||'')}</div>
-    <div class="news-list">${items.length?items.map(item=>newsItemHTML(item)).join(''):'<div class="news-empty">対象を選んで「取得」を押すと、最新ニュースを最大20件表示します。</div>'}</div>
+    <div class="news-list">${items.length?items.map(item=>newsItemHTML(item)).join(''):newsEmptyHTML(news.target,news.status)}</div>
   </div>`;
+}
+function newsEmptyHTML(target,status){
+  if(status==='ニュース取得失敗'){
+    const q=target==='all'?'ワールドカップ サッカー 最新':`${newsTargetLabel(target)} ワールドカップ サッカー 最新`;
+    const url=`https://news.google.com/search?q=${encodeURIComponent(q)}&hl=ja&gl=JP&ceid=JP:ja`;
+    return `<div class="news-empty">ニュース一覧を取得できませんでした。<br><a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:#9df7f5;font-weight:900">Googleニュースで確認する</a></div>`;
+  }
+  return '<div class="news-empty">対象を選んで「取得」を押すと、最新ニュースを最大20件表示します。</div>';
 }
 function newsPlaceholderImage(label){
   const text=String(label||'W杯').slice(0,4);
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="148" height="104" viewBox="0 0 148 104"><rect width="148" height="104" rx="14" fill="#14233a"/><circle cx="30" cy="30" r="13" fill="#34d2d0" opacity=".75"/><text x="74" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="800" fill="#eef5ff">${text}</text></svg>`;
   return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
 }
+function newsFallbackImage(target){
+  const t=target||'all';
+  if(t==='all')return 'worldcup-icon.png';
+  const code=FLAG_CODE[t];
+  if(code)return `https://flagcdn.com/w160/${code}.png`;
+  return newsPlaceholderImage(newsTargetLabel(t));
+}
 function newsItemHTML(item){
-  const label=state.news?.target==='all'?'W杯':(T[state.news?.target]?.[0]||'W杯');
-  const img=item.image||newsPlaceholderImage(label);
+  const target=(state.news&&state.news.target)||'all';
+  const label=target==='all'?'W杯':(T[target]?.[0]||'W杯');
+  const fallback=newsFallbackImage(target);
+  const emergency=newsPlaceholderImage(label);
+  const img=item.image||fallback;
   const title=item.title||'タイトルなし';
   const url=item.url||'#';
-  return `<a class="news-item" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="news-thumb" src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.src='${newsPlaceholderImage(label)}';this.onerror=null;"><span class="news-title">${esc(title)}</span></a>`;
+  return `<a class="news-item" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="news-thumb" src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-fallback="${esc(fallback)}" data-emergency="${esc(emergency)}" onerror="if(!this.dataset.usedFallback){this.dataset.usedFallback='1';this.src=this.dataset.fallback;}else{this.onerror=null;this.src=this.dataset.emergency;}"><span class="news-title">${esc(title)}</span></a>`;
 }
 
 function koMatchByNo(no){return KNOCKOUT_MATCHES.find(m=>Number(m.no)===Number(no))||null}
 function koDependencyNos(m){return [m.a,m.b].map(x=>String(x||'').match(/^[WL](\d+)$/)).filter(Boolean).map(x=>Number(x[1]))}
-function knockoutLayout(){
-  const cardW=196, cardH=96, colW=245, top=58, step=112, left=20;
+function koViewCol(){
+  const n=Number(state.ko?.viewCol||0);
+  return Number.isFinite(n)?Math.max(0,Math.min(3,Math.round(n))):0;
+}
+function koViewRangeLabel(titles,viewCol){
+  const page=knockoutPage(viewCol);
+  return `表示：${page.titles.join(' / ')}`;
+}
+function knockoutPage(viewCol=koViewCol()){
+  const pages=[
+    {cols:[0,1,2],titles:['ベスト32','ラウンド16','準々決勝']},
+    {cols:[1,2,3],titles:['ラウンド16','準々決勝','準決勝']},
+    {cols:[2,3,4],titles:['準々決勝','準決勝','決勝']},
+    {cols:[3,4],titles:['準決勝','決勝']}
+  ];
+  return pages[Math.max(0,Math.min(3,viewCol))]||pages[0];
+}
+function knockoutLayout(viewCol=koViewCol()){
+  const cardH=96, top=54;
+  const page=knockoutPage(viewCol);
+  const visibleCols=page.cols;
+  const twoColView=visibleCols.length===2;
+  const xCols=twoColView?[8,56]:[2,34.5,67];
+  const cardW=twoColView?36:30.5;
   const r32=[73,75,74,77,83,84,81,82,76,78,79,80,86,88,85,87];
   const r16=[90,89,93,94,91,92,95,96];
   const qf=[97,98,99,100];
   const sf=[101,102];
-  const third=[103];
-  const final=[104];
-  const orders=[r32,r16,qf,sf,third,final];
-  const titles=['ベスト32','ラウンド16','準々決勝','準決勝','3位決定戦','決勝'];
+  const finalCol=[104,103];
+  const orders=[r32,r16,qf,sf,finalCol];
+  const globalTitles=['ベスト32','ラウンド16','準々決勝','準決勝','決勝'];
   const pos={};
-  r32.forEach((no,i)=>{pos[no]={x:left,y:top+i*step,w:cardW,h:cardH,col:0}});
+  const xForGlobalCol=(col)=>xCols[visibleCols.indexOf(col)];
+  const stepForCount=(count)=>count>=8?112:(count>=4?116:148);
 
-  // まず通常のトーナメント表として、前ラウンド2試合の中央に次カードを置く。
-  [r16,qf,sf,third,final].forEach((arr,idx)=>{
-    const col=idx+1;
-    arr.forEach(no=>{
+  const firstCol=visibleCols[0];
+  const firstOrder=orders[firstCol]||[];
+  const firstStep=stepForCount(firstOrder.length);
+  firstOrder.forEach((no,i)=>{
+    pos[no]={x:xForGlobalCol(firstCol),y:top+i*firstStep,w:cardW,h:cardH,col:firstCol,viewIndex:0};
+  });
+
+  for(let vi=1;vi<visibleCols.length;vi++){
+    const col=visibleCols[vi];
+    const arr=orders[col]||[];
+    if(col===4){
+      const p101=pos[101], p102=pos[102];
+      const fallbackMid=top+cardH+20;
+      const mid=(p101&&p102)?((p101.y+p101.h/2)+(p102.y+p102.h/2))/2:fallbackMid;
+      const gap=14;
+      pos[104]={x:xForGlobalCol(col),y:Math.max(top,mid-cardH-gap/2),w:cardW,h:cardH,col,viewIndex:vi};
+      pos[103]={x:xForGlobalCol(col),y:pos[104].y+cardH+gap,w:cardW,h:cardH,col,viewIndex:vi};
+      continue;
+    }
+    arr.forEach((no,i)=>{
       const m=koMatchByNo(no);
-      const deps=m?koDependencyNos(m):[];
-      const centers=deps.map(d=>pos[d]).filter(Boolean).map(p=>p.y+p.h/2);
-      const cy=centers.length?centers.reduce((a,b)=>a+b,0)/centers.length:(top+7*step);
-      pos[no]={x:left+col*colW,y:cy-cardH/2,w:cardW,h:cardH,col};
+      const deps=m?koDependencyNos(m).map(d=>pos[d]).filter(Boolean):[];
+      let cy;
+      if(deps.length){
+        cy=deps.map(p=>p.y+p.h/2).reduce((a,b)=>a+b,0)/deps.length;
+      }else{
+        const st=stepForCount(arr.length);
+        cy=top+i*st+cardH/2;
+      }
+      pos[no]={x:xForGlobalCol(col),y:cy-cardH/2,w:cardW,h:cardH,col,viewIndex:vi};
     });
-  });
+  }
 
-  // スマホ横スクロール時に右側ラウンドの縦余白が大きくなりすぎるため、
-  // 右に進むほど縦方向だけを圧縮する。カード同士の勝ち上がり線は再計算後の座標で接続するため崩れない。
-  const verticalCompress={1:.58,2:.38,3:.25,4:.18,5:.18};
-  Object.values(pos).forEach(p=>{
-    if(!p || !p.col)return;
-    const factor=verticalCompress[p.col]||1;
-    p.y=top+(p.y-top)*factor;
-  });
-
-  const boardW=left+titles.length*colW+20;
-  const r32Bottom=Math.max(...r32.map(no=>pos[no].y+pos[no].h));
-  const laterBottom=Math.max(...Object.values(pos).map(p=>p.y+p.h));
-  const boardH=Math.max(r32Bottom,laterBottom)+40;
-  return {pos,orders,titles,cardW,cardH,colW,left,boardW,boardH};
+  const visibleMatches=visibleCols.flatMap(col=>orders[col]||[]);
+  const visiblePositions=visibleMatches.map(no=>pos[no]).filter(Boolean);
+  const boardH=Math.max(...visiblePositions.map(p=>p.y+p.h),top+cardH)+34;
+  return {pos,orders,titles:page.titles,globalTitles,visibleCols,visibleMatches,cardW,cardH,boardW:100,boardH,viewCol};
 }
 function knockoutScheduleHTML(){
-  const ko=state.ko||{status:'',results:{}};
-  const layout=knockoutLayout();
-  const all=layout.orders.flat();
+  const ko=state.ko||{status:'',results:{},viewCol:0};
+  const layout=knockoutLayout(koViewCol());
+  const prevDisabled=layout.viewCol<=0?'disabled':'';
+  const nextDisabled=layout.viewCol>=3?'disabled':'';
+  const animClass=ko.anim==='next'?' ko-slide-next':(ko.anim==='prev'?' ko-slide-prev':'');
+  const titleXs=layout.visibleCols.length===2?[8,56]:[2,34.5,67];
   return `<section class="panel"><div class="card"><div class="ko-head"><h2>決勝T日程</h2><div class="stat-actions"><div class="stat-status">${esc(ko.status||'')}</div><button class="btn primary" id="updateKnockout">更新</button></div></div>
-    <div class="ko-board-wrap"><div class="ko-board" style="min-width:${layout.boardW}px;height:${layout.boardH}px;">
+    <div class="ko-viewbar"><button class="ko-nav-btn" data-ko-nav="-1" ${prevDisabled} aria-label="左へ">‹</button><div class="ko-view-label">${esc(koViewRangeLabel(layout.titles,layout.viewCol))}</div><button class="ko-nav-btn" data-ko-nav="1" ${nextDisabled} aria-label="右へ">›</button></div>
+    <div class="ko-board-wrap"><div class="ko-board${animClass}" data-ko-view="${layout.viewCol}" style="height:${layout.boardH}px;">
       ${knockoutLinesHTML(layout)}
-      ${layout.titles.map((title,i)=>`<div class="ko-round-title" style="left:${layout.left+i*layout.colW}px;width:${layout.cardW}px;">${esc(title)}</div>`).join('')}
-      ${all.map(no=>koMatchCardHTML(koMatchByNo(no),layout.pos[no])).join('')}
+      ${layout.visibleCols.map((col,i)=>`<div class="ko-round-title" style="left:${titleXs[i]}%;width:${layout.cardW}%">${esc(layout.globalTitles[col])}</div>`).join('')}
+      ${layout.visibleMatches.map(no=>koMatchCardHTML(koMatchByNo(no),layout.pos[no])).join('')}
     </div></div>
-    <div class="ko-note">日時は日本時間で表示しています。カードをタップすると詳細を確認できます。</div>
+    <div class="ko-note">「‹」「›」で表示ラウンドを滑らかに切り替えます。横スクロールは使わず、最後は準決勝と決勝だけを表示します。カードをタップすると詳細を確認できます。</div>
   </div></section>`;
 }
 function knockoutLinesHTML(layout){
@@ -1025,10 +1096,10 @@ function knockoutLinesHTML(layout){
       if(!mt)return;
       const source=layout.pos[Number(mt[2])];
       if(!source)return;
+      if(mt[1]==='L')return;
       const x1=source.x+source.w, y1=source.y+source.h/2, x2=target.x, y2=target.y+target.h/2;
       const mid=(x1+x2)/2;
-      const dashed=mt[1]==='L'?' ko-dashed':'';
-      paths.push(`<path class="${dashed.trim()}" d="M ${x1} ${y1} H ${mid} V ${y2} H ${x2}"/>`);
+      paths.push(`<path d="M ${x1} ${y1} H ${mid} V ${y2} H ${x2}"/>`);
     });
   });
   return `<svg class="ko-lines" viewBox="0 0 ${layout.boardW} ${layout.boardH}" preserveAspectRatio="none">${paths.join('')}</svg>`;
@@ -1044,8 +1115,9 @@ function koMatchCardHTML(m,pos){
   const bScore=scoreText(result.as,result.awayPens);
   const aWin=done&&isKoWinner(result,'home');
   const bWin=done&&isKoWinner(result,'away');
-  return `<div class="ko-card ${done?'done':''} ${live?'live':''}" style="left:${pos.x}px;top:${pos.y}px;" data-ko-match="${m.no}" data-ko-col="${pos.col}" role="button" tabindex="0" aria-label="${esc(m.round)} ${esc(dateText(m.date))}">
-    <div class="ko-meta"><span>${esc(dateText(m.date))}</span></div>
+  const roundLabel=m.no===104?'決勝':(m.no===103?'3位決定戦':'');
+  return `<div class="ko-card ${done?'done':''} ${live?'live':''}" style="left:${pos.x}%;top:${pos.y}px;width:${pos.w}%;" data-ko-match="${m.no}" data-ko-col="${pos.col}" role="button" tabindex="0" aria-label="${esc(m.round)} ${esc(dateText(m.date))}">
+    <div class="ko-meta"><span>${esc(dateText(m.date))}</span>${roundLabel?`<span class="ko-card-label ${m.no===103?'third':''}">${esc(roundLabel)}</span>`:''}</div>
     <div class="ko-teams">${koTeamHTML(aSide,aScore,aWin)}${koTeamHTML(bSide,bScore,bWin)}</div>
   </div>`;
 }
@@ -1218,38 +1290,18 @@ function simpleTab(tab){
     <table class="table stat-table"><thead><tr><th>順位</th><th>${label}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank||i+1}</td><td>${esc(r.value||'')}</td><td><span class="stat-player">${r.team?teamFlag(r.team):''}${esc(r.player||'')}</span>${r.team?` <span class="small">(${esc(T[r.team]?.[0]||r.team)})</span>`:''}</td></tr>`).join('')}</tbody></table>
   </div>`
 }
+function changeKnockoutView(delta){
+  state.ko=state.ko||{status:'',results:{},viewCol:0};
+  const d=Number(delta||0);
+  const next=Math.max(0,Math.min(3,koViewCol()+d));
+  if(next===koViewCol())return;
+  state.ko.viewCol=next;
+  state.ko.anim=d>0?'next':'prev';
+  save();
+  render();
+}
 function bindKnockoutAutoAlign(){
-  const wrap=document.querySelector('.ko-board-wrap');
-  const board=document.querySelector('.ko-board');
-  if(!wrap||!board)return;
-  const apply=()=>{
-    const cards=Array.from(board.querySelectorAll('.ko-card'));
-    if(!cards.length)return;
-    const scrollLeft=wrap.scrollLeft;
-    const probeX=scrollLeft+14;
-    const firstVisible=cards
-      .filter(c=>c.offsetLeft+c.offsetWidth>probeX)
-      .sort((a,b)=>a.offsetLeft-b.offsetLeft||a.offsetTop-b.offsetTop)[0];
-    if(!firstVisible){board.style.setProperty('--ko-shift-y','0px');return;}
-    const col=firstVisible.dataset.koCol||'0';
-    if(col==='0'){
-      board.style.setProperty('--ko-shift-y','0px');
-      return;
-    }
-    const colCards=cards.filter(c=>(c.dataset.koCol||'0')===col);
-    const top=Math.min(...colCards.map(c=>c.offsetTop));
-    const targetTop=8;
-    const shift=Math.min(0,targetTop-top);
-    board.style.setProperty('--ko-shift-y',`${Math.round(shift)}px`);
-  };
-  let raf=0;
-  const schedule=()=>{
-    if(raf)cancelAnimationFrame(raf);
-    raf=requestAnimationFrame(apply);
-  };
-  wrap.addEventListener('scroll',schedule,{passive:true});
-  window.addEventListener('resize',schedule,{passive:true});
-  setTimeout(apply,0);
+  // ページ切替式に変更したため、横スクロール補正は不要です。
 }
 function bind(){
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});
@@ -1261,6 +1313,11 @@ function bind(){
   document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()});
   const updateGroups=document.getElementById('updateGroups');if(updateGroups)updateGroups.onclick=updateGroupStandings;
   const updateKnockout=document.getElementById('updateKnockout');if(updateKnockout)updateKnockout.onclick=updateKnockoutSchedule;
+  document.querySelectorAll('[data-ko-nav]').forEach(b=>{b.onclick=()=>changeKnockoutView(b.dataset.koNav)});
+  const koBoard=document.querySelector('.ko-board');
+  if(koBoard&&state.ko&&state.ko.anim){
+    koBoard.addEventListener('animationend',()=>{delete state.ko.anim;save();},{once:true});
+  }
   document.querySelectorAll('[data-ko-match]').forEach(b=>{b.onclick=()=>openKoDetail(b.dataset.koMatch);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openKoDetail(b.dataset.koMatch)}}});
   bindKnockoutAutoAlign();
   document.querySelectorAll('[data-stat-update]').forEach(b=>b.onclick=()=>updatePlayerStats(b.dataset.statUpdate));
@@ -1519,8 +1576,28 @@ function normalizeScorers(scorers,m){
   out.away=[...new Set(out.away.filter(Boolean))];
   return out;
 }
-function scorerLines(items){return (items||[]).map(x=>`<div>${esc(x)}</div>`).join('')}
+function scorerLines(items){return (items||[]).map(x=>{
+  const p=parseScorerLabel(x);
+  return `<div class="scorer-line"><span class="scorer-name">${esc(p.name)}</span><span class="scorer-period">${esc(p.period)}</span><span class="scorer-minute">${esc(p.minute)}</span></div>`;
+}).join('')}
+function parseScorerLabel(label){
+  let s=String(label||'').trim();
+  const isPk=/\(?PK\)?|ペナルティ|penalty/i.test(s)&&!/PK戦|shootout/i.test(s);
+  s=s.replace(/\s*\(?PK\)?\s*/gi,' ').replace(/ペナルティキック|ペナルティ|penalty/gi,' ').replace(/\s+/g,' ').trim();
+  const addPk=name=>isPk&&!String(name||'').startsWith('(PK)')?`(PK)${name}`:name;
+  const m=s.match(/^(.*?)(?:\s+)(前半|後半|延前|延後|前|後)\s*([0-9]+(?:\+[0-9]+)?(?:['′分])?)?$/);
+  if(m)return {name:addPk((m[1]||'得点').trim()),period:(m[2]||'').trim(),minute:(m[3]||'').trim()};
+  const m2=s.match(/^(.*?)(?:\s+)([0-9]+(?:\+[0-9]+)?(?:['′分])?)$/);
+  if(m2)return {name:addPk((m2[1]||'得点').trim()),period:'',minute:(m2[2]||'').trim()};
+  return {name:addPk(s||'得点'),period:'',minute:''};
+}
 function formatScorerLabel(name,minute){return `${name||'得点'}${minute?` ${minute}`:''}`.trim()}
+function addPenaltyPrefixToScorerLabel(label){
+  const s=String(label||'').trim();
+  if(!s)return s;
+  const p=parseScorerLabel(s+' (PK)');
+  return `${p.name}${p.period?` ${p.period}`:''}${p.minute?` ${p.minute}`:''}`.trim();
+}
 function stripTeamFromScorerLabel(label){return String(label).replace(/（[^）]+）/g,'').replace(/\([^)]*\)/g,'').trim()}
 function scoreStringTeam(label,m){
   const txt=String(label);
@@ -1727,7 +1804,8 @@ function parseScorersFromText(text,m){
       if(m2){name=m2[1].trim();team=teamIdFromText(m2[2]||l)}
     }
     if(!team)team=teamIdFromText(l);
-    const label=formatScorerLabel(name||l.replace(/^Goal!\s*/i,'').slice(0,40),minute);
+    let label=formatScorerLabel(name||l.replace(/^Goal!\s*/i,'').slice(0,40),minute);
+    if(/penalty|ペナルティ|PK/i.test(l)&&!/shootout|PK戦/i.test(l))label=addPenaltyPrefixToScorerLabel(label);
     if(team===m.home&&!out.home.includes(label))out.home.push(label);
     if(team===m.away&&!out.away.includes(label))out.away.push(label);
   });
@@ -1773,7 +1851,8 @@ function extractScorers(data,m){
     const athlete=goalAthlete(item);
     const team=goalTeam(item,m);
     const rawText=String(item.text||item.displayText||item.shortText||item.commentary||item.description||'').replace(/\s+/g,' ').trim();
-    const label=formatScorerLabel(athlete||rawText||'得点',minute);
+    let label=formatScorerLabel(athlete||rawText||'得点',minute);
+    if(/penalty|ペナルティ|PK/i.test(rawText)&&!/shootout|PK戦/i.test(rawText))label=addPenaltyPrefixToScorerLabel(label);
     if(team===m.home && !out.home.includes(label))out.home.push(label);
     if(team===m.away && !out.away.includes(label))out.away.push(label);
   });
@@ -1861,9 +1940,20 @@ function buildGdeltQueries(target){
   ];
 }
 function buildGoogleNewsQuery(target){
-  if(!target||target==='all')return '(ワールドカップ OR W杯) サッカー 2026';
+  return buildGoogleNewsQueries(target)[0];
+}
+function buildGoogleNewsQueries(target){
+  if(!target||target==='all')return [
+    'ワールドカップ サッカー',
+    'W杯 サッカー',
+    'FIFAワールドカップ'
+  ];
   const jp=T[target]?.[0]||target;
-  return `${jp} (ワールドカップ OR W杯 OR サッカー)`;
+  return [
+    `${jp} サッカー`,
+    `${jp} ワールドカップ`,
+    `${jp} W杯`
+  ];
 }
 function hasJapaneseText(s){
   return /[ぁ-んァ-ヶ一-龯]/.test(String(s||''));
@@ -1882,33 +1972,154 @@ function newsApiUrlForQuery(query){
 function newsApiUrl(target){
   return newsApiUrlForQuery(buildGdeltQueries(target)[0]);
 }
-function googleNewsRssUrl(target){
+function googleNewsRssUrlForQuery(query){
   const params=new URLSearchParams({
-    q:buildGoogleNewsQuery(target),
+    q:query,
     hl:'ja',
     gl:'JP',
     ceid:'JP:ja'
   });
   return `${GOOGLE_NEWS_RSS}?${params.toString()}`;
 }
+function googleNewsRssUrl(target){
+  return googleNewsRssUrlForQuery(buildGoogleNewsQuery(target));
+}
+
+function isHttpNewsImage(url){
+  const u=String(url||'').trim();
+  return /^https?:\/\//i.test(u)&&!/(?:\.svg)(?:[?#]|$)/i.test(u)&&!/\b(?:favicon|sprite|blank|pixel|tracking|transparent)\b/i.test(u);
+}
+function absolutizeNewsImageUrl(src,base){
+  let u=decodeHtml(String(src||'')).trim().replace(/^['\"]|['\"]$/g,'');
+  if(!u||/^data:/i.test(u))return '';
+  if(u.startsWith('//'))u='https:'+u;
+  try{return new URL(u,base||location.href).href}catch(e){return ''}
+}
+function parseArticleImageFromText(text,baseUrl){
+  const raw=String(text||'');
+  const pick=src=>{
+    const u=absolutizeNewsImageUrl(src,baseUrl);
+    return isHttpNewsImage(u)?u:'';
+  };
+  try{
+    if(/<\s*(html|head|body|meta|img)\b/i.test(raw)){
+      const doc=new DOMParser().parseFromString(raw,'text/html');
+      const selectors=[
+        'meta[property="og:image"]','meta[property="og:image:url"]','meta[property="og:image:secure_url"]',
+        'meta[name="twitter:image"]','meta[name="twitter:image:src"]','link[rel="image_src"]'
+      ];
+      for(const sel of selectors){
+        const el=doc.querySelector(sel);
+        const val=el&&(el.getAttribute('content')||el.getAttribute('href'));
+        const u=pick(val);
+        if(u)return u;
+      }
+      const imgs=Array.from(doc.querySelectorAll('img'));
+      for(const img of imgs){
+        const val=img.getAttribute('src')||img.getAttribute('data-src')||img.getAttribute('data-original')||img.getAttribute('data-lazy-src')||img.getAttribute('data-srcset')||img.getAttribute('srcset')||'';
+        const first=String(val).split(',')[0].trim().split(/\s+/)[0];
+        const u=pick(first);
+        if(u)return u;
+      }
+    }
+  }catch(e){}
+  const md=raw.match(/!\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/i);
+  if(md){const u=pick(md[1]);if(u)return u;}
+  const direct=raw.match(/https?:\/\/[^\s\)\]"'<>]+\.(?:jpg|jpeg|png|webp|avif)(?:\?[^\s\)\]"'<>]*)?/i);
+  if(direct){const u=pick(direct[0]);if(u)return u;}
+  return '';
+}
+function promiseWithSoftTimeout(promise,ms){
+  return new Promise(resolve=>{
+    let done=false;
+    const timer=setTimeout(()=>{if(!done){done=true;resolve('')}},ms);
+    Promise.resolve(promise).then(v=>{if(!done){done=true;clearTimeout(timer);resolve(v||'')}}).catch(()=>{if(!done){done=true;clearTimeout(timer);resolve('')}});
+  });
+}
+function firstTruthy(promises){
+  return new Promise(resolve=>{
+    let left=promises.length;
+    if(!left)return resolve('');
+    promises.forEach(p=>Promise.resolve(p).then(v=>{
+      if(v){resolve(v);left=-999;return;}
+      left--; if(left===0)resolve('');
+    }).catch(()=>{left--; if(left===0)resolve('')}));
+  });
+}
+async function fetchTextViaCoddProxy(url){
+  const res=await fetch(CODD_PROXY+encodeURIComponent(url),{cache:'no-store'});
+  if(!res.ok)throw new Error('Codetabs article HTTP '+res.status);
+  return await res.text();
+}
+async function fetchArticleImage(url){
+  const target=normalizeGoogleNewsLink(url);
+  if(!/^https?:\/\//i.test(target))return '';
+  const loaders=[
+    ()=>fetchAllOriginsText(target),
+    ()=>fetchAllOriginsGetText(target),
+    ()=>fetchTextViaCoddProxy(target),
+    ()=>fetchReaderText(target)
+  ];
+  const attempts=loaders.map(fn=>promiseWithSoftTimeout(fn(),2800).then(txt=>parseArticleImageFromText(txt,target)).catch(()=>''));
+  return await firstTruthy(attempts);
+}
+async function enrichNewsImagesSequential(items,target){
+  const out=[];
+  const list=(Array.isArray(items)?items:[]).slice(0,20);
+  for(const item of list){
+    const copy=Object.assign({},item);
+    if(!isHttpNewsImage(copy.image)){
+      const img=await fetchArticleImage(copy.url).catch(()=>'');
+      copy.image=isHttpNewsImage(img)?img:newsFallbackImage(target);
+    }
+    out.push(copy);
+  }
+  return out;
+}
+
 async function fetchNews(){
   state.news=state.news||{target:'all',status:'',items:[]};
   const sel=document.getElementById('newsTarget');
   if(sel)state.news.target=sel.value||'all';
+  const target=state.news.target;
   state.news.status='取得中・・・';
   state.news.items=[];
   save();render();
   try{
-    const items=await fetchNewsItems(state.news.target);
-    const deduped=dedupeNews(items).slice(0,20);
-    state.news.items=deduped.length?deduped:fallbackNewsSearchItems(state.news.target);
-    state.news.status=deduped.length?`取得済 ${deduped.length}件`:'取得済';
+    const items=await promiseWithSoftTimeout(fetchNewsItems(target),NEWS_FAST_LIMIT_MS);
+    const deduped=dedupeNews(Array.isArray(items)?items:[]).slice(0,20);
+    if(deduped.length){
+      state.news.items=deduped.map(item=>Object.assign({},item,{image:isHttpNewsImage(item.image)?item.image:newsFallbackImage(target)}));
+      state.news.status=`取得済 ${deduped.length}件`;
+      save();render();
+      // 記事一覧の表示を待たせないため、画像補完は最大6件だけバックグラウンドで軽く実行する。
+      enhanceNewsImagesInBackground(target);
+    }else{
+      state.news.items=[];
+      state.news.status='ニュース取得失敗';
+    }
   }catch(e){
     console.warn('news fetch failed',e);
-    state.news.status='取得済';
-    state.news.items=fallbackNewsSearchItems(state.news.target);
+    state.news.items=[];
+    state.news.status='ニュース取得失敗';
   }
   save();render();
+}
+async function enhanceNewsImagesInBackground(target){
+  const current=(state.news&&state.news.target)||'all';
+  if(current!==target||!Array.isArray(state.news.items)||!state.news.items.length)return;
+  const targets=state.news.items.map((item,idx)=>({item,idx})).filter(x=>!isHttpNewsImage(x.item.image)||x.item.image===newsFallbackImage(target)).slice(0,NEWS_BG_IMAGE_LIMIT);
+  if(!targets.length)return;
+  const results=await Promise.all(targets.map(x=>promiseWithSoftTimeout(fetchArticleImage(x.item.url),3500).then(img=>({idx:x.idx,img})).catch(()=>({idx:x.idx,img:''}))));
+  if(!state.news||state.news.target!==target||!Array.isArray(state.news.items))return;
+  let changed=false;
+  for(const r of results){
+    if(isHttpNewsImage(r.img)&&state.news.items[r.idx]){
+      state.news.items[r.idx].image=r.img;
+      changed=true;
+    }
+  }
+  if(changed){save();render();}
 }
 function fallbackNewsSearchItems(target){
   const label=newsTargetLabel(target);
@@ -1930,44 +2141,45 @@ function fallbackNewsSearchItems(target){
   return base.slice(0,20).map((q,i)=>({
     title:`${label}：${q} の日本語ニュースを開く`,
     url:`https://news.google.com/search?q=${encodeURIComponent(q)}&hl=ja&gl=JP&ceid=JP:ja`,
-    image:newsPlaceholderImage(label),
+    image:newsFallbackImage(target),
     domain:'Google News',
     seen:''
   }));
 }
 
 async function fetchNewsItems(target){
-  const errors=[];
   const loaders=[
+    ['GDELT',()=>fetchGdeltNewsItems(target)],
+    ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
     ['Google News AllOrigins',()=>fetchGoogleNewsAllOriginsItems(target)],
     ['Google News AllOrigins Get',()=>fetchGoogleNewsAllOriginsGetItems(target)],
     ['Google News Codd Proxy',()=>fetchGoogleNewsCoddProxyItems(target)],
-    ['Google News Reader',()=>fetchGoogleNewsItems(target)],
-    ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
-    ['GDELT',()=>fetchGdeltNewsItems(target)]
+    ['Google News Reader',()=>fetchGoogleNewsItems(target)]
   ];
-  let combined=[];
-  for(const [name,loader] of loaders){
-    try{
-      const items=await loader();
-      if(items&&items.length){
-        combined=combined.concat(items);
-        if(dedupeNews(combined).length>=20)break;
-      }
-    }catch(e){
-      console.warn('news loader failed:',name,e);
-      errors.push(e);
-    }
-  }
-  if(combined.length)return combined;
+  // 以前は取得元を1つずつ順番に待っていたため、最初の取得元が遅いとニュース一覧まで出ませんでした。
+  // ここでは全取得元を並列で走らせ、先に返ったものから統合します。
+  const settled=await Promise.all(loaders.map(([name,loader])=>
+    promiseWithSoftTimeout(loader(),5200)
+      .then(items=>({name,items:Array.isArray(items)?items:[],error:null}))
+      .catch(error=>({name,items:[],error}))
+  ));
+  const combined=[];
+  const errors=[];
+  settled.forEach(r=>{
+    if(r.error){console.warn('news loader failed:',r.name,r.error);errors.push(r.error);return;}
+    const usable=(r.items||[]).filter(x=>x&&x.title&&normalizeNewsUrl(x.url));
+    combined.push(...usable);
+  });
+  const deduped=dedupeNews(combined);
+  if(deduped.length)return deduped;
   if(errors.length)throw errors[errors.length-1];
   return [];
 }
 function toNewsArticleFromGdelt(a){
   return {
-    title:a.title||'',
-    url:a.url||a.url_mobile||'',
-    image:a.socialimage||a.image||'',
+    title:decodeHtml(a.title||''),
+    url:normalizeNewsUrl(a.url||a.url_mobile||''),
+    image:isHttpNewsImage(a.socialimage||a.image||'')?(a.socialimage||a.image):'',
     seen:a.seendate||'',
     domain:a.domain||''
   };
@@ -2006,16 +2218,22 @@ function rss2JsonUrl(rssUrl){
   return `${RSS2JSON_API}?${params.toString()}`;
 }
 async function fetchGoogleNewsRss2JsonItems(target){
-  const res=await fetch(rss2JsonUrl(googleNewsRssUrl(target)),{cache:'no-store'});
-  if(!res.ok)throw new Error('RSS2JSON HTTP '+res.status);
-  const data=await res.json();
-  if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON error');
-  const items=Array.isArray(data.items)?data.items:[];
-  return items.map(x=>{
-    const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
-    const link=normalizeGoogleNewsLink(x.link||x.guid||'');
-    return {title:decodeHtml(x.title||''),url:link,image:image,seen:x.pubDate||'',domain:x.author||'Google News'};
-  }).filter(a=>a.title&&a.url);
+  const out=[];
+  for(const q of buildGoogleNewsQueries(target)){
+    const res=await fetch(rss2JsonUrl(googleNewsRssUrlForQuery(q)),{cache:'no-store'});
+    if(!res.ok)throw new Error('RSS2JSON HTTP '+res.status);
+    const data=await res.json();
+    if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON error');
+    const items=Array.isArray(data.items)?data.items:[];
+    out.push(...items.map(x=>{
+      const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
+      const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(x.link||x.guid||''));
+      const img=absolutizeNewsImageUrl(image,link);
+      return {title:decodeHtml(x.title||''),url:link,image:isHttpNewsImage(img)?img:'',seen:x.pubDate||'',domain:x.author||'Google News'};
+    }).filter(a=>a.title&&a.url));
+    if(dedupeNews(out).length>=20)break;
+  }
+  return out;
 }
 async function fetchAllOriginsText(url){
   const res=await fetch(ALLORIGINS_RAW+encodeURIComponent(url),{cache:'no-store'});
@@ -2028,40 +2246,43 @@ async function fetchAllOriginsGetText(url){
   const data=await res.json();
   return data.contents||'';
 }
+async function collectGoogleNewsByQueries(target,reader){
+  const out=[];
+  for(const q of buildGoogleNewsQueries(target)){
+    const url=googleNewsRssUrlForQuery(q);
+    const text=await reader(url,q);
+    const fromXml=parseGoogleNewsRssXml(text);
+    out.push(...(fromXml.length?fromXml:parseGoogleNewsReaderText(text)));
+    if(dedupeNews(out).length>=20)break;
+  }
+  return out;
+}
 async function fetchGoogleNewsAllOriginsItems(target){
-  const text=await fetchAllOriginsText(googleNewsRssUrl(target));
-  const fromXml=parseGoogleNewsRssXml(text);
-  if(fromXml.length)return fromXml;
-  return parseGoogleNewsReaderText(text);
+  return collectGoogleNewsByQueries(target,url=>fetchAllOriginsText(url));
 }
 async function fetchGoogleNewsAllOriginsGetItems(target){
-  const text=await fetchAllOriginsGetText(googleNewsRssUrl(target));
-  const fromXml=parseGoogleNewsRssXml(text);
-  if(fromXml.length)return fromXml;
-  return parseGoogleNewsReaderText(text);
+  return collectGoogleNewsByQueries(target,url=>fetchAllOriginsGetText(url));
 }
 async function fetchGoogleNewsCoddProxyItems(target){
-  const res=await fetch(CODD_PROXY+encodeURIComponent(googleNewsRssUrl(target)),{cache:'no-store'});
-  if(!res.ok)throw new Error('Proxy HTTP '+res.status);
-  const text=await res.text();
-  const fromXml=parseGoogleNewsRssXml(text);
-  if(fromXml.length)return fromXml;
-  return parseGoogleNewsReaderText(text);
+  return collectGoogleNewsByQueries(target,async url=>{
+    const res=await fetch(CODD_PROXY+encodeURIComponent(url),{cache:'no-store'});
+    if(!res.ok)throw new Error('Proxy HTTP '+res.status);
+    return await res.text();
+  });
 }
 async function fetchGoogleNewsItems(target){
-  const url=googleNewsRssUrl(target);
-  let text='';
-  try{
-    const direct=await fetch(url,{cache:'no-store'});
-    if(direct.ok)text=await direct.text();
-  }catch(e){}
-  if(!text)text=await fetchReaderText(url);
-  const fromXml=parseGoogleNewsRssXml(text);
-  if(fromXml.length)return fromXml;
-  return parseGoogleNewsReaderText(text);
+  return collectGoogleNewsByQueries(target,async url=>{
+    let text='';
+    try{
+      const direct=await fetch(url,{cache:'no-store'});
+      if(direct.ok)text=await direct.text();
+    }catch(e){}
+    if(!text)text=await fetchReaderText(url);
+    return text;
+  });
 }
 function normalizeGoogleNewsLink(url){
-  const raw=String(url||'').trim();
+  const raw=normalizeGoogleNewsMaybeRelativeUrl(url);
   if(!raw)return '';
   try{
     const u=new URL(raw);
@@ -2070,36 +2291,95 @@ function normalizeGoogleNewsLink(url){
   }catch(e){}
   return raw;
 }
+function isGoogleSearchUrl(url){
+  try{
+    const u=new URL(String(url||''));
+    const host=u.hostname.replace(/^www\./,'').toLowerCase();
+    if((host==='google.com'||host.endsWith('.google.com'))&&/\/search/i.test(u.pathname))return true;
+    if(host==='news.google.com'&&/\/search/i.test(u.pathname))return true;
+    return false;
+  }catch(e){return false}
+}
+function isDirectNewsUrl(url){
+  const u=String(url||'').trim();
+  return /^https?:\/\//i.test(u)&&!isGoogleSearchUrl(u);
+}
+function normalizeNewsUrl(url){
+  const u=normalizeGoogleNewsLink(url);
+  return isDirectNewsUrl(u)?u:'';
+}
 function decodeHtml(s){
   const txt=document.createElement('textarea');
   txt.innerHTML=String(s||'');
   return txt.value;
 }
+function normalizeGoogleNewsMaybeRelativeUrl(url){
+  const raw=String(url||'').trim();
+  if(!raw)return '';
+  if(/^https?:\/\//i.test(raw))return raw;
+  if(raw.startsWith('//'))return 'https:'+raw;
+  if(raw.startsWith('/'))return 'https://news.google.com'+raw;
+  return raw;
+}
+function cleanRssText(text){
+  let raw=String(text||'').trim();
+  if(!raw)return '';
+  // AllOriginsやReader経由でXMLがHTMLエスケープされる場合があるため、RSSらしい文字列に戻します。
+  if(raw.includes('&lt;item')||raw.includes('&lt;rss')||raw.includes('&lt;channel'))raw=decodeHtml(raw);
+  raw=raw.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,'$1');
+  return raw;
+}
+function parseGoogleNewsRssRegex(text){
+  const raw=cleanRssText(text);
+  if(!raw||!/<item[\s>]/i.test(raw))return [];
+  const out=[];
+  const itemRe=/<item[\s\S]*?<\/item>/gi;
+  const tag=(block,name)=>{
+    const m=block.match(new RegExp('<'+name+'(?:\s[^>]*)?>([\s\S]*?)<\/'+name+'>','i'));
+    return m?decodeHtml(m[1].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()):'';
+  };
+  let m;
+  while((m=itemRe.exec(raw))){
+    const block=m[0];
+    const title=tag(block,'title');
+    const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(tag(block,'link')));
+    const pubDate=tag(block,'pubDate');
+    const source=tag(block,'source');
+    const desc=tag(block,'description');
+    const imgMatch=block.match(/<(?:media:content|media:thumbnail)[^>]+url=["']([^"']+)["']/i)||desc.match(/<img[^>]+src=["']([^"']+)["']/i);
+    const image=imgMatch?absolutizeNewsImageUrl(imgMatch[1],link):'';
+    if(title&&link)out.push({title,url:link,image:isHttpNewsImage(image)?image:'',seen:pubDate,domain:source||'Google News'});
+  }
+  return out;
+}
 function parseGoogleNewsRssXml(text){
-  const raw=String(text||'').trim();
+  const raw=cleanRssText(text);
   if(!raw||!/[<]item[\s>]/i.test(raw))return [];
   try{
     const doc=new DOMParser().parseFromString(raw,'text/xml');
-    if(doc.querySelector('parsererror'))return [];
-    return Array.from(doc.querySelectorAll('item')).map(item=>{
+    if(doc.querySelector('parsererror'))return parseGoogleNewsRssRegex(raw);
+    const parsed=Array.from(doc.querySelectorAll('item')).map(item=>{
       const get=tag=>item.getElementsByTagName(tag)[0]?.textContent?.trim()||'';
       const desc=get('description');
       const imgNode=item.getElementsByTagName('media:content')[0]||item.getElementsByTagName('media:thumbnail')[0];
       const img=imgNode?.getAttribute('url')||((desc.match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
-      return {title:decodeHtml(get('title')),url:normalizeGoogleNewsLink(get('link')),image:img,seen:get('pubDate'),domain:get('source')};
+      const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(get('link')));
+      const image=absolutizeNewsImageUrl(img,link);
+      return {title:decodeHtml(get('title')),url:link,image:isHttpNewsImage(image)?image:'',seen:get('pubDate'),domain:get('source')||'Google News'};
     }).filter(a=>a.title&&a.url);
-  }catch(e){return []}
+    return parsed.length?parsed:parseGoogleNewsRssRegex(raw);
+  }catch(e){return parseGoogleNewsRssRegex(raw)}
 }
 function parseGoogleNewsReaderText(text){
   const out=[];
   const seen=new Set();
   const lines=String(text||'').replace(/\r/g,'').split('\n');
-  const linkRe=/\[([^\]]{8,220})\]\((https?:\/\/[^)]+)\)/g;
+  const linkRe=/\[([^\]]{8,220})\]\(((?:https?:\/\/|\/)[^)]+)\)/g;
   lines.forEach(line=>{
     let m;
     while((m=linkRe.exec(line))){
       const title=stripMarkdownLinks(m[1]).replace(/\s+-\s+Google ニュース$/,'').trim();
-      const url=normalizeGoogleNewsLink(m[2].trim());
+      const url=normalizeNewsUrl(m[2].trim());
       if(!title||!url||seen.has(url))continue;
       if(/^(画像|動画|Google|ニュース|詳細|その他)$/.test(title))continue;
       seen.add(url);
@@ -2149,7 +2429,9 @@ function dedupeNews(items){
     const clean=Object.assign({},item);
     clean.title=decodeHtml(stripMarkdownLinks(clean.title)).replace(/\s+-\s+[^-]{2,30}$/,'').trim()||clean.title;
     if(!hasJapaneseText(clean.title))continue;
-    clean.image=clean.image&&/^https?:\/\//.test(clean.image)?clean.image:'';
+    clean.url=normalizeNewsUrl(clean.url);
+    if(!clean.url)continue;
+    clean.image=isHttpNewsImage(clean.image)?clean.image:'';
     if(out.some(x=>isSimilarNews(clean,x)))continue;
     out.push(clean);
     if(out.length>=20)break;

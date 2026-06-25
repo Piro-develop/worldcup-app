@@ -356,6 +356,37 @@ const STAT_SOURCES={
   ]
 };
 
+
+const SOCCERKING_FALLBACK_STATS={
+  updated:'Soccer King 6/25掲載データ',
+  rows:[
+    {rank:1,player:'リオネル・メッシ',team:'ar',goals:5,assists:0},
+    {rank:2,player:'ヴィニシウス・ジュニオール',team:'br',goals:4,assists:1},
+    {rank:3,player:'キリアン・エンバペ',team:'fr',goals:4,assists:0},
+    {rank:4,player:'アーリング・ハーランド',team:'no',goals:4,assists:0},
+    {rank:5,player:'デニズ・ウンダヴ',team:'de',goals:3,assists:2},
+    {rank:6,player:'ヨハン・マンザンビ',team:'ch',goals:3,assists:1},
+    {rank:7,player:'マテウス・クーニャ',team:'br',goals:3,assists:0},
+    {rank:8,player:'ジョナサン・デイヴィッド',team:'ca',goals:3,assists:0},
+    {rank:9,player:'イスマエル・サイバリ',team:'ma',goals:3,assists:0},
+    {rank:10,player:'クリセンシオ・サマーフィル',team:'nl',goals:2,assists:1},
+    {rank:11,player:'ミケル・オヤルサバル',team:'es',goals:2,assists:1},
+    {rank:12,player:'マクシミリアーノ・アラウホ',team:'uy',goals:2,assists:1},
+    {rank:13,player:'上田綺世',team:'jp',goals:2,assists:1},
+    {rank:14,player:'コーディ・ガクポ',team:'nl',goals:2,assists:1},
+    {rank:15,player:'ルベン・バルガス',team:'ch',goals:2,assists:1}
+  ]
+};
+function fallbackStatRows(kind){
+  const key=kind==='goals'?'goals':'assists';
+  return SOCCERKING_FALLBACK_STATS.rows
+    .filter(r=>Number(r[key])>0)
+    .slice()
+    .sort((a,b)=>Number(b[key])-Number(a[key])||Number(a.rank)-Number(b.rank))
+    .slice(0,10)
+    .map((r,i)=>({rank:i+1,value:r[key],player:r.player,team:r.team}));
+}
+
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
@@ -550,6 +581,7 @@ function save(){
 }
 function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function escapeRegExp(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 function teamFlag(id){
   const code=FLAG_CODE[id];
   const name=esc(T[id]?.[0]||id);
@@ -661,7 +693,7 @@ function simpleTab(tab){
   const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];
   if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;
   if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;
-  const rowsData=state[tab]||rows(tab==='goals'?'得点':'アシスト');
+  const rowsData=((state[tab]||[]).some(r=>r.player||r.value)?state[tab]:fallbackStatRows(tab));
   const label=tab==='goals'?'得点数':'アシスト数';
   const status=(state.statStatus&&state.statStatus[tab])||'未更新';
   return `<div class="card"><h2>${title}</h2>
@@ -1048,7 +1080,9 @@ async function updatePlayerStats(kind){
     state[kind]=result.rows.slice(0,10).map((r,i)=>({rank:i+1,value:r.value,player:r.player,team:r.team||''}));
     state.statStatus[kind]=`${result.source} から ${result.rows.length}件取得：${new Date().toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
   }else{
-    state.statStatus[kind]=`自動取得失敗：${result.message||'解析できるランキング表が見つかりませんでした。'}`;
+    const fb=fallbackStatRows(kind);
+    if(fb.length)state[kind]=fb;
+    state.statStatus[kind]=`自動取得失敗：${result.message||'解析できるランキング表が見つかりませんでした。'}／Soccer Kingフォールバック表示`;
   }
   save();render();
 }
@@ -1130,59 +1164,48 @@ function cleanPlayerName(name){
 }
 function parseSoccerKingStatsText(text,kind){
   const lines=String(text||'').replace(/\r/g,'').split(/\n+/).map(normalizeArticleLine).filter(Boolean);
-  const start=Math.max(0,lines.findIndex(l=>/FIFAワールドカップ\s*2026\s*得点ランキング|順位\s*選手／国\s*得点/.test(l)));
-  const scope=lines.slice(start,start+90);
+  const start=Math.max(0,lines.findIndex(l=>/FIFAワールドカップ\s*2026\s*得点ランキング|順位\s*選手／国\s*得点|得点ランキング/.test(l)));
+  let end=lines.findIndex((l,i)=>i>start&&/ワールドカップ2026得点王争い|得点ランキングの順位決定方法|日本代表（SAMURAI BLUE）の得点記録/.test(l));
+  if(end<0)end=start+140;
+  const scopeLines=lines.slice(start,end);
   const rows=[];
   const seen=new Set();
+  const teamNames=Object.values(T).map(v=>v[0]).sort((a,b)=>b.length-a.length).map(escapeRegExp).join('|');
 
-  for(let i=0;i<scope.length-1;i++){
-    const a=scope[i];
-    const b=scope[i+1];
+  const section=scopeLines.join(' ').replace(/\s+/g,' ');
+  const re=new RegExp("(\\d{1,2})\\s+(.+?)\\s+("+teamNames+")\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+\\d{1,4}\\s*[′'’]","g");
+  let m;
+  while((m=re.exec(section))&&rows.length<20){
+    const rank=Number(m[1]);
+    const player=cleanPlayerName(m[2]);
+    const teamName=m[3];
+    const goals=Number(m[4]);
+    const assists=Number(m[5]);
+    const value=kind==='goals'?goals:assists;
+    const team=teamIdFromText(teamName);
+    if(!player||/順位|選手|得点|アシスト|時間|INDEX|ランキング|FIFA|ワールドカップ/.test(player))continue;
+    if(!Number.isFinite(value)||value<=0)continue;
+    const key=rank+'|'+player+'|'+teamName+'|'+value;
+    if(!seen.has(key)){seen.add(key);rows.push({rank,value,player,team})}
+  }
 
-    // Reader形: "1 リオネル・メッシ" + "アルゼンチン 5 0 170′"
-    let m=a.match(/^(\d{1,2})\s+(.+?)$/);
-    let n=b.match(/^(.+?)\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,4})[′'’]?\s*$/);
-    if(m&&n){
-      const rank=Number(m[1]);
-      const player=cleanPlayerName(m[2]);
-      const teamName=normalizeArticleLine(n[1]);
-      const goals=Number(n[2]);
-      const assists=Number(n[3]);
+  if(!rows.length){
+    for(let i=0;i<scopeLines.length-1;i++){
+      const a=scopeLines[i], b=scopeLines[i+1];
+      const m1=a.match(/^(\d{1,2})\s+(.+?)$/);
+      const m2=b.match(/^(.+?)\s+(\d{1,2})\s+(\d{1,2})\s+\d{1,4}\s*[′'’]?\s*$/);
+      if(!m1||!m2)continue;
+      const rank=Number(m1[1]);
+      const player=cleanPlayerName(m1[2]);
+      const team=teamIdFromText(m2[1]);
+      const goals=Number(m2[2]);
+      const assists=Number(m2[3]);
       const value=kind==='goals'?goals:assists;
-      const team=teamIdFromText(teamName);
-      if(player&&Number.isFinite(value)&&value>0){
-        const key=rank+'|'+player+'|'+teamName+'|'+value;
-        if(!seen.has(key)){
-          seen.add(key);
-          rows.push({rank,value,player,team});
-        }
-      }
-      continue;
-    }
-
-    // 1行にまとまっている場合にも対応
-    const joined=(a+' '+b).replace(/\s+/g,' ').trim();
-    m=joined.match(/^(\d{1,2})\s+(.+?)\s+(メキシコ|南アフリカ|韓国|チェコ|カナダ|ボスニア・ヘルツェゴビナ|カタール|スイス|ブラジル|モロッコ|ハイチ|スコットランド|アメリカ|パラグアイ|オーストラリア|トゥルキエ|ドイツ|キュラソー|コートジボワール|エクアドル|オランダ|日本|スウェーデン|チュニジア|ベルギー|エジプト|イラン|ニュージーランド|スペイン|カーボベルデ|サウジアラビア|ウルグアイ|フランス|セネガル|イラク|ノルウェー|アルゼンチン|アルジェリア|オーストリア|ヨルダン|ポルトガル|ウズベキスタン|コロンビア|コンゴ民主共和国|イングランド|クロアチア|ガーナ|パナマ)\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,4})[′'’]?/);
-    if(m){
-      const rank=Number(m[1]);
-      const player=cleanPlayerName(m[2]);
-      const teamName=m[3];
-      const goals=Number(m[4]);
-      const assists=Number(m[5]);
-      const value=kind==='goals'?goals:assists;
-      const team=teamIdFromText(teamName);
-      if(player&&value>0){
-        const key=rank+'|'+player+'|'+teamName+'|'+value;
-        if(!seen.has(key)){
-          seen.add(key);
-          rows.push({rank,value,player,team});
-        }
-      }
+      if(player&&team&&value>0)rows.push({rank,value,player,team});
     }
   }
-  return rows
-    .filter(r=>r.player&&!/順位|選手|得点|アシスト|時間|INDEX|ランキング/.test(r.player))
-    .sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
+
+  return rows.sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
 }
 
 function parseStatsText(text,kind){

@@ -155,7 +155,7 @@
     .toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px}
     .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.sheet-title{font-weight:900}.sheet-close{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--line);border-radius:999px;background:#111c30;color:#fff;font-size:20px;font-weight:900;line-height:1;display:inline-flex;align-items:center;justify-content:center}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
 
-    .card{border:1px solid var(--line);border-radius:16px;background:rgba(12,20,36,.9);padding:14px;margin:10px 0;box-shadow:var(--shadow)}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(205,220,245,.12);padding:8px;text-align:left}.input{width:100%;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#fff;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}
+    .card{border:1px solid var(--line);border-radius:16px;background:rgba(12,20,36,.9);padding:14px;margin:10px 0;box-shadow:var(--shadow)}.stat-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 10px}.stat-status{font-size:11px;color:var(--muted);line-height:1.5}.source-pill{display:inline-flex;align-items:center;margin-left:6px;padding:2px 6px;border-radius:999px;background:#14233a;color:#b7c8df;font-size:10px}.stat-table .flag-img{width:18px;height:12px;margin-right:4px}.stat-player{font-weight:900}.stat-source-note{margin-top:10px;font-size:11px;color:#8fa1bc;line-height:1.5}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(205,220,245,.12);padding:8px;text-align:left}.input{width:100%;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#fff;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}
 
     .group-grid{
       display:grid;
@@ -320,7 +320,7 @@
 <script>
 (function(){
 'use strict';
-const STORE='wc2026-group-detail-v1';
+const STORE='wc2026-free-auto-v1';
 const BRACKET_STORE='wc2026-bracket-user-v1';
 const LEGACY_STORES=['wc2026-light-bracket-v1','wc2026-light-bracket-v2','wc2026-light-bracket-v3','wc2026-light-bracket-v4','wc2026-light-bracket-v5','wc2026-groups-v1','wc2026-group-detail-v1'];
 const T={
@@ -335,9 +335,22 @@ const ELIMINATED=['tr','ht','tn','pa','jo'];
 const uniq=a=>[...new Set(a)];
 const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
-const tabs=[['bracket','決勝トーナメント'],['groups','グループリーグ'],['goals','得点ランキング'],['flash','速報'],['news','最新ニュース']];
+const tabs=[['bracket','決勝トーナメント'],['groups','グループリーグ'],['goals','得点ランキング'],['assists','アシストランキング'],['flash','速報'],['news','最新ニュース']];
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+const STAT_SOURCES={
+  goals:[
+    {name:'ESPN Stats',url:'https://www.espn.com/soccer/stats/_/league/fifa.world'},
+    {name:'Google Search',url:'https://www.google.com/search?q=ワールドカップ+統計情報+得点ランキング'},
+    {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+scorers'}
+  ],
+  assists:[
+    {name:'ESPN Stats',url:'https://www.espn.com/soccer/stats/_/league/fifa.world'},
+    {name:'Google Search',url:'https://www.google.com/search?q=ワールドカップ+統計情報+アシストランキング'},
+    {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+assists'}
+  ]
+};
+
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
@@ -517,14 +530,13 @@ function migrateSavedBracket(){
   return null;
 }
 function load(){
-  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'初期データを表示中',goals:rows('得点'),matchCache:{}};
+  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'初期データを表示中',goals:rows('得点'),assists:rows('アシスト'),statStatus:{goals:'未更新',assists:'未更新'},matchCache:{}};
   const saved=readSaved(STORE);
   const merged=Object.assign(base,saved||{});
   const preserved=migrateSavedBracket();
   if(preserved)merged.bracket=preserved;
   if(!merged.groups)merged.groups=buildGroupRows(initialGroups);
   if(!merged.matchCache)merged.matchCache={};
-  if(merged.active==='assists')merged.active='groups';
   return merged;
 }
 function save(){
@@ -641,11 +653,17 @@ function groupBoxHTML(g,rows){
   </div>`
 }
 function simpleTab(tab){
-  const title={goals:'得点ランキング',flash:'速報',news:'最新ニュース'}[tab];
+  const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];
   if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;
   if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;
-  let rowsData=state.goals;
-  return `<div class="card"><h2>${title}</h2><p class="small">得点ランキングは、信頼できる取得元が確定した後に自動更新へ切り替えます。現在は表示枠のみです。</p><table class="table"><thead><tr><th>順位</th><th>得点数</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank}</td><td><input class="input" data-r="goals|${i}|value" value="${esc(r.value)}"></td><td><input class="input" data-r="goals|${i}|player" placeholder="選手名" value="${esc(r.player)}"></td></tr>`).join('')}</tbody></table></div>`
+  const rowsData=state[tab]||rows(tab==='goals'?'得点':'アシスト');
+  const label=tab==='goals'?'得点数':'アシスト数';
+  const status=(state.statStatus&&state.statStatus[tab])||'未更新';
+  return `<div class="card"><h2>${title}</h2>
+    <div class="stat-toolbar"><div class="stat-status">状態：${esc(status)}<span class="source-pill">無料自動取得を試行</span></div><button class="btn primary" data-stat-update="${tab}">更新</button></div>
+    <table class="table stat-table"><thead><tr><th>順位</th><th>${label}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank||i+1}</td><td>${esc(r.value||'')}</td><td><span class="stat-player">${r.team?teamFlag(r.team):''}${esc(r.player||'')}</span>${r.team?` <span class="small">(${esc(T[r.team]?.[0]||r.team)})</span>`:''}</td></tr>`).join('')}</tbody></table>
+    <div class="stat-source-note">ESPN/Google検索ページをJina Reader経由で読み取り、表形式・行形式の統計データを抽出します。取得元の表示形式が変わる場合は失敗します。</div>
+  </div>`
 }
 function bind(){
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});
@@ -655,6 +673,7 @@ function bind(){
   if(reset)reset.onclick=()=>{if(confirm('添付画像の初期表示に戻しますか？')){state.bracket=clone(initial);save();render()}};
   document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()});
   const updateGroups=document.getElementById('updateGroups');if(updateGroups)updateGroups.onclick=updateGroupStandings;
+  document.querySelectorAll('[data-stat-update]').forEach(b=>b.onclick=()=>updatePlayerStats(b.dataset.statUpdate));
   document.querySelectorAll('[data-group]').forEach(b=>{b.onclick=()=>openGroupDetail(b.dataset.group);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openGroupDetail(b.dataset.group)}}})
 }
 function toggleConfirm(id){
@@ -848,7 +867,12 @@ async function loadGroupMatchDetails(g){
     if(state.matchCache[m.id]&&!state.matchCache[m.id].loading&&state.matchCache[m.id].fetched)return;
     try{
       const data=await fetchESPNEventSummary(m.id);
-      state.matchCache[m.id]=Object.assign({fetched:true},parseMatchSummary(data,m));
+      let parsed=Object.assign({fetched:true},parseMatchSummary(data,m));
+      if(hasNoScorers(parsed)&&((Number(parsed.hs)||Number(m.hs)||0)+(Number(parsed.as)||Number(m.as)||0)>0)){
+        const extra=await fetchMatchPageScorers(m);
+        if(extra&&(extra.home.length||extra.away.length))parsed.scorers=extra;
+      }
+      state.matchCache[m.id]=parsed;
     }catch(e){
       state.matchCache[m.id]=Object.assign({fetched:true,completed:true,hs:m.hs,as:m.as,scorers:[]});
     }
@@ -865,6 +889,65 @@ async function fetchESPNEventSummary(eventId){
     try{const r=await fetch(url);if(r.ok)return await r.json();lastErr=new Error('HTTP '+r.status)}catch(e){lastErr=e}
   }
   throw lastErr||new Error('summary取得失敗');
+}
+function hasNoScorers(parsed){
+  const sc=parsed&&parsed.scorers;
+  if(!sc)return true;
+  if(Array.isArray(sc))return sc.length===0;
+  return !(sc.home&&sc.home.length)&&!(sc.away&&sc.away.length);
+}
+function readerUrl(url){return 'https://r.jina.ai/'+url}
+async function fetchReaderText(url){
+  const r=await fetch(readerUrl(url));
+  if(!r.ok)throw new Error('Reader HTTP '+r.status);
+  return await r.text();
+}
+async function fetchMatchPageScorers(m){
+  const urls=[
+    `https://www.espn.com/soccer/match/_/gameId/${m.id}`,
+    `https://www.espn.com/soccer/commentary/_/gameId/${m.id}`,
+    `https://www.espn.com/soccer/report/_/gameId/${m.id}`
+  ];
+  for(const u of urls){
+    try{
+      const txt=await fetchReaderText(u);
+      const parsed=parseScorersFromText(txt,m);
+      if(parsed.home.length||parsed.away.length)return parsed;
+    }catch(e){}
+  }
+  return {home:[],away:[]};
+}
+function parseScorersFromText(text,m){
+  const out={home:[],away:[]};
+  const lines=String(text||'').split(/\n+/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
+  const joined=lines.join('\n');
+  const goalLines=lines.filter(l=>/Goal!|GOAL|goal by|scores/i.test(l));
+  goalLines.forEach(l=>{
+    if(/missed|saved|ruled out|offside|penalty shootout|woodwork|post|bar/i.test(l))return;
+    const minute=(l.match(/(\d{1,3}(?:\+\d{1,2})?)['’]/)||l.match(/\b(\d{1,3})(?:st|nd|rd|th) minute\b/i)||[])[1]||'';
+    let name='';
+    let team='';
+    let m1=l.match(/Goal![^.]*\.\s*([^()\[\]-]+?)\s*\(([^)]+)\)/i);
+    if(m1){name=m1[1].trim();team=teamIdFromText(m1[2])}
+    if(!name){
+      let m2=l.match(/(?:goal by|scored by|scores)\s+([^,\.\(]+)(?:\s*\(([^)]+)\))?/i);
+      if(m2){name=m2[1].trim();team=teamIdFromText(m2[2]||l)}
+    }
+    if(!team)team=teamIdFromText(l);
+    const label=formatScorerLabel(name||l.replace(/^Goal!\s*/i,'').slice(0,40),minute);
+    if(team===m.home&&!out.home.includes(label))out.home.push(label);
+    if(team===m.away&&!out.away.includes(label))out.away.push(label);
+  });
+  return out;
+}
+function teamIdFromText(text){
+  const x=String(text||'').toLowerCase().replace(/[’']/g,'').trim();
+  if(!x)return '';
+  for(const [name,id] of Object.entries(NAME_MAP)){if(x.includes(name))return id}
+  for(const [id,v] of Object.entries(T)){if(x.includes(String(v[0]).toLowerCase()))return id}
+  const abbr=x.toUpperCase().match(/\b[A-Z]{3}\b/);
+  if(abbr&&ESPN_MAP[abbr[0]])return ESPN_MAP[abbr[0]];
+  return '';
 }
 function parseMatchSummary(data,m){
   const comp=(data.header?.competitions?.[0])||(data.competitions?.[0])||{};
@@ -956,6 +1039,76 @@ function goalTeam(item,m){
     if(code&&txt.includes(code))return t;
   }
   return '';
+}
+
+async function updatePlayerStats(kind){
+  state.statStatus=state.statStatus||{};
+  state.statStatus[kind]='更新中...';
+  save();render();
+  const result=await fetchPlayerStats(kind);
+  if(result.rows.length){
+    state[kind]=result.rows.slice(0,10).map((r,i)=>({rank:i+1,value:r.value,player:r.player,team:r.team||''}));
+    state.statStatus[kind]=`${result.source} から ${result.rows.length}件取得：${new Date().toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
+  }else{
+    state.statStatus[kind]=`自動取得失敗：${result.message||'解析できるランキング表が見つかりませんでした。'}`;
+  }
+  save();render();
+}
+async function fetchPlayerStats(kind){
+  const sources=STAT_SOURCES[kind]||[];
+  let last='';
+  for(const src of sources){
+    try{
+      const txt=await fetchReaderText(src.url);
+      const rows=parseStatsText(txt,kind);
+      if(rows.length)return {source:src.name,rows};
+      last=src.name+' は取得できましたが、表を解析できませんでした。';
+    }catch(e){last=src.name+' 取得失敗';}
+  }
+  return {rows:[],message:last};
+}
+function parseStatsText(text,kind){
+  const cleaned=String(text||'').replace(/\r/g,'');
+  if(/No Data Available/i.test(cleaned))return [];
+  const lines=cleaned.split('\n').map(x=>x.replace(/[*`]/g,'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  const rows=[];
+  const seen=new Set();
+  const want=kind==='goals'?/(goal|得点|scorer)/i:/(assist|アシスト)/i;
+  const start=Math.max(0,lines.findIndex(l=>want.test(l))-5);
+  const scope=lines.slice(start,start+220);
+  for(const line of scope){
+    const parsed=parseStatsLine(line,kind);
+    if(parsed&&parsed.player&&Number(parsed.value)>0){
+      const key=parsed.player+'|'+parsed.value+'|'+parsed.team;
+      if(!seen.has(key)){seen.add(key);rows.push(parsed)}
+    }
+    if(rows.length>=15)break;
+  }
+  return rows.sort((a,b)=>Number(b.value)-Number(a.value));
+}
+function parseStatsLine(line,kind){
+  const cells=line.includes('|')?line.split('|').map(x=>x.trim()).filter(Boolean):null;
+  if(cells&&cells.length>=3){
+    const nums=cells.map((c,i)=>({i,n:Number(c)})).filter(x=>Number.isFinite(x.n));
+    const stat=nums.filter(x=>x.n>=0&&x.n<30).pop();
+    if(!stat)return null;
+    const value=stat.n;
+    const teamCell=cells.find(c=>teamIdFromText(c));
+    const team=teamIdFromText(teamCell||'');
+    const player=cells.find((c,i)=>i!==stat.i&&c!==teamCell&&!/^\d+$/.test(c)&&!/rank|name|team|club|player|goals?|assists?|得点|アシスト/i.test(c));
+    if(player)return {player:player.replace(/\[[^\]]+\]/g,'').trim(),team,value};
+  }
+  const m=line.match(/^(?:#?\s*)?(\d{1,2})[\.\)]?\s+(.+?)\s+(\d{1,2})$/);
+  if(m){
+    let body=m[2].trim();
+    const value=Number(m[3]);
+    const team=teamIdFromText(body);
+    for(const [id,v] of Object.entries(T))body=body.replace(new RegExp(v[0],'gi'),'');
+    Object.keys(NAME_MAP).forEach(n=>{body=body.replace(new RegExp(n,'gi'),'')});
+    body=body.replace(/\b[A-Z]{3}\b/g,'').replace(/[-–—|,]+/g,' ').replace(/\s+/g,' ').trim();
+    if(body&&value>0)return {player:body,team,value};
+  }
+  return null;
 }
 
 function openSheet(id){

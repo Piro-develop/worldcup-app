@@ -349,6 +349,7 @@ const STAT_SOURCES={
     {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+scorers'}
   ],
   assists:[
+    {name:'スポーツナビ アシストランキング',url:'https://soccer.yahoo.co.jp/wcup/category/2026/stats?gk=18&type=6',parser:'yahoo'},
     {name:'Soccer King 得点ランキング表',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'},
     {name:'ESPN Stats',url:'https://www.espn.com/soccer/stats/_/league/fifa.world'},
     {name:'Google Search',url:'https://www.google.com/search?q=ワールドカップ+統計情報+アシストランキング'},
@@ -378,7 +379,8 @@ const SOCCERKING_FALLBACK_STATS={
   ]
 };
 function fallbackStatRows(kind){
-  const key=kind==='goals'?'goals':'assists';
+  if(kind==='assists')return yahooAssistFallbackRows();
+  const key='goals';
   return SOCCERKING_FALLBACK_STATS.rows
     .filter(r=>Number(r[key])>0)
     .slice()
@@ -386,7 +388,6 @@ function fallbackStatRows(kind){
     .slice(0,10)
     .map((r,i)=>({rank:i+1,value:r[key],player:r.player,team:r.team}));
 }
-
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
@@ -566,9 +567,13 @@ function migrateSavedBracket(){
   return null;
 }
 function load(){
-  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'初期データを表示中',goals:rows('得点'),assists:rows('アシスト'),statStatus:{goals:'未更新',assists:'未更新'},matchCache:{}};
+  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'初期データを表示中',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'Soccer Kingフォールバック表示中',assists:'スポーツナビフォールバック表示中'},matchCache:{}};
   const saved=readSaved(STORE);
   const merged=Object.assign(base,saved||{});
+  if(!String(merged.statStatus?.assists||'').includes('スポーツナビ')&&!String(merged.statStatus?.assists||'').includes('Yahoo')){
+    merged.assists=fallbackStatRows('assists');
+    merged.statStatus=Object.assign({},merged.statStatus,{assists:'スポーツナビフォールバック表示中'});
+  }
   const preserved=migrateSavedBracket();
   if(preserved)merged.bracket=preserved;
   if(!merged.groups)merged.groups=buildGroupRows(initialGroups);
@@ -1082,7 +1087,7 @@ async function updatePlayerStats(kind){
   }else{
     const fb=fallbackStatRows(kind);
     if(fb.length)state[kind]=fb;
-    state.statStatus[kind]=`自動取得失敗：${result.message||'解析できるランキング表が見つかりませんでした。'}／Soccer Kingフォールバック表示`;
+    state.statStatus[kind]=`自動取得失敗：${result.message||'解析できるランキング表が見つかりませんでした。'}／${kind==='assists'?'スポーツナビ':'Soccer King'}フォールバック表示`;
   }
   save();render();
 }
@@ -1092,7 +1097,7 @@ async function fetchPlayerStats(kind){
   for(const src of sources){
     try{
       const txt=await fetchReaderText(src.url);
-      const rows=src.parser==='soccerking'?parseSoccerKingStatsText(txt,kind):parseStatsText(txt,kind);
+      const rows=src.parser==='soccerking'?parseSoccerKingStatsText(txt,kind):src.parser==='yahoo'?parseYahooStatsText(txt,kind):parseStatsText(txt,kind);
       if(rows.length)return {source:src.name,rows};
       last=src.name+' は取得できましたが、表を解析できませんでした。';
     }catch(e){last=src.name+' 取得失敗';}
@@ -1205,6 +1210,38 @@ function parseSoccerKingStatsText(text,kind){
     }
   }
 
+  return rows.sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
+}
+
+function parseYahooStatsText(text,kind){
+  const lines=String(text||'').replace(/\r/g,'').split(/\n+/).map(normalizeArticleLine).filter(Boolean);
+  const start=Math.max(0,lines.findIndex(l=>/順位\s*選手名\s*チーム名\s*Pos\.|個人成績|アシスト/.test(l)));
+  const scope=lines.slice(start,start+180);
+  const rows=[];
+  const seen=new Set();
+  const teamNames=Object.values(T).map(v=>v[0]).concat(['DRコンゴ']).sort((a,b)=>b.length-a.length).map(escapeRegExp).join('|');
+  const pos='(?:GK|DF|MF|FW)';
+  const re=new RegExp('^(\\d{1,2})\\s+(.+?)\\s+('+teamNames+')\\s+'+pos+'\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+', 'i');
+
+  for(const raw of scope){
+    const line=raw.replace(/cite\\d+†([^]+)/g,'$1').replace(/\s+/g,' ').trim();
+    const m=line.match(re);
+    if(!m)continue;
+    const rank=Number(m[1]);
+    const player=cleanPlayerName(m[2]);
+    const teamName=m[3];
+    const goals=Number(m[4]);
+    const assists=Number(m[6]);
+    const value=kind==='goals'?goals:assists;
+    const team=teamName==='DRコンゴ'?'cd':teamIdFromText(teamName);
+    if(!player||!Number.isFinite(value)||value<=0)continue;
+    const key=player+'|'+team+'|'+value;
+    if(!seen.has(key)){
+      seen.add(key);
+      rows.push({rank,value,player,team});
+    }
+    if(rows.length>=20)break;
+  }
   return rows.sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
 }
 

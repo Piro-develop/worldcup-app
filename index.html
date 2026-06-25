@@ -459,7 +459,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=8500;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_PIPELINE_VERSION='jp-news-curated-direct-v8';
+const NEWS_PIPELINE_VERSION='jp-news-filtered-latest-v9';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -2068,15 +2068,16 @@ function buildNewsQuery(target){
 }
 function buildGdeltQueries(target){
   if(!target||target==='all')return [
-    'ワールドカップ サッカー',
-    'W杯 サッカー',
-    'FIFAワールドカップ'
+    'ワールドカップ 決勝トーナメント',
+    'W杯 日程 結果',
+    'FIFAワールドカップ 組み合わせ',
+    'ワールドカップ 得点ランキング'
   ];
   const jp=T[target]?.[0]||target;
   return [
     `${jp} ワールドカップ`,
     `${jp} W杯`,
-    `${jp} サッカー`
+    `${jp} ワールドカップ サッカー`
   ];
 }
 function buildGoogleNewsQuery(target){
@@ -2084,15 +2085,16 @@ function buildGoogleNewsQuery(target){
 }
 function buildGoogleNewsQueries(target){
   if(!target||target==='all')return [
-    'ワールドカップ サッカー',
-    'W杯 サッカー',
-    'FIFAワールドカップ'
+    'ワールドカップ 決勝トーナメント',
+    'W杯 日程 結果',
+    'FIFAワールドカップ 組み合わせ',
+    'ワールドカップ 得点ランキング'
   ];
   const jp=T[target]?.[0]||target;
   return [
-    `${jp} サッカー`,
     `${jp} ワールドカップ`,
-    `${jp} W杯`
+    `${jp} W杯`,
+    `${jp} ワールドカップ サッカー`
   ];
 }
 function hasJapaneseText(s){
@@ -2353,17 +2355,17 @@ function jinaSearchUrlForQuery(query){
 }
 function buildJinaSearchQueries(target){
   if(!target||target==='all')return [
-    'ワールドカップ サッカー 最新 ニュース',
-    'W杯 サッカー 最新 ニュース',
-    'FIFAワールドカップ 2026 サッカー ニュース',
-    'ワールドカップ 決勝トーナメント サッカー ニュース'
+    'ワールドカップ 決勝トーナメント ニュース',
+    'W杯 日程 結果 ニュース',
+    'FIFAワールドカップ 組み合わせ ニュース',
+    'ワールドカップ 得点ランキング ニュース'
   ];
   const jp=T[target]?.[0]||target;
   return [
-    `${jp} サッカー 最新 ニュース`,
     `${jp} ワールドカップ 最新 ニュース`,
     `${jp} W杯 最新 ニュース`,
-    `${jp} 代表 サッカー ニュース`
+    `${jp} ワールドカップ サッカー ニュース`,
+    `${jp} W杯 代表 ニュース`
   ];
 }
 function parseJinaSearchJson(data,domain){
@@ -2485,6 +2487,84 @@ function titleMatchesNewsTarget(title,target){
   const t=String(title||'').toLowerCase();
   return newsTargetAliasList(target).some(a=>a&&t.includes(String(a).toLowerCase()));
 }
+function hasWorldCupNewsContext(text,url,source){
+  const t=String(text||'')+' '+String(url||'')+' '+String(source&&source.name||source||'');
+  return /(ワールドカップ|W杯|ＦＩＦＡ|FIFA|北米中|決勝トーナメント|グループステージ|ベスト32|ラウンド16|準々決勝|準決勝|決勝|3位決定戦|３位決定戦|組み合わせ|勝ち上がり|大会|出場国|得点ランキング|アシストランキング|wcup|worldcup|world-cup|world cup)/i.test(t);
+}
+function mentionsAnyCountryAlias(text,targetToIgnore){
+  let t=String(text||'').toLowerCase();
+  // 全体ニュースで使われやすい時刻・開催地表現は、国別記事と誤判定しないよう除外します。
+  t=t.replace(/日本時間/g,'').replace(/米国時間/g,'').replace(/現地時間/g,'').replace(/北米中/g,'').replace(/開催国/g,'');
+  for(const id of Object.keys(T)){
+    if(id===targetToIgnore)continue;
+    const aliases=newsTargetAliasList(id).filter(a=>String(a||'').length>=2);
+    for(const a of aliases){
+      const x=String(a||'').toLowerCase();
+      if(!x)continue;
+      if(x==='米国')continue;
+      if(t.includes(x))return true;
+    }
+  }
+  return false;
+}
+function isWholeTournamentNews(title,url,source){
+  const text=cleanNewsTitle(title)+' '+String(url||'')+' '+String(source&&source.name||source||'');
+  if(!hasWorldCupNewsContext(text,url,source))return false;
+  const mentionsCountry=mentionsAnyCountryAlias(text,'');
+  const hasGeneralTheme=/(日程|結果一覧|全試合|組み合わせ|順位|得点ランキング|アシストランキング|出場国|大会|全体|開幕|閉幕|登録メンバー|放送|視聴|開催地|スタジアム|ルール|レギュレーション|抽選|トーナメント表)/.test(text);
+  // 個別国・個別代表の記事は、丸ごとW杯全体には出さない。日程・組み合わせなど全体情報だけは許可。
+  if(mentionsCountry&&!hasGeneralTheme)return false;
+  return hasGeneralTheme||!mentionsCountry;
+}
+function newsMatchesRequestedScope(item,target,source){
+  const title=cleanNewsTitle(item&&item.title||'');
+  const url=String(item&&item.url||'');
+  if(!isUsableNewsTitle(title))return false;
+  if(!hasWorldCupNewsContext(title,url,source))return false;
+  if(!target||target==='all')return isWholeTournamentNews(title,url,source);
+  return titleMatchesNewsTarget(title,target);
+}
+function parseNewsDateValueFromString(s){
+  const raw=String(s||'');
+  if(!raw)return 0;
+  const compact=raw.match(/(20\d{2})(\d{2})(\d{2})(?:[T\s_-]?(\d{2})(\d{2})?(\d{2})?)?/);
+  if(compact){
+    const y=+compact[1],m=+compact[2]-1,d=+compact[3],hh=+(compact[4]||0),mm=+(compact[5]||0),ss=+(compact[6]||0);
+    const v=Date.UTC(y,m,d,hh,mm,ss);
+    if(!Number.isNaN(v))return v;
+  }
+  const sep=raw.match(/(20\d{2})[\/\.\-年](\d{1,2})[\/\.\-月](\d{1,2})/);
+  if(sep){
+    const y=+sep[1],m=+sep[2]-1,d=+sep[3];
+    const v=Date.UTC(y,m,d);
+    if(!Number.isNaN(v))return v;
+  }
+  const jp=raw.match(/(?:20\d{2}年)?(\d{1,2})月(\d{1,2})日/);
+  if(jp){
+    const y=(new Date()).getFullYear(),m=+jp[1]-1,d=+jp[2];
+    const v=Date.UTC(y,m,d);
+    if(!Number.isNaN(v))return v;
+  }
+  const parsed=Date.parse(raw);
+  return Number.isNaN(parsed)?0:parsed;
+}
+function newsTimeValue(item){
+  return parseNewsDateValueFromString([item&&item.seen,item&&item.url,item&&item.title].filter(Boolean).join(' '));
+}
+function sortNewsLatestFirst(items){
+  return (Array.isArray(items)?items:[]).map((item,idx)=>({item,idx,time:newsTimeValue(item)}))
+    .sort((a,b)=>{
+      if(b.time!==a.time)return b.time-a.time;
+      const ao=Number.isFinite(+a.item._order)?+a.item._order:a.idx;
+      const bo=Number.isFinite(+b.item._order)?+b.item._order:b.idx;
+      return ao-bo;
+    })
+    .map(x=>x.item);
+}
+function prepareNewsItems(items,target,limit=20){
+  const filtered=(Array.isArray(items)?items:[]).filter(item=>newsMatchesRequestedScope(item,target,item&&item.domain));
+  return dedupeNews(sortNewsLatestFirst(filtered),Math.max(limit*3,60)).slice(0,limit);
+}
 function isLikelyArticlePath(url){
   try{
     const u=new URL(String(url||''));
@@ -2504,21 +2584,23 @@ function isLikelyArticlePath(url){
     return !isListingNewsUrl(url);
   }catch(e){return false}
 }
-function parseCuratedNewsLinks(text,source,target){
+function parseCuratedNewsLinks(text,source,target,sourceIndex){
   const raw=String(text||'').replace(/\r/g,'');
   const out=[];
   const seen=new Set();
+  let order=0;
   const add=(title,url)=>{
     title=cleanNewsTitle(stripMarkdownLinks(title||''));
     url=normalizeNewsArticleUrl(normalizeGoogleNewsMaybeRelativeUrl(url||''));
     if(!title||!url||seen.has(url))return;
     if(!isUsableNewsTitle(title))return;
-    if(!titleMatchesNewsTarget(title,target))return;
     if(!isLikelyArticlePath(url))return;
+    const candidate={title,url,image:'',seen:'',domain:source.name,_order:(Number(sourceIndex)||0)*1000+(order++)};
+    if(!newsMatchesRequestedScope(candidate,target,source))return;
     if(/^(画像|動画|写真|一覧|もっと見る|続きを読む|Google|ニュース|詳細|その他|ログイン|ホーム|トップ)$/.test(title))return;
     if(/記事一覧|ニュース一覧|特設ページ|出場国一覧|試合日程・結果|ルール変更|順位表$/.test(title))return;
     seen.add(url);
-    out.push({title,url,image:'',seen:'',domain:source.name});
+    out.push(candidate);
   };
   const linkRe=/\[([^\]]{8,260})\]\(((?:https?:\/\/|\/)[^)\s]+)\)/g;
   let m;
@@ -2537,16 +2619,14 @@ function parseCuratedNewsLinks(text,source,target){
   return out;
 }
 async function fetchCuratedJapaneseSoccerNewsItems(target){
-  const settled=await Promise.all(CURATED_NEWS_SOURCES.map(source=>
+  const settled=await Promise.all(CURATED_NEWS_SOURCES.map((source,sourceIndex)=>
     promiseWithSoftTimeout(fetchReaderText(source.url),3600)
-      .then(text=>({source,text}))
-      .catch(()=>({source,text:''}))
+      .then(text=>({source,sourceIndex,text}))
+      .catch(()=>({source,sourceIndex,text:''}))
   ));
   let out=[];
-  settled.forEach(x=>{out.push(...parseCuratedNewsLinks(x.text,x.source,target));});
-  out=dedupeNews(out,80);
-  // ここでは20件に切らず、後段で提供元が偏らないように並べ替える。
-  return out;
+  settled.forEach(x=>{out.push(...parseCuratedNewsLinks(x.text,x.source,target,x.sourceIndex));});
+  return prepareNewsItems(out,target,80);
 }
 
 
@@ -2592,12 +2672,9 @@ function diversifyNewsBySource(items,limit=20,firstPassCap=4){
 }
 
 async function fetchNewsItems(target){
-  // 根本方針：まず「直接記事の一覧ページ」をJina Readerで読む。
-  // Google News RSS / CORSプロキシは不安定なので、主経路ではなく補助に限定する。
-  const primaryRaw=dedupeNews(await promiseWithSoftTimeout(fetchCuratedJapaneseSoccerNewsItems(target),4700),80);
-  const primary=diversifyNewsBySource(primaryRaw,20,4);
-  if(primary.length>=8 && countNewsSources(primary)>=3)return primary;
-  if(primary.length>=12 && countNewsSources(primary)>=2)return primary;
+  // 方針：表示は最新順を優先し、W杯全体は個別国記事を除外、国別はW杯関連だけに限定する。
+  const primaryRaw=await promiseWithSoftTimeout(fetchCuratedJapaneseSoccerNewsItems(target),4700);
+  const primary=prepareNewsItems(primaryRaw,target,20);
 
   const fallbackLoaders=[
     ['Google News RSS2JSON JSONP',()=>fetchGoogleNewsRss2JsonpItems(target)],
@@ -2608,7 +2685,7 @@ async function fetchNewsItems(target){
     ['Jina Search',()=>fetchJinaSearchNewsItems(target)]
   ];
   const settled=await Promise.all(fallbackLoaders.map(([name,loader])=>
-    promiseWithSoftTimeout(loader(),3600)
+    promiseWithSoftTimeout(loader(),3200)
       .then(items=>({name,items:Array.isArray(items)?items:[],error:null}))
       .catch(error=>({name,items:[],error}))
   ));
@@ -2618,11 +2695,13 @@ async function fetchNewsItems(target){
     (r.items||[]).forEach(x=>{
       const title=cleanNewsTitle(x&&x.title);
       const url=normalizeNewsArticleUrl(x&&x.url);
-      if(!isUsableNewsTitle(title)||!url||isListingNewsUrl(url))return;
-      combined.push({title,url,image:'',seen:x.seen||'',domain:x.domain||r.name});
+      const item={title,url,image:'',seen:x.seen||'',domain:x.domain||r.name};
+      if(!url||isListingNewsUrl(url))return;
+      if(!newsMatchesRequestedScope(item,target,item.domain))return;
+      combined.push(item);
     });
   });
-  return diversifyNewsBySource(combined,20,4);
+  return prepareNewsItems(combined,target,20);
 }
 function toNewsArticleFromGdelt(a){
   const url=normalizeNewsArticleUrl(a.url||a.url_mobile||'');

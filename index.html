@@ -457,10 +457,10 @@ const RSS2JSON_API='https://api.rss2json.com/v1/api.json';
 const ALLORIGINS_RAW='https://api.allorigins.win/raw?url=';
 const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
-const NEWS_FAST_LIMIT_MS=12000;
+const NEWS_FAST_LIMIT_MS=18000;
 const NEWS_BG_IMAGE_LIMIT=0;
 const NEWS_MIN_STABLE_RESULTS=8;
-const NEWS_PIPELINE_VERSION='jp-news-stable-cache-v18';
+const NEWS_PIPELINE_VERSION='jp-news-direct-article-stable-v19';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -2343,17 +2343,15 @@ async function enrichNewsImagesSequential(items,target){
 
 
 function sanitizeNewsCacheItems(items,target,limit=20){
-  return dedupeNews((Array.isArray(items)?items:[]).map(item=>{
-    const fallback=isFallbackSearchNewsItem(item);
-    return {
+  return dedupeNews((Array.isArray(items)?items:[])
+    .filter(item=>!isFallbackSearchNewsItem(item))
+    .map(item=>({
       title:cleanNewsTitle(item&&item.title||''),
-      url:fallback?String(item&&item.url||'').trim():normalizeNewsArticleUrl(item&&item.url||''),
+      url:normalizeNewsArticleUrl(item&&item.url||''),
       image:newsProviderLogo(item,target),
       seen:item&&item.seen||'',
-      domain:item&&item.domain||'',
-      _fallbackSearch:fallback
-    };
-  }),limit).slice(0,limit);
+      domain:item&&item.domain||''
+    })),limit).slice(0,limit);
 }
 function getNewsCacheForTarget(target){
   state.news=state.news||{target:'all',status:'',items:[],cache:{},requestId:0,version:NEWS_PIPELINE_VERSION};
@@ -2397,10 +2395,8 @@ async function fetchNews(){
       state.news.items=cachedNow.map(item=>Object.assign({},item,{image:newsInitialImage(item,target)}));
       state.news.status=newsStatusForItems(cachedNow);
     }else{
-      const fallback=fallbackNewsSearchItems(target);
-      state.news.items=fallback.map(item=>Object.assign({},item,{image:newsInitialImage(item,target)}));
-      setNewsCacheForTarget(target,fallback);
-      state.news.status=newsStatusForItems(fallback);
+      state.news.items=[];
+      state.news.status='ニュース取得失敗';
     }
   }
   save();render();
@@ -2433,65 +2429,9 @@ async function enhanceNewsLinksAndImagesInBackground(target){
 }
 async function enhanceNewsImagesInBackground(target){return enhanceNewsLinksAndImagesInBackground(target)}
 function fallbackNewsSearchItems(target){
-  const label=newsTargetLabel(target);
-  const jp=target==='all'?'ワールドカップ':(T[target]?.[0]||target);
-  const aliases=target==='all'?[]:newsTargetAliasList(target).filter(Boolean);
-  const alias=aliases.find(a=>/[ぁ-んァ-ヶ一-龯]/.test(a))||jp;
-  const opponents=target==='all'?[]:newsTargetOpponentAliases(target).filter(a=>/[ぁ-んァ-ヶ一-龯]/.test(a));
-  const base=target==='all'?
-    [
-      '北中米W杯 2026 スタジアム 開催地',
-      '北中米W杯 2026 観客 動員 集客',
-      'FIFAワールドカップ2026 大会運営 ルール',
-      'ワールドカップ2026 VAR 審判 判定',
-      '北中米ワールドカップ 2026 チケット 価格',
-      'FIFAワールドカップ2026 経済効果 開催都市',
-      '北中米W杯 2026 課題 批判 評価',
-      'ワールドカップ2026 世界 盛り上がり 熱狂',
-      'FIFAワールドカップ2026 セキュリティ 交通 宿泊',
-      '北中米W杯 2026 暑さ 気候 ピッチ',
-      'ワールドカップ2026 放映権 スポンサー',
-      'FIFAワールドカップ2026 大会全体 評価',
-      '北中米W杯 2026 開催国 アメリカ カナダ メキシコ',
-      'ワールドカップ2026 開催都市 スタジアム 観客',
-      'FIFA 2026 World Cup 北中米 日本語ニュース',
-      '北米中 ワールドカップ 2026 ニュース',
-      '2026ワールドカップ 開催地 課題 日本語ニュース',
-      '2026ワールドカップ 観客動員 スタジアム 日本語ニュース',
-      'FIFAワールドカップ2026 ルール 変更 日本語ニュース',
-      '北中米ワールドカップ2026 世界の反応 日本語ニュース'
-    ]:
-    uniq([
-      `${alias} W杯 ニュース`,
-      `${alias} ワールドカップ ニュース`,
-      `${alias}代表 W杯 ニュース`,
-      `${alias} サッカー代表 W杯`,
-      `${alias} W杯 監督 コメント`,
-      `${alias} W杯 選手 インタビュー`,
-      `${alias} W杯 ケガ 負傷`,
-      `${alias} W杯 コンディション`,
-      `${alias} W杯 次戦 準備`,
-      `${alias} W杯 スタメン予想`,
-      `${alias} W杯 先発予想`,
-      `${alias} W杯 練習 戦術`,
-      `${alias} W杯 試合結果`,
-      `${alias} ワールドカップ 日程 結果`,
-      `${alias} W杯 スコア`,
-      `${alias} W杯 グループステージ`,
-      `${alias} W杯 決勝トーナメント`,
-      `${alias} 代表 ニュース`,
-      ...opponents.slice(0,6).flatMap(op=>[`${alias} ${op} W杯`,`${alias} ${op} ワールドカップ`]),
-      ...aliases.filter(a=>a!==alias).slice(0,6).flatMap(a=>[`${a} W杯`,`${a} ワールドカップ`])
-    ]);
-  return base.slice(0,20).map((q,i)=>({
-    title:`${label}：${q} のニュース検索`,
-    url:`https://news.google.com/search?q=${encodeURIComponent(q)}&hl=ja&gl=JP&ceid=JP:ja`,
-    image:newsFallbackImage(target),
-    domain:'Google News Search',
-    seen:'',
-    _fallbackSearch:true,
-    _order:900000+i
-  }));
+  // 検索結果ページを「ニュース記事」として表示しないため、カード用の検索リンク補完は廃止します。
+  // 実記事が取得できない場合は newsEmptyHTML で案内だけを表示します。
+  return [];
 }
 function isFallbackSearchNewsItem(item){
   if(!item)return false;
@@ -2506,21 +2446,20 @@ function countDirectNewsItems(items){
 function stableNewsSelection(fresh,cached,target,limit=20){
   const freshPrepared=prepareNewsItems(Array.isArray(fresh)?fresh:[],target,limit);
   const cachedPrepared=sanitizeNewsCacheItems(Array.isArray(cached)?cached:[],target,limit);
-  const fallback=fallbackNewsSearchItems(target);
   const freshDirect=countDirectNewsItems(freshPrepared);
   const cachedDirect=countDirectNewsItems(cachedPrepared);
   let selected=[];
-  // 既に十分な直接記事を保持している場合は、再取得結果の揺れで0件化・別内容化しないよう固定します。
-  if(cachedDirect>=NEWS_MIN_STABLE_RESULTS){
-    selected=cachedPrepared;
-  }else if(freshDirect>=NEWS_MIN_STABLE_RESULTS){
+  // 直接記事が十分にある場合のみキャッシュを安定化に使う。
+  // ただし新規取得が十分な場合は新規を優先し、古いキャッシュ固定で更新されない状態を避ける。
+  if(freshDirect>=NEWS_MIN_STABLE_RESULTS){
     selected=freshPrepared;
-  }else if(cachedPrepared.length){
-    selected=dedupeNews([...cachedPrepared,...freshPrepared,...fallback],limit);
+  }else if(cachedDirect>=NEWS_MIN_STABLE_RESULTS){
+    selected=dedupeNews([...cachedPrepared,...freshPrepared],limit);
+  }else if(freshDirect>0||cachedDirect>0){
+    selected=dedupeNews([...freshPrepared,...cachedPrepared],limit);
   }else{
-    selected=dedupeNews([...freshPrepared,...fallback],limit);
+    selected=[];
   }
-  if(selected.length<limit)selected=dedupeNews([...selected,...fallback],limit);
   return selected.slice(0,limit);
 }
 function newsStatusForItems(items){
@@ -2528,9 +2467,9 @@ function newsStatusForItems(items){
   const direct=countDirectNewsItems(items);
   if(!total)return 'ニュース取得失敗';
   if(direct===total)return `取得済 ${total}件`;
-  if(direct>0)return `取得済 ${total}件（直接記事${direct}件＋検索候補）`;
-  return `取得済 ${total}件（検索候補。直接記事不足）`;
+  return `取得済 ${direct}件`;
 }
+
 
 
 function jinaSearchUrlForQuery(query){
@@ -2586,18 +2525,15 @@ function parseJinaSearchText(text,domain){
   return out;
 }
 async function fetchJinaSearchNewsItems(target){
-  const out=[];
-  for(const q of buildJinaSearchQueries(target)){
-    try{
-      const res=await fetch(jinaSearchUrlForQuery(q),{cache:'no-store',headers:{'Accept':'application/json,text/plain,*/*'}});
-      if(!res.ok)throw new Error('Jina Search HTTP '+res.status);
-      const text=await res.text();
-      out.push(...parseJinaSearchText(text,'Jina Search'));
-      if(dedupeNews(out).length>=20)break;
-    }catch(e){console.warn('Jina Search failed',q,e)}
-  }
-  return out;
+  const queries=buildJinaSearchQueries(target).slice(0,newsQueryLimit(target,6));
+  return collectNewsQueriesInParallel(target,queries,async q=>{
+    const res=await fetch(jinaSearchUrlForQuery(q),{cache:'no-store',headers:{'Accept':'application/json,text/plain,*/*'}});
+    if(!res.ok)throw new Error('Jina Search HTTP '+res.status);
+    const text=await res.text();
+    return parseJinaSearchText(text,'Jina Search').map(a=>Object.assign({},a,{_query:q}));
+  },20,6200);
 }
+
 
 function newsTargetAliasList(target){
   if(!target||target==='all')return [];
@@ -2986,13 +2922,14 @@ async function fetchNewsItems(target){
     ['GDELT',()=>fetchGdeltNewsItems(target)],
     ['Google News Reader',()=>fetchGoogleNewsItems(target)],
     ['Google News AllOrigins GET',()=>fetchGoogleNewsAllOriginsGetItems(target)],
+    ['Google News Codd Proxy',()=>fetchGoogleNewsCoddProxyItems(target)],
     ['Google News Search Reader',()=>fetchGoogleNewsSearchReaderItems(target)],
     ['Yahoo News Search Reader',()=>fetchYahooNewsSearchReaderItems(target)],
     ['Jina Search',()=>fetchJinaSearchNewsItems(target)]
   ];
   const queryTextForTarget=buildGoogleNewsQueries(target).join(' ');
   const settled=await Promise.all(fallbackLoaders.map(([name,loader],loaderIndex)=>
-    promiseWithSoftTimeout(loader(),6200)
+    promiseWithSoftTimeout(loader(),15000)
       .then(items=>({name,loaderIndex,items:Array.isArray(items)?items:[],error:null}))
       .catch(error=>({name,loaderIndex,items:[],error}))
   ));
@@ -3069,18 +3006,32 @@ async function fetchJsonWithFallbacks(url){
   throw lastErr||new Error('JSON取得失敗');
 }
 
-async function fetchGdeltNewsItems(target){
-  const out=[];
-  for(const q of buildGdeltQueries(target)){
-    try{
-      const data=await fetchJsonWithFallbacks(newsApiUrlForQuery(q));
-      const articles=Array.isArray(data.articles)?data.articles:[];
-      out.push(...articles.map(toNewsArticleFromGdelt).filter(a=>isUsableNewsTitle(a.title)&&a.url));
-      if(dedupeNews(out).length>=20)break;
-    }catch(e){console.warn('GDELT query failed',q,e)}
-  }
-  return out;
+function newsQueryLimit(target,baseLimit){
+  return (!target||target==='all')?Math.min(baseLimit,8):Math.min(baseLimit,10);
 }
+async function collectNewsQueriesInParallel(target,queries,handler,limit=20,timeout=5200){
+  const list=uniq(Array.isArray(queries)?queries:[]).filter(Boolean);
+  const settled=await Promise.all(list.map((q,idx)=>
+    promiseWithSoftTimeout(handler(q,idx),timeout)
+      .then(items=>({idx,q,items:Array.isArray(items)?items:[]}))
+      .catch(error=>({idx,q,items:[],error}))
+  ));
+  const out=[];
+  settled.sort((a,b)=>a.idx-b.idx).forEach(r=>{
+    if(r.error)console.warn('news query failed',r.q,r.error);
+    (r.items||[]).forEach((item,i)=>out.push(Object.assign({},item,{_query:item._query||r.q,_order:Number.isFinite(+item._order)?+item._order:(r.idx*1000+i)})));
+  });
+  return dedupeNews(out,Math.max(limit*4,120));
+}
+async function fetchGdeltNewsItems(target){
+  const queries=buildGdeltQueries(target).slice(0,newsQueryLimit(target,8));
+  return collectNewsQueriesInParallel(target,queries,async q=>{
+    const data=await fetchJsonWithFallbacks(newsApiUrlForQuery(q));
+    const articles=Array.isArray(data.articles)?data.articles:[];
+    return articles.map(toNewsArticleFromGdelt).filter(a=>isUsableNewsTitle(a.title)&&a.url).map(a=>Object.assign(a,{_query:q}));
+  },20,5600);
+}
+
 function rss2JsonUrl(rssUrl){
   const params=new URLSearchParams({rss_url:rssUrl,count:'50'});
   return `${RSS2JSON_API}?${params.toString()}`;
@@ -3101,45 +3052,37 @@ function fetchJsonp(url,timeout=4200){
   });
 }
 async function fetchGoogleNewsRss2JsonpItems(target){
-  const out=[];
-  for(const q of buildGoogleNewsQueries(target)){
-    try{
-      const data=await fetchJsonp(rss2JsonUrl(googleNewsRssUrlForQuery(q)),4200);
-      if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON JSONP error');
-      const items=Array.isArray(data.items)?data.items:[];
-      out.push(...items.map(x=>{
-        const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
-        const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(x.link||x.guid||''));
-        const img=absolutizeNewsImageUrl(image,link);
-        return {title:decodeHtml(x.title||''),url:link,image:isHttpNewsImage(img)?img:'',seen:x.pubDate||'',domain:x.author||'Google News'};
-      }).filter(a=>a.title&&a.url));
-      if(dedupeNews(out).length>=20)break;
-    }catch(e){console.warn('RSS2JSON JSONP query failed',q,e)}
-  }
-  return out;
+  const queries=buildGoogleNewsQueries(target).slice(0,newsQueryLimit(target,5));
+  return collectNewsQueriesInParallel(target,queries,async q=>{
+    const data=await fetchJsonp(rss2JsonUrl(googleNewsRssUrlForQuery(q)),5200);
+    if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON JSONP error');
+    const items=Array.isArray(data.items)?data.items:[];
+    return items.map(x=>{
+      const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
+      const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(x.link||x.guid||''));
+      const img=absolutizeNewsImageUrl(image,link);
+      return {title:decodeHtml(x.title||''),url:link,image:isHttpNewsImage(img)?img:'',seen:x.pubDate||'',domain:x.author||'Google News',_query:q};
+    }).filter(a=>a.title&&a.url);
+  },20,6200);
 }
+
 async function fetchGoogleNewsRss2JsonItems(target){
-  const out=[];
-  for(const q of buildGoogleNewsQueries(target)){
-    try{
-      const res=await fetch(rss2JsonUrl(googleNewsRssUrlForQuery(q)),{cache:'no-store'});
-      if(!res.ok)throw new Error('RSS2JSON HTTP '+res.status);
-      const data=await res.json();
-      if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON error');
-      const items=Array.isArray(data.items)?data.items:[];
-      out.push(...items.map(x=>{
-        const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
-        const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(x.link||x.guid||''));
-        const img=absolutizeNewsImageUrl(image,link);
-        return {title:decodeHtml(x.title||''),url:link,image:isHttpNewsImage(img)?img:'',seen:x.pubDate||'',domain:x.author||'Google News'};
-      }).filter(a=>a.title&&a.url));
-      if(dedupeNews(out).length>=20)break;
-    }catch(e){
-      console.warn('RSS2JSON query failed',q,e);
-    }
-  }
-  return out;
+  const queries=buildGoogleNewsQueries(target).slice(0,newsQueryLimit(target,5));
+  return collectNewsQueriesInParallel(target,queries,async q=>{
+    const res=await fetch(rss2JsonUrl(googleNewsRssUrlForQuery(q)),{cache:'no-store'});
+    if(!res.ok)throw new Error('RSS2JSON HTTP '+res.status);
+    const data=await res.json();
+    if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON error');
+    const items=Array.isArray(data.items)?data.items:[];
+    return items.map(x=>{
+      const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
+      const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(x.link||x.guid||''));
+      const img=absolutizeNewsImageUrl(image,link);
+      return {title:decodeHtml(x.title||''),url:link,image:isHttpNewsImage(img)?img:'',seen:x.pubDate||'',domain:x.author||'Google News',_query:q};
+    }).filter(a=>a.title&&a.url);
+  },20,6200);
 }
+
 async function fetchAllOriginsText(url){
   const res=await fetch(ALLORIGINS_RAW+encodeURIComponent(url),{cache:'no-store'});
   if(!res.ok)throw new Error('AllOrigins HTTP '+res.status);
@@ -3152,21 +3095,16 @@ async function fetchAllOriginsGetText(url){
   return data.contents||'';
 }
 async function collectGoogleNewsByQueries(target,reader){
-  const out=[];
-  for(const q of buildGoogleNewsQueries(target)){
+  const queries=buildGoogleNewsQueries(target).slice(0,newsQueryLimit(target,9));
+  return collectNewsQueriesInParallel(target,queries,async q=>{
     const url=googleNewsRssUrlForQuery(q);
-    try{
-      const text=await promiseWithSoftTimeout(reader(url,q),4000);
-      const fromXml=parseGoogleNewsRssXml(text);
-      const parsed=fromXml.length?fromXml:parseGoogleNewsReaderText(text);
-      out.push(...parsed);
-      if(dedupeNews(out).length>=20)break;
-    }catch(e){
-      console.warn('Google News query failed',q,e);
-    }
-  }
-  return out;
+    const text=await promiseWithSoftTimeout(reader(url,q),5200);
+    const fromXml=parseGoogleNewsRssXml(text);
+    const parsed=fromXml.length?fromXml:parseGoogleNewsReaderText(text);
+    return parsed.map(a=>Object.assign({},a,{_query:q}));
+  },20,6200);
 }
+
 async function fetchGoogleNewsAllOriginsItems(target){
   return collectGoogleNewsByQueries(target,url=>fetchAllOriginsText(url));
 }
@@ -3321,29 +3259,23 @@ function parseMarkdownNewsLinks(text,domain){
   return out;
 }
 async function fetchGoogleNewsSearchReaderItems(target){
-  const out=[];
-  for(const q of buildGoogleNewsQueries(target)){
+  const queries=buildGoogleNewsQueries(target).slice(0,newsQueryLimit(target,8));
+  return collectNewsQueriesInParallel(target,queries,async q=>{
     const url=`https://news.google.com/search?q=${encodeURIComponent(q)}&hl=ja&gl=JP&ceid=JP:ja`;
-    try{
-      const txt=await fetchReaderText(url);
-      out.push(...parseMarkdownNewsLinks(txt,'Google News'));
-      if(dedupeNews(out).length>=20)break;
-    }catch(e){console.warn('Google News search reader failed',q,e)}
-  }
-  return out;
+    const txt=await fetchReaderText(url);
+    return parseMarkdownNewsLinks(txt,'Google News').map(a=>Object.assign({},a,{_query:q}));
+  },20,6200);
 }
+
 async function fetchYahooNewsSearchReaderItems(target){
-  const out=[];
-  for(const q of buildGoogleNewsQueries(target)){
+  const queries=buildGoogleNewsQueries(target).slice(0,newsQueryLimit(target,8));
+  return collectNewsQueriesInParallel(target,queries,async q=>{
     const url=`https://news.yahoo.co.jp/search?p=${encodeURIComponent(q)}`;
-    try{
-      const txt=await fetchReaderText(url);
-      out.push(...parseMarkdownNewsLinks(txt,'Yahoo!ニュース'));
-      if(dedupeNews(out).length>=20)break;
-    }catch(e){console.warn('Yahoo news search reader failed',q,e)}
-  }
-  return out;
+    const txt=await fetchReaderText(url);
+    return parseMarkdownNewsLinks(txt,'Yahoo!ニュース').map(a=>Object.assign({},a,{_query:q}));
+  },20,6200);
 }
+
 function normalizeNewsTitle(t){
   return String(t||'')
     .toLowerCase()

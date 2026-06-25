@@ -34,7 +34,7 @@
       position:relative;
       width:100%;
       max-width:920px;
-      height:750px;
+      height:650px;
       margin:0 auto;
       border-radius:14px;
       background:linear-gradient(180deg,rgba(8,14,25,.2),rgba(5,9,19,.2));
@@ -52,9 +52,9 @@
     .slot{
       position:absolute;
       z-index:2;
-      width:31.8%;
-      height:4.9%;
-      min-height:30px;
+      width:38%;
+      height:4.1%;
+      min-height:24px;
       border:1px solid var(--line);
       border-radius:8px;
       background:linear-gradient(180deg,#14223a,#0d1728);
@@ -108,7 +108,7 @@
     .team-text{
       flex:1 1 auto;
       min-width:0;
-      font-size:clamp(9px,1.25vw,14px);
+      font-size:clamp(8.5px,1.1vw,12px);
       font-weight:900;
       line-height:1.15;
       white-space:nowrap;
@@ -203,10 +203,10 @@ function bracketHTML(){
   </section>`
 }
 function linesSVG(){
-  const slotTop=4.2;
-  const matchGap=12.2;
-  const slotGap=5.9;
-  const slotH=4.9;
+  const slotTop=3.5;
+  const matchGap=11.8;
+  const slotGap=5.5;
+  const slotH=4.1;
   const pairCenters=Array.from({length:8},(_,i)=>{
     const first=slotTop+i*matchGap+slotH/2;
     return [first, first+slotGap];
@@ -217,32 +217,36 @@ function linesSVG(){
   const final=(semi[0]+semi[1])/2;
   let p=[];
   const line=(x1,x2,y)=>p.push(`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/>`);
-  pairCenters.forEach(([a,b],i)=>{
-    line(32.9,35.0,a);line(32.9,35.0,b);
-    p.push(`<line x1="35.0" y1="${a}" x2="35.0" y2="${b}"/>`);
-    line(35.0,38.0,mid[i]);
-  });
-  for(let i=0;i<4;i++){const a=mid[i*2],b=mid[i*2+1],m=block[i];p.push(`<line x1="38.0" y1="${a}" x2="38.0" y2="${b}"/>`);line(38.0,41.0,m);}
-  for(let i=0;i<2;i++){const a=block[i*2],b=block[i*2+1],m=semi[i];p.push(`<line x1="41.0" y1="${a}" x2="41.0" y2="${b}"/>`);line(41.0,45.0,m);}
-  p.push(`<line x1="45.0" y1="${semi[0]}" x2="45.0" y2="${semi[1]}"/>`);
-  line(45.0,49.0,final);
 
+  // 左側：枠の右端中央から中央方向へ
   pairCenters.forEach(([a,b],i)=>{
-    line(67.1,65.0,a);line(67.1,65.0,b);
-    p.push(`<line x1="65.0" y1="${a}" x2="65.0" y2="${b}"/>`);
-    line(65.0,62.0,mid[i]);
+    line(39.0,40.6,a);line(39.0,40.6,b);
+    p.push(`<line x1="40.6" y1="${a}" x2="40.6" y2="${b}"/>`);
+    line(40.6,43.0,mid[i]);
   });
-  for(let i=0;i<4;i++){const a=mid[i*2],b=mid[i*2+1],m=block[i];p.push(`<line x1="62.0" y1="${a}" x2="62.0" y2="${b}"/>`);line(62.0,59.0,m);}
-  for(let i=0;i<2;i++){const a=block[i*2],b=block[i*2+1],m=semi[i];p.push(`<line x1="59.0" y1="${a}" x2="59.0" y2="${b}"/>`);line(59.0,55.0,m);}
-  p.push(`<line x1="55.0" y1="${semi[0]}" x2="55.0" y2="${semi[1]}"/>`);
-  line(55.0,51.0,final);
-  p.push(`<line x1="49.0" y1="${final}" x2="51.0" y2="${final}"/>`);
+  for(let i=0;i<4;i++){const a=mid[i*2],b=mid[i*2+1],m=block[i];p.push(`<line x1="43.0" y1="${a}" x2="43.0" y2="${b}"/>`);line(43.0,45.2,m);}
+  for(let i=0;i<2;i++){const a=block[i*2],b=block[i*2+1],m=semi[i];p.push(`<line x1="45.2" y1="${a}" x2="45.2" y2="${b}"/>`);line(45.2,48.6,m);}
+  p.push(`<line x1="48.6" y1="${semi[0]}" x2="48.6" y2="${semi[1]}"/>`);
+  line(48.6,49.7,final);
+
+  // 右側：枠の左端中央から中央方向へ
+  pairCenters.forEach(([a,b],i)=>{
+    line(61.0,59.4,a);line(61.0,59.4,b);
+    p.push(`<line x1="59.4" y1="${a}" x2="59.4" y2="${b}"/>`);
+    line(59.4,57.0,mid[i]);
+  });
+  for(let i=0;i<4;i++){const a=mid[i*2],b=mid[i*2+1],m=block[i];p.push(`<line x1="57.0" y1="${a}" x2="57.0" y2="${b}"/>`);line(57.0,54.8,m);}
+  for(let i=0;i<2;i++){const a=block[i*2],b=block[i*2+1],m=semi[i];p.push(`<line x1="54.8" y1="${a}" x2="54.8" y2="${b}"/>`);line(54.8,51.4,m);}
+  p.push(`<line x1="51.4" y1="${semi[0]}" x2="51.4" y2="${semi[1]}"/>`);
+  line(51.4,50.3,final);
+
+  p.push(`<line x1="49.7" y1="${final}" x2="50.3" y2="${final}"/>`);
   p.push(`<circle class="final-dot" cx="50" cy="${final}" r=".65"/>`);
   return `<svg class="bracket-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${p.join('')}</svg>`
 }
 function slotHTML(s,side,mi,si){
-  const top=4.2+(mi*12.2)+(si?5.9:0);
-  const left=side==='left'?1.1:67.1;
+  const top=3.5+(mi*11.8)+(si?5.5:0);
+  const left=side==='left'?1.0:61.0;
   const classes=`slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'} ${s.fixed?'fixed':''} ${s.confirmed||s.fixed?'confirmed':''}`;
   const mainAttr=s.fixed?'disabled aria-disabled="true"':`data-slot="${s.id}"`;
   const confirmAttr=s.fixed?'aria-label="確定済み"':`data-confirm="${s.id}" aria-label="確定"`;

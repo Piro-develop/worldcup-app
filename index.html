@@ -26,7 +26,7 @@
     body{background:radial-gradient(circle at 50% -10%,rgba(58,98,150,.32),transparent 34%),linear-gradient(180deg,#070c16 0%,#050913 100%)}
     .wrap{max-width:1180px;margin:0 auto;padding:12px 8px 28px}
     .hero{padding:8px 6px 4px}.eyebrow{font-size:10px;letter-spacing:.22em;color:#78c7ff;font-weight:800}.title{font-size:22px;margin:5px 0 2px;font-weight:900}.lead{font-size:12px;color:var(--muted);margin:0;line-height:1.55}
-    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow:visible;position:sticky;top:0;z-index:50;margin-top:10px;padding:7px;border:1px solid var(--line);border-radius:14px;background:rgba(7,12,22,.82);backdrop-filter:blur(14px)}
+    .tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;overflow:visible;position:sticky;top:0;z-index:50;margin-top:10px;padding:7px;border:1px solid var(--line);border-radius:14px;background:rgba(7,12,22,.82);backdrop-filter:blur(14px)}
     .tab{width:100%;min-width:0;border:1px solid transparent;border-radius:10px;padding:8px 2px;background:transparent;color:#c8d6ea;font-size:12px;font-weight:800;white-space:nowrap;text-align:center}.tab.active{background:rgba(52,210,208,.16);border-color:rgba(52,210,208,.45);color:#fff}
     .panel{margin-top:10px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 2px}.btn{border:1px solid var(--line);border-radius:10px;background:#111c30;color:#eaf3ff;padding:8px 10px;font-weight:800;font-size:12px}.btn.primary{background:linear-gradient(180deg,#1b8a94,#155c66);border-color:rgba(52,210,208,.44)}
 
@@ -310,7 +310,23 @@
     .scorer-empty{color:#8fa1bc}
     .group-detail-note{font-size:11px;color:#8fa1bc;line-height:1.45;margin-top:6px}
 
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:11px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
+
+    .stat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+    .stat-head h2{margin:0;font-size:20px;line-height:1.25}
+    .stat-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex:0 0 auto}
+    .stat-actions .stat-status{min-width:58px;text-align:right;white-space:nowrap}
+    .news-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+    .news-head h2{margin:0;font-size:20px;line-height:1.25}
+    .news-controls{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:10px}
+    .news-status{font-size:11px;color:var(--muted);text-align:right;white-space:nowrap;margin-bottom:8px;min-height:16px}
+    .news-list{display:flex;flex-direction:column;gap:9px}
+    .news-item{display:grid;grid-template-columns:74px 1fr;gap:10px;align-items:center;border:1px solid rgba(205,220,245,.13);border-radius:13px;background:#0d1728;padding:8px;text-decoration:none;color:inherit}
+    .news-item:hover{border-color:rgba(52,210,208,.48)}
+    .news-thumb{width:74px;height:52px;border-radius:9px;object-fit:cover;background:#14233a;border:1px solid rgba(255,255,255,.12)}
+    .news-title{font-size:12.5px;line-height:1.42;font-weight:900;color:#eef5ff}
+    .news-empty{font-size:12px;color:var(--muted);line-height:1.6;padding:12px;border:1px dashed rgba(205,220,245,.22);border-radius:12px;background:rgba(13,23,40,.72)}
+    @media (max-width:430px){.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
   </style>
 </head>
 <body>
@@ -353,7 +369,10 @@ const ELIMINATED=['tr','ht','tn','pa','jo'];
 const uniq=a=>[...new Set(a)];
 const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
-const tabs=[['bracket','決勝T表'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ']];
+const tabs=[['bracket','決勝T表'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ'],['news','ニュース']];
+const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Africa',ch:'Switzerland',ca:'Canada',br:'Brazil',ma:'Morocco',co:'Colombia',pt:'Portugal',hr:'Croatia',es:'Spain',at:'Austria',us:'United States',be:'Belgium',ci:'Ivory Coast',no:'Norway',mx:'Mexico',eng:'England',ar:'Argentina',uy:'Uruguay',au:'Australia',py:'Paraguay',eg:'Egypt',nl:'Netherlands',se:'Sweden',tn:'Tunisia',cz:'Czechia',qa:'Qatar',ba:'Bosnia and Herzegovina',ht:'Haiti',sct:'Scotland',tr:'Türkiye',ec:'Ecuador',cw:'Curaçao',ir:'Iran',nz:'New Zealand',sa:'Saudi Arabia',cv:'Cape Verde',sn:'Senegal',iq:'Iraq',dz:'Algeria',jo:'Jordan',uz:'Uzbekistan',cd:'DR Congo',gh:'Ghana',pa:'Panama'};
+const NEWS_COUNTRY_ORDER=['jp','ar','es','fr','eng','pt','br','ma','nl','be','de','hr','co','mx','sn','uy','us','ch','ir','tr','ec','at','kr','au','dz','eg','ca','no','ci','pa','se','cz','py','sct','tn','cd','uz','qa','iq','za','sa','jo','ba','cv','gh','cw','ht','nz'];
+const GDELT_DOC_API='https://api.gdeltproject.org/api/v2/doc/doc';
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -684,7 +703,7 @@ function migrateSavedBracket(){
   return null;
 }
 function load(){
-  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{}};
+  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{},news:{target:'all',status:'',items:[]}};
   const saved=readSaved(STORE);
   const merged=Object.assign(base,saved||{});
   if(!String(merged.statStatus?.assists||'').includes('スポーツナビ')&&!String(merged.statStatus?.assists||'').includes('Yahoo')){
@@ -701,6 +720,10 @@ function load(){
   if(!['','更新中・・・','更新済'].includes(merged.bracketStatus||''))merged.bracketStatus='';
   merged.statStatus=Object.assign({goals:'',assists:''},merged.statStatus||{});
   ['goals','assists'].forEach(k=>{if(!['','更新中・・・','更新済'].includes(merged.statStatus[k]||''))merged.statStatus[k]='';});
+  if(!merged.news||typeof merged.news!=='object')merged.news={target:'all',status:'',items:[]};
+  if(merged.news.target!=='all'&&!NEWS_COUNTRY_ORDER.includes(merged.news.target))merged.news.target='all';
+  if(!Array.isArray(merged.news.items))merged.news.items=[];
+  if(!['','取得中・・・','取得済','取得失敗'].includes(merged.news.status||''))merged.news.status='';
   return merged;
 }
 function save(){
@@ -830,16 +853,34 @@ function topTwentyRows(list){
   while(out.length<20)out.push({rank:out.length+1,value:'',player:'',team:''});
   return out;
 }
+function newsOptionsHTML(){
+  const opts=[`<option value="all">W杯全体</option>`].concat(NEWS_COUNTRY_ORDER.map(id=>`<option value="${id}">${esc(T[id]?.[0]||id)}</option>`));
+  return opts.join('');
+}
+function newsHTML(){
+  const news=state.news||{target:'all',status:'',items:[]};
+  const items=Array.isArray(news.items)?news.items:[];
+  return `<div class="card"><div class="news-head"><h2>ニュース</h2></div>
+    <div class="news-controls"><select class="input" id="newsTarget">${newsOptionsHTML()}</select><button class="btn primary" id="fetchNews">取得</button></div>
+    <div class="news-status">${esc(news.status||'')}</div>
+    <div class="news-list">${items.length?items.map(item=>newsItemHTML(item)).join(''):'<div class="news-empty">対象を選んで「取得」を押すと、最新ニュースを最大20件表示します。</div>'}</div>
+  </div>`;
+}
+function newsItemHTML(item){
+  const img=item.image||'./worldcup-icon.png';
+  const title=item.title||'タイトルなし';
+  const url=item.url||'#';
+  return `<a class="news-item" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="news-thumb" src="${esc(img)}" alt="" loading="lazy" onerror="this.src='./worldcup-icon.png';this.onerror=null;"><span class="news-title">${esc(title)}</span></a>`;
+}
 function simpleTab(tab){
-  const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'最新ニュース'}[tab];
+  const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'ニュース'}[tab];
   if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;
-  if(tab==='news')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><select class="input"><option>W杯全体</option>${ALL.map(id=>`<option>${esc(T[id][0])}</option>`).join('')}</select></div>`;
+  if(tab==='news')return newsHTML();
   const sourceRows=((state[tab]||[]).some(r=>r.player||r.value)?state[tab]:fallbackStatRows(tab));
   const rowsData=topTwentyRows(sourceRows);
   const label=tab==='goals'?'得点数':'アシスト数';
   const status=(state.statStatus&&state.statStatus[tab])||'';
-  return `<div class="card"><h2>${title}</h2>
-    <div class="stat-toolbar"><div class="stat-status">${esc(status)}</div><button class="btn primary" data-stat-update="${tab}">更新</button></div>
+  return `<div class="card"><div class="stat-head"><h2>${title}</h2><div class="stat-actions"><div class="stat-status">${esc(status)}</div><button class="btn primary" data-stat-update="${tab}">更新</button></div></div>
     <table class="table stat-table"><thead><tr><th>順位</th><th>${label}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank||i+1}</td><td>${esc(r.value||'')}</td><td><span class="stat-player">${r.team?teamFlag(r.team):''}${esc(r.player||'')}</span>${r.team?` <span class="small">(${esc(T[r.team]?.[0]||r.team)})</span>`:''}</td></tr>`).join('')}</tbody></table>
   </div>`
 }
@@ -853,6 +894,12 @@ function bind(){
   document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()});
   const updateGroups=document.getElementById('updateGroups');if(updateGroups)updateGroups.onclick=updateGroupStandings;
   document.querySelectorAll('[data-stat-update]').forEach(b=>b.onclick=()=>updatePlayerStats(b.dataset.statUpdate));
+  const newsTarget=document.getElementById('newsTarget');
+  if(newsTarget){
+    newsTarget.value=(state.news&&state.news.target)||'all';
+    newsTarget.onchange=()=>{state.news=state.news||{target:'all',status:'',items:[]};state.news.target=newsTarget.value;save()};
+  }
+  const fetchNewsBtn=document.getElementById('fetchNews');if(fetchNewsBtn)fetchNewsBtn.onclick=fetchNews;
   document.querySelectorAll('[data-group]').forEach(b=>{b.onclick=()=>openGroupDetail(b.dataset.group);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openGroupDetail(b.dataset.group)}}})
 }
 function toggleConfirm(id){
@@ -1415,6 +1462,94 @@ function goalTeam(item,m){
     if(code&&txt.includes(code))return t;
   }
   return '';
+}
+
+function buildNewsQuery(target){
+  if(!target||target==='all')return '("FIFA World Cup 2026" OR "World Cup 2026" OR "ワールドカップ" OR "W杯")';
+  const jp=T[target]?.[0]||target;
+  const en=NEWS_EN[target]||jp;
+  const country=jp===en?`"${en}"`:`("${jp}" OR "${en}")`;
+  return `${country} ("FIFA World Cup 2026" OR "World Cup 2026" OR "ワールドカップ" OR "W杯")`;
+}
+function newsApiUrl(target){
+  const params=new URLSearchParams({
+    query:buildNewsQuery(target),
+    mode:'ArtList',
+    format:'json',
+    maxrecords:'100',
+    sort:'DateDesc',
+    timespan:'7d'
+  });
+  return `${GDELT_DOC_API}?${params.toString()}`;
+}
+async function fetchNews(){
+  state.news=state.news||{target:'all',status:'',items:[]};
+  const sel=document.getElementById('newsTarget');
+  if(sel)state.news.target=sel.value||'all';
+  state.news.status='取得中・・・';
+  save();render();
+  try{
+    const res=await fetch(newsApiUrl(state.news.target),{cache:'no-store'});
+    if(!res.ok)throw new Error('ニュース取得HTTP '+res.status);
+    const data=await res.json();
+    const articles=Array.isArray(data.articles)?data.articles:[];
+    state.news.items=dedupeNews(articles.map(a=>({
+      title:a.title||'',
+      url:a.url||a.url_mobile||'',
+      image:a.socialimage||a.image||'',
+      seen:a.seendate||'',
+      domain:a.domain||''
+    })).filter(a=>a.title&&a.url)).slice(0,20);
+    state.news.status='取得済';
+  }catch(e){
+    console.warn('news fetch failed',e);
+    state.news.status='取得失敗';
+  }
+  save();render();
+}
+function normalizeNewsTitle(t){
+  return String(t||'')
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g,'')
+    .replace(/[\[\]【】「」『』（）()<>〈〉《》]/g,' ')
+    .replace(/(fifa|world cup|ワールドカップ|w杯|2026|北米中|サッカー)/g,' ')
+    .replace(/[\s\-–—_.,，。:：;；!！?？/／|｜]+/g,'')
+    .trim();
+}
+function bigramSet(str){
+  const s=normalizeNewsTitle(str);
+  if(!s)return new Set();
+  if(s.length<2)return new Set([s]);
+  const out=new Set();
+  for(let i=0;i<s.length-1;i++)out.add(s.slice(i,i+2));
+  return out;
+}
+function titleSimilarity(a,b){
+  const A=bigramSet(a),B=bigramSet(b);
+  if(!A.size||!B.size)return 0;
+  let inter=0;
+  A.forEach(x=>{if(B.has(x))inter++});
+  return inter/(A.size+B.size-inter);
+}
+function isSimilarNews(a,b){
+  const na=normalizeNewsTitle(a.title),nb=normalizeNewsTitle(b.title);
+  if(!na||!nb)return false;
+  if(a.url&&b.url&&a.url===b.url)return true;
+  if(na===nb)return true;
+  const shorter=na.length<nb.length?na:nb;
+  const longer=na.length<nb.length?nb:na;
+  if(shorter.length>=10&&longer.includes(shorter))return true;
+  return titleSimilarity(na,nb)>=0.72;
+}
+function dedupeNews(items){
+  const out=[];
+  for(const item of items){
+    if(!item.title||!item.url)continue;
+    if(out.some(x=>isSimilarNews(item,x)))continue;
+    out.push(item);
+    if(out.length>=20)break;
+  }
+  return out;
 }
 
 async function updatePlayerStats(kind){

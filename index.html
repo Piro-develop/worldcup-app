@@ -459,7 +459,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=8500;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_PIPELINE_VERSION='jp-news-focused-editorial-v11';
+const NEWS_PIPELINE_VERSION='jp-news-country-schedule-result-v12';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -2075,6 +2075,8 @@ function buildGdeltQueries(target){
   ];
   const jp=T[target]?.[0]||target;
   return [
+    `${jp} W杯 試合結果`,
+    `${jp} ワールドカップ 日程 結果`,
     `${jp} 2026 W杯 監督 コメント`,
     `${jp} 北中米W杯 選手 インタビュー`,
     `${jp} ワールドカップ2026 怪我 コンディション`,
@@ -2093,6 +2095,8 @@ function buildGoogleNewsQueries(target){
   ];
   const jp=T[target]?.[0]||target;
   return [
+    `${jp} W杯 試合結果`,
+    `${jp} ワールドカップ 日程 結果`,
     `${jp} 2026 W杯 監督 コメント`,
     `${jp} 北中米W杯 選手 インタビュー`,
     `${jp} ワールドカップ2026 怪我 コンディション`,
@@ -2516,8 +2520,21 @@ function hasWorldCupNewsContext(text,url,source){
 }
 function hasUtilityOnlyNewsTopic(text){
   const t=String(text||'');
-  // ニュースタブでは、他タブで見られる日程・結果・放送・ランキング等だけの記事は除外します。
+  // W杯全体ニュースでは、他タブで見られる日程・結果・放送・ランキング等だけの記事は除外します。
   return /(日程|試合日程|放送|テレビ|配信|中継|地上波|ABEMA|DAZN|視聴方法|何時|キックオフ|日本時間|速報|試合結果|結果速報|スコア|勝敗|順位表|勝ち点|組み合わせ|トーナメント表|得点ランキング|アシストランキング|得点者一覧|ハイライト|出場国一覧|対戦カード|全試合|ラウンド16の日程|準々決勝の日程)/.test(t);
+}
+function hasCountryScheduleResultTopic(text){
+  const t=String(text||'');
+  // 国別ニュースでは、記事不足になりやすい国を救うため、試合日程・結果・スコア系も許可します。
+  return /(日程|試合日程|対戦カード|次戦|次の試合|キックオフ|日本時間|速報|試合結果|結果速報|スコア|勝利|敗戦|引き分け|ドロー|快勝|完勝|逆転|突破|敗退|決勝トーナメント|グループステージ|第[123一二三]戦|初戦|最終戦|勝ち点)/.test(t);
+}
+function hasCountryWorldCupNewsContext(text,target){
+  const t=String(text||'');
+  if(hasExcludedWorldCupCategory(t))return false;
+  const hasWc=/(FIFAワールドカップ|ワールドカップ|W杯|World Cup|worldcup|wcup)/i.test(t);
+  if(hasWc)return true;
+  // 取得元ページやURLがW杯特集配下である場合、タイトル側にW杯の語がなくても国別記事として許可します。
+  return /(Soccer King W杯|ゲキサカ W杯|GOAL W杯|スポーツナビ W杯|\/world\/wc|\/worldcup|\/wcup|category\/2026)/i.test(t);
 }
 function hasCountryEditorialTopic(text){
   const t=String(text||'');
@@ -2556,14 +2573,18 @@ function isWholeTournamentNews(title,url,source){
 function newsMatchesRequestedScope(item,target,source){
   const title=cleanNewsTitle(item&&item.title||'');
   const url=String(item&&item.url||'');
-  const text=title+' '+url+' '+String(source&&source.name||source||'');
+  const text=title+' '+url+' '+String(source&&source.name||source||'')+' '+String(item&&item.domain||'');
   if(!isUsableNewsTitle(title))return false;
   if(isImageOnlyNewsTitle(title))return false;
-  if(!hasCurrentMensWorldCup2026Context(text))return false;
-  if(!target||target==='all')return isWholeTournamentNews(title,url,source);
+  if(!target||target==='all'){
+    if(!hasCurrentMensWorldCup2026Context(text))return false;
+    return isWholeTournamentNews(title,url,source);
+  }
   if(!titleMatchesNewsTarget(text,target))return false;
-  if(hasUtilityOnlyNewsTopic(text)&&!hasCountryEditorialTopic(text))return false;
-  return hasCountryEditorialTopic(text);
+  if(!hasCountryWorldCupNewsContext(text,target))return false;
+  // 国別は、インタビュー・負傷・スタメン等に加えて、日程・結果系も許可する。
+  // ただし、似た記事は dedupeNews / prepareNewsItems 側で除外する。
+  return hasCountryEditorialTopic(text)||hasCountryScheduleResultTopic(text)||hasUtilityOnlyNewsTopic(text);
 }
 function parseNewsDateValueFromString(s){
   const raw=String(s||'');

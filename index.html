@@ -424,7 +424,7 @@ const STORE='wc2026-free-auto-v1';
 const BRACKET_STORE='wc2026-bracket-user-v1';
 const LEGACY_STORES=['wc2026-light-bracket-v1','wc2026-light-bracket-v2','wc2026-light-bracket-v3','wc2026-light-bracket-v4','wc2026-light-bracket-v5','wc2026-groups-v1','wc2026-group-detail-v1'];
 const T={
- de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','ENG'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
+ de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','ENG'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トルコ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
 };
 const FLAG_CODE={
   de:'de',jp:'jp',fr:'fr',kr:'kr',za:'za',ch:'ch',ca:'ca',br:'br',ma:'ma',co:'co',pt:'pt',hr:'hr',es:'es',at:'at',us:'us',be:'be',ci:'ci',no:'no',mx:'mx',eng:'gb-eng',ar:'ar',uy:'uy',au:'au',py:'py',eg:'eg',nl:'nl',se:'se',tn:'tn',cz:'cz',qa:'qa',ba:'ba',ht:'ht',sct:'gb-sct',tr:'tr',ec:'ec',cw:'cw',ir:'ir',nz:'nz',sa:'sa',cv:'cv',sn:'sn',iq:'iq',dz:'dz',jo:'jo',uz:'uz',cd:'cd',gh:'gh',pa:'pa'
@@ -436,7 +436,7 @@ const uniq=a=>[...new Set(a)];
 const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
 const tabs=[['bracket','決勝T表'],['knockout','決勝T日程'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ'],['news','ニュース']];
-const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Africa',ch:'Switzerland',ca:'Canada',br:'Brazil',ma:'Morocco',co:'Colombia',pt:'Portugal',hr:'Croatia',es:'Spain',at:'Austria',us:'United States',be:'Belgium',ci:'Ivory Coast',no:'Norway',mx:'Mexico',eng:'England',ar:'Argentina',uy:'Uruguay',au:'Australia',py:'Paraguay',eg:'Egypt',nl:'Netherlands',se:'Sweden',tn:'Tunisia',cz:'Czechia',qa:'Qatar',ba:'Bosnia and Herzegovina',ht:'Haiti',sct:'Scotland',tr:'Türkiye',ec:'Ecuador',cw:'Curaçao',ir:'Iran',nz:'New Zealand',sa:'Saudi Arabia',cv:'Cape Verde',sn:'Senegal',iq:'Iraq',dz:'Algeria',jo:'Jordan',uz:'Uzbekistan',cd:'DR Congo',gh:'Ghana',pa:'Panama'};
+const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Africa',ch:'Switzerland',ca:'Canada',br:'Brazil',ma:'Morocco',co:'Colombia',pt:'Portugal',hr:'Croatia',es:'Spain',at:'Austria',us:'United States',be:'Belgium',ci:'Ivory Coast',no:'Norway',mx:'Mexico',eng:'England',ar:'Argentina',uy:'Uruguay',au:'Australia',py:'Paraguay',eg:'Egypt',nl:'Netherlands',se:'Sweden',tn:'Tunisia',cz:'Czechia',qa:'Qatar',ba:'Bosnia and Herzegovina',ht:'Haiti',sct:'Scotland',tr:'Turkey',ec:'Ecuador',cw:'Curaçao',ir:'Iran',nz:'New Zealand',sa:'Saudi Arabia',cv:'Cape Verde',sn:'Senegal',iq:'Iraq',dz:'Algeria',jo:'Jordan',uz:'Uzbekistan',cd:'DR Congo',gh:'Ghana',pa:'Panama'};
 const NEWS_COUNTRY_ORDER=(()=>{
   const order=Object.keys(T).filter(id=>id!=='jp').sort((a,b)=>String(T[a]?.[0]||a).localeCompare(String(T[b]?.[0]||b),'ja'));
   const moveAfter=(id,after)=>{
@@ -459,7 +459,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=8500;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_PIPELINE_VERSION='jp-news-scored-fallback-v13';
+const NEWS_PIPELINE_VERSION='jp-news-relaxed-rescue-v14';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -2620,18 +2620,22 @@ function scoreCountryNews(item,target,source){
   if(!aliasHit&&!opponentHit)return {score:-999,category:'reject'};
   const editorial=hasCountryEditorialTopic(text);
   const schedule=hasCountryScheduleResultTopic(text)||hasUtilityOnlyNewsTopic(text);
-  // 国名＋対戦相手名＋試合/次戦系の記事は、タイトルにW杯の語がなくても救済します。
-  // 例：「アメリカ対トルコの見どころ」「アルジェリアがオーストリア戦へ調整」など。
-  if(!hasCountryWorldCupNewsContext(text,target)&&!(aliasHit&&opponentHit&&(schedule||editorial)))return {score:-999,category:'reject'};
+  const wcContext=hasCountryWorldCupNewsContext(text,target);
   let score=0;
   if(aliasHit)score+=36;
-  if(opponentHit)score+=14;
+  if(opponentHit)score+=18;
   if(/(FIFAワールドカップ|ワールドカップ|W杯|World Cup|worldcup|wcup)/i.test(text))score+=30;
-  if(/(2026|北米中|北中米|category\/2026|\/wcup|\/worldcup|Soccer King W杯|ゲキサカ W杯|GOAL W杯|スポーツナビ W杯)/i.test(text))score+=12;
+  if(/(2026|北米中|北中米|category\/2026|\/wcup|\/worldcup|Soccer King W杯|ゲキサカ W杯|GOAL W杯|スポーツナビ W杯)/i.test(text))score+=14;
   if(editorial)score+=36;
-  if(schedule)score+=18;
-  if(/(次戦|次の試合|対戦相手|決勝トーナメント|突破|敗退|グループステージ)/.test(text))score+=10;
-  if(/(監督|指揮官|会見|コメント|インタビュー|負傷|怪我|ケガ|コンディション|スタメン|先発|戦術|練習)/.test(text))score+=10;
+  if(schedule)score+=20;
+  if(/(次戦|次の試合|対戦相手|決勝トーナメント|突破|敗退|グループステージ)/.test(text))score+=12;
+  if(/(監督|指揮官|会見|コメント|インタビュー|負傷|怪我|ケガ|コンディション|スタメン|先発|戦術|練習)/.test(text))score+=12;
+  // 日本語記事が少ない国は、タイトルにW杯の語が入らないことがある。
+  // その場合も国名/対戦相手＋試合・代表文脈があれば救済し、点数だけ下げる。
+  if(!wcContext){
+    if(editorial||schedule||opponentHit)score-=18;
+    else score-=42;
+  }
   const category=editorial?'editorial':(schedule?'schedule':'fallback');
   return {score,category};
 }
@@ -2643,9 +2647,15 @@ function isWholeTournamentNews(title,url,source){
   return scoreWholeTournamentNews({title,url,domain:String(source&&source.name||source||'')},'all',source).score>=45;
 }
 function newsMatchesRequestedScope(item,target,source){
-  const scored=scoreNewsItemForTarget(item,target,source);
-  // ここでは「候補として残すか」だけを緩めに判定し、最終表示は prepareNewsItems で段階的に選別します。
-  return scored.score>=45;
+  const title=cleanNewsTitle(item&&item.title||'');
+  const url=String(item&&item.url||'');
+  const text=title+' '+url+' '+String(source&&source.name||source||'')+' '+String(item&&item.domain||'');
+  // 入口では厳しく落とさない。ここで落とすと、フランス・アメリカ・アルジェリア等の
+  // 日本語記事が少ない国で候補自体が消えるため、最終選別は prepareNewsItems に集約する。
+  if(!isUsableNewsTitle(title))return false;
+  if(newsHardRejectsText(text,title))return false;
+  if(!target||target==='all')return /(FIFAワールドカップ|ワールドカップ|W杯|World Cup|worldcup|wcup|北中米|北米中|2026)/i.test(text)||hasWholeTournamentEditorialTopic(text);
+  return titleMatchesNewsTarget(text,target)||countryOpponentMatchesNewsTarget(text,target)||hasCountryWorldCupNewsContext(text,target);
 }
 function parseNewsDateValueFromString(s){
   const raw=String(s||'');
@@ -2685,27 +2695,34 @@ function sortNewsLatestFirst(items){
     .map(x=>x.item);
 }
 function prepareNewsItems(items,target,limit=20){
-  const scored=(Array.isArray(items)?items:[]).map((item,idx)=>{
+  const all=(Array.isArray(items)?items:[]).map((item,idx)=>{
     const x=Object.assign({},item);
     const s=scoreNewsItemForTarget(x,target,x.domain);
     x._newsScore=s.score;
     x._newsCategory=s.category;
     x._order=Number.isFinite(+x._order)?+x._order:idx;
     return x;
-  }).filter(x=>x._newsScore>=45);
+  }).filter(x=>x._newsScore>-500);
 
+  const enough=list=>dedupeNews(sortNewsLatestFirst(list),limit).length>=Math.min(8,limit);
   let selected=[];
   if(!target||target==='all'){
-    // W杯全体は、大会運営・開催地・観客・ルール・評価などに絞る。件数不足でも個別国の試合記事には戻さない。
-    selected=scored.filter(x=>x._newsScore>=45);
+    const strict=all.filter(x=>x._newsScore>=45 && !hasUtilityOnlyNewsTopic(x.title));
+    const medium=all.filter(x=>x._newsScore>=28);
+    const loose=all.filter(x=>x._newsScore>=12 || /(FIFAワールドカップ|ワールドカップ|W杯|北中米|北米中|2026)/i.test((x.title||'')+' '+(x.url||'')));
+    selected=strict;
+    if(!enough(selected))selected=selected.concat(medium);
+    if(!enough(selected))selected=selected.concat(loose);
   }else{
-    // 国別はまず選手/監督/負傷/スタメン等を優先。少ない国だけ、日程・結果・対戦相手系まで自動緩和。
-    const editorial=scored.filter(x=>x._newsCategory==='editorial'&&x._newsScore>=70);
-    const schedule=scored.filter(x=>x._newsCategory==='schedule'&&x._newsScore>=60);
-    const fallback=scored.filter(x=>x._newsScore>=45);
+    // 1) チーム状況系 → 2) 日程/結果系 → 3) 国名/対戦相手があるW杯周辺ニュース、の順に段階緩和。
+    const editorial=all.filter(x=>x._newsCategory==='editorial'&&x._newsScore>=58);
+    const schedule=all.filter(x=>x._newsCategory==='schedule'&&x._newsScore>=42);
+    const fallback=all.filter(x=>x._newsScore>=26);
+    const rescue=all.filter(x=>x._newsScore>=8 && (titleMatchesNewsTarget((x.title||'')+' '+(x.url||''),target)||countryOpponentMatchesNewsTarget((x.title||'')+' '+(x.url||''),target)));
     selected=editorial.slice();
-    if(dedupeNews(sortNewsLatestFirst(selected),limit).length<8)selected=selected.concat(schedule);
-    if(dedupeNews(sortNewsLatestFirst(selected),limit).length<8)selected=selected.concat(fallback);
+    if(!enough(selected))selected=selected.concat(schedule);
+    if(!enough(selected))selected=selected.concat(fallback);
+    if(!enough(selected))selected=selected.concat(rescue);
   }
   const cleaned=sortNewsLatestFirst(selected).map(item=>{
     const x=Object.assign({},item);
@@ -2713,7 +2730,7 @@ function prepareNewsItems(items,target,limit=20){
     delete x._newsCategory;
     return x;
   });
-  return dedupeNews(cleaned,Math.max(limit*3,80)).slice(0,limit);
+  return dedupeNews(cleaned,Math.max(limit*4,120)).slice(0,limit);
 }
 function isLikelyArticlePath(url){
   try{
@@ -2746,7 +2763,8 @@ function parseCuratedNewsLinks(text,source,target,sourceIndex){
     if(!isUsableNewsTitle(title))return;
     if(!isLikelyArticlePath(url))return;
     const candidate={title,url,image:'',seen:'',domain:source.name,_order:(Number(sourceIndex)||0)*1000+(order++)};
-    if(!newsMatchesRequestedScope(candidate,target,source))return;
+    // ここでは対象国との一致判定をしない。最終段階の点数制で選別する。
+    if(newsHardRejectsText(title+' '+url+' '+source.name,title))return;
     if(isImageOnlyNewsTitle(title))return;
     if(/^(画像|動画|写真|一覧|もっと見る|続きを読む|Google|ニュース|詳細|その他|ログイン|ホーム|トップ)$/.test(title))return;
     if(/記事一覧|ニュース一覧|特設ページ|出場国一覧|試合日程・結果|ルール変更|順位表$/.test(title))return;
@@ -2777,7 +2795,7 @@ async function fetchCuratedJapaneseSoccerNewsItems(target){
   ));
   let out=[];
   settled.forEach(x=>{out.push(...parseCuratedNewsLinks(x.text,x.source,target,x.sourceIndex));});
-  return prepareNewsItems(out,target,80);
+  return dedupeNews(out,160);
 }
 
 
@@ -2825,7 +2843,7 @@ function diversifyNewsBySource(items,limit=20,firstPassCap=4){
 async function fetchNewsItems(target){
   // 方針：表示は最新順を優先し、W杯全体は個別国記事を除外、国別はW杯関連だけに限定する。
   const primaryRaw=await promiseWithSoftTimeout(fetchCuratedJapaneseSoccerNewsItems(target),4700);
-  const primary=prepareNewsItems(primaryRaw,target,20);
+  const primary=Array.isArray(primaryRaw)?primaryRaw:[];
 
   const fallbackLoaders=[
     ['Google News RSS2JSON JSONP',()=>fetchGoogleNewsRss2JsonpItems(target)],
@@ -2833,6 +2851,8 @@ async function fetchNewsItems(target){
     ['GDELT',()=>fetchGdeltNewsItems(target)],
     ['Google News Reader',()=>fetchGoogleNewsItems(target)],
     ['Google News AllOrigins GET',()=>fetchGoogleNewsAllOriginsGetItems(target)],
+    ['Google News Search Reader',()=>fetchGoogleNewsSearchReaderItems(target)],
+    ['Yahoo News Search Reader',()=>fetchYahooNewsSearchReaderItems(target)],
     ['Jina Search',()=>fetchJinaSearchNewsItems(target)]
   ];
   const settled=await Promise.all(fallbackLoaders.map(([name,loader])=>

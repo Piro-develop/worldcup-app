@@ -445,9 +445,9 @@ const RSS2JSON_API='https://api.rss2json.com/v1/api.json';
 const ALLORIGINS_RAW='https://api.allorigins.win/raw?url=';
 const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
-const NEWS_FAST_LIMIT_MS=10000;
-const NEWS_BG_IMAGE_LIMIT=6;
-const NEWS_PIPELINE_VERSION='jp-news-jina-direct-v4';
+const NEWS_FAST_LIMIT_MS=8500;
+const NEWS_BG_IMAGE_LIMIT=0;
+const NEWS_PIPELINE_VERSION='jp-news-fast-direct-noimage-v5';
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -1021,8 +1021,9 @@ function newsDomainIcon(url){
   }catch(e){return ''}
 }
 function newsInitialImage(item,target){
-  if(item&&isHttpNewsImage(item.image))return item.image;
-  return newsDomainIcon(item&&item.url)||newsFallbackImage(target);
+  // 速度と安定性を優先するため、記事本文の画像解析は行わない。
+  // 国別は国旗、W杯全体はアプリアイコンを基本サムネイルにする。
+  return newsFallbackImage(target);
 }
 function isNewsPlaceholderImage(img,item,target){
   const u=String(img||'');
@@ -2229,17 +2230,14 @@ async function fetchNews(){
     if(deduped.length){
       state.news.items=deduped.map(item=>Object.assign({},item,{image:newsInitialImage(item,target)}));
       state.news.status=`取得済 ${deduped.length}件`;
-      save();render();
-      // 一覧表示を優先する。Googleニュース経由URLの直接記事化と画像補完は最大6件だけ裏側で行う。
-      enhanceNewsLinksAndImagesInBackground(target);
     }else{
       state.news.items=[];
-      state.news.status='取得失敗';
+      state.news.status='直接記事を取得できませんでした';
     }
   }catch(e){
     console.warn('news fetch failed',e);
     state.news.items=[];
-    state.news.status='取得失敗';
+    state.news.status='ニュース取得失敗';
   }
   save();render();
 }
@@ -2375,36 +2373,31 @@ async function fetchJinaSearchNewsItems(target){
 }
 
 async function fetchNewsItems(target){
-  // 根本方針：検索結果ページをカード化しない一方、Googleニュースの「記事ページ」は許容する。
-  // 直接記事URLだけに絞ると取得元の仕様変更で0件になりやすいため、記事一覧はRSS/GDELTから先に表示し、
-  // Googleニュース経由URLの直接記事化は後段のバックグラウンド処理で行う。
-  const loaders=[
-    // 1. Jina Search: CORSで壊れにくく、検索結果ページではなく記事URLと記事タイトルを返しやすい。
-    ['Jina Search',()=>fetchJinaSearchNewsItems(target)],
-    // 2. GDELT: 直接記事URLと画像URLが取れる場合がある。
-    ['GDELT',()=>fetchGdeltNewsItems(target)],
-    // 3. Google News RSS: Googleニュースの記事ページを許容。検索結果ページは除外。
+  // 根本方針：ニュース一覧表示を最優先にし、重いサムネイル解析・直接記事化処理は行わない。
+  // Google検索結果ページは除外するが、Googleニュースの記事ページは表示対象にする。
+  const fastLoaders=[
     ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
-    ['Google News AllOrigins',()=>fetchGoogleNewsAllOriginsItems(target)],
     ['Google News AllOrigins GET',()=>fetchGoogleNewsAllOriginsGetItems(target)],
-    ['Google News Codetabs',()=>fetchGoogleNewsCoddProxyItems(target)],
+    ['Google News AllOrigins RAW',()=>fetchGoogleNewsAllOriginsItems(target)],
     ['Google News Reader',()=>fetchGoogleNewsItems(target)],
-    // 4. 最後の補助。直接記事URLが取れたものだけ残す。
-    ['Google News Search Reader',()=>fetchGoogleNewsSearchReaderItems(target)],
-    ['Yahoo News Search Reader',()=>fetchYahooNewsSearchReaderItems(target)]
+    ['Google News Codetabs',()=>fetchGoogleNewsCoddProxyItems(target)],
+    ['GDELT',()=>fetchGdeltNewsItems(target)],
+    ['Jina Search',()=>fetchJinaSearchNewsItems(target)]
   ];
-  const settled=await Promise.all(loaders.map(([name,loader])=>
+  const settled=await Promise.all(fastLoaders.map(([name,loader])=>
     promiseWithSoftTimeout(loader(),5200)
       .then(items=>({name,items:Array.isArray(items)?items:[],error:null}))
       .catch(error=>({name,items:[],error}))
   ));
   const combined=[];
   settled.forEach(r=>{
-    if(r.error){console.warn('news loader failed:',r.name,r.error);return;}
-    const usable=(r.items||[])
-      .map(x=>Object.assign({},x,{title:cleanNewsTitle(x.title),url:normalizeNewsArticleUrl(x.url)}))
-      .filter(x=>x&&isUsableNewsTitle(x.title)&&x.url&&!isListingNewsUrl(x.url));
-    combined.push(...usable);
+    if(r.error)console.warn('news loader failed:',r.name,r.error);
+    (r.items||[]).forEach(x=>{
+      const title=cleanNewsTitle(x&&x.title);
+      const url=normalizeNewsArticleUrl(x&&x.url);
+      if(!isUsableNewsTitle(title)||!url||isListingNewsUrl(url))return;
+      combined.push({title,url,image:'',seen:x.seen||'',domain:x.domain||r.name});
+    });
   });
   return dedupeNews(combined);
 }
@@ -2476,18 +2469,22 @@ function rss2JsonUrl(rssUrl){
 async function fetchGoogleNewsRss2JsonItems(target){
   const out=[];
   for(const q of buildGoogleNewsQueries(target)){
-    const res=await fetch(rss2JsonUrl(googleNewsRssUrlForQuery(q)),{cache:'no-store'});
-    if(!res.ok)throw new Error('RSS2JSON HTTP '+res.status);
-    const data=await res.json();
-    if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON error');
-    const items=Array.isArray(data.items)?data.items:[];
-    out.push(...items.map(x=>{
-      const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
-      const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(x.link||x.guid||''));
-      const img=absolutizeNewsImageUrl(image,link);
-      return {title:decodeHtml(x.title||''),url:link,image:isHttpNewsImage(img)?img:'',seen:x.pubDate||'',domain:x.author||'Google News'};
-    }).filter(a=>a.title&&a.url));
-    if(dedupeNews(out).length>=20)break;
+    try{
+      const res=await fetch(rss2JsonUrl(googleNewsRssUrlForQuery(q)),{cache:'no-store'});
+      if(!res.ok)throw new Error('RSS2JSON HTTP '+res.status);
+      const data=await res.json();
+      if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON error');
+      const items=Array.isArray(data.items)?data.items:[];
+      out.push(...items.map(x=>{
+        const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
+        const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(x.link||x.guid||''));
+        const img=absolutizeNewsImageUrl(image,link);
+        return {title:decodeHtml(x.title||''),url:link,image:isHttpNewsImage(img)?img:'',seen:x.pubDate||'',domain:x.author||'Google News'};
+      }).filter(a=>a.title&&a.url));
+      if(dedupeNews(out).length>=20)break;
+    }catch(e){
+      console.warn('RSS2JSON query failed',q,e);
+    }
   }
   return out;
 }
@@ -2506,10 +2503,15 @@ async function collectGoogleNewsByQueries(target,reader){
   const out=[];
   for(const q of buildGoogleNewsQueries(target)){
     const url=googleNewsRssUrlForQuery(q);
-    const text=await reader(url,q);
-    const fromXml=parseGoogleNewsRssXml(text);
-    out.push(...(fromXml.length?fromXml:parseGoogleNewsReaderText(text)));
-    if(dedupeNews(out).length>=20)break;
+    try{
+      const text=await promiseWithSoftTimeout(reader(url,q),4000);
+      const fromXml=parseGoogleNewsRssXml(text);
+      const parsed=fromXml.length?fromXml:parseGoogleNewsReaderText(text);
+      out.push(...parsed);
+      if(dedupeNews(out).length>=20)break;
+    }catch(e){
+      console.warn('Google News query failed',q,e);
+    }
   }
   return out;
 }

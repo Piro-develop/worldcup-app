@@ -34,7 +34,7 @@
       position:relative;
       width:100%;
       max-width:920px;
-      aspect-ratio:920/750;
+      height:750px;
       margin:0 auto;
       border-radius:14px;
       background:linear-gradient(180deg,rgba(8,14,25,.2),rgba(5,9,19,.2));
@@ -125,10 +125,10 @@
     .eng-flag:before{content:"";position:absolute;left:7px;top:0;width:3px;height:100%;background:#c8102e}
     .eng-flag:after{content:"";position:absolute;left:0;top:4px;width:100%;height:3px;background:#c8102e}
     .toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px}
-    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px}.sheet-title{font-weight:900}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
+    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.sheet-title{font-weight:900}.sheet-close{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--line);border-radius:999px;background:#111c30;color:#fff;font-size:20px;font-weight:900;line-height:1;display:inline-flex;align-items:center;justify-content:center}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
 
     .card{border:1px solid var(--line);border-radius:16px;background:rgba(12,20,36,.9);padding:14px;margin:10px 0;box-shadow:var(--shadow)}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(205,220,245,.12);padding:8px;text-align:left}.input{width:100%;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#fff;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.slot{padding:2px 3px;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag{font-size:11px}.eng-flag{width:15px;height:10px;margin-right:2px}.team-text{font-size:9px}.toolbar{display:none}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag{font-size:11px}.eng-flag{width:15px;height:10px;margin-right:2px}.team-text{font-size:9px}.toolbar{display:none}}
   </style>
 </head>
 <body>
@@ -146,7 +146,7 @@
 <script>
 (function(){
 'use strict';
-const STORE='wc2026-light-bracket-v4';
+const STORE='wc2026-light-bracket-v5';
 const T={
  de:['ドイツ','🇩🇪'],jp:['日本','🇯🇵'],fr:['フランス','🇫🇷'],kr:['韓国','🇰🇷'],za:['南アフリカ','🇿🇦'],ch:['スイス','🇨🇭'],ca:['カナダ','🇨🇦'],br:['ブラジル','🇧🇷'],ma:['モロッコ','🇲🇦'],co:['コロンビア','🇨🇴'],pt:['ポルトガル','🇵🇹'],hr:['クロアチア','🇭🇷'],es:['スペイン','🇪🇸'],at:['オーストリア','🇦🇹'],us:['アメリカ','🇺🇸'],be:['ベルギー','🇧🇪'],ci:['コートジボワール','🇨🇮'],no:['ノルウェー','🇳🇴'],mx:['メキシコ','🇲🇽'],eng:['イングランド','ENG'],ar:['アルゼンチン','🇦🇷'],uy:['ウルグアイ','🇺🇾'],au:['オーストラリア','🇦🇺'],py:['パラグアイ','🇵🇾'],eg:['エジプト','🇪🇬'],nl:['オランダ','🇳🇱'],se:['スウェーデン','🇸🇪'],tn:['チュニジア','🇹🇳'],cz:['チェコ','🇨🇿'],qa:['カタール','🇶🇦'],ba:['ボスニア・ヘルツェゴビナ','🇧🇦'],ht:['ハイチ','🇭🇹'],sct:['スコットランド','🏴'],tr:['トゥルキエ','🇹🇷'],ec:['エクアドル','🇪🇨'],cw:['キュラソー','🇨🇼'],ir:['イラン','🇮🇷'],nz:['ニュージーランド','🇳🇿'],sa:['サウジアラビア','🇸🇦'],cv:['カーボベルデ','🇨🇻'],sn:['セネガル','🇸🇳'],iq:['イラク','🇮🇶'],dz:['アルジェリア','🇩🇿'],jo:['ヨルダン','🇯🇴'],uz:['ウズベキスタン','🇺🇿'],cd:['コンゴ民主共和国','🇨🇩'],gh:['ガーナ','🇬🇭'],pa:['パナマ','🇵🇦']
 };
@@ -299,9 +299,10 @@ function openSheet(id){
   editing=id;
   document.getElementById('backdrop').classList.add('show');
   document.getElementById('sheet').classList.add('show');
-  document.getElementById('sheet').innerHTML=`<div class="sheet-head"><div class="sheet-title">${esc(s.tag)} の候補国を選択</div><div class="small">複数選択できます。確定済みのチーム、敗退決定チームは選択肢から除外されます。</div></div><div class="sheet-body">${options.length?options.map(id=>`<label class="opt"><input type="checkbox" value="${id}" ${s.sel.includes(id)?'checked':''}>${teamFlag(id)}<b>${esc(T[id][0])}</b></label>`).join(''):'<div class="small">選択可能な候補がありません。</div>'}</div><div class="sheet-actions"><button class="btn" id="clearSel">クリア</button><button class="btn primary" id="doneSel">反映</button></div>`;
+  document.getElementById('sheet').innerHTML=`<div class="sheet-head"><div><div class="sheet-title">${esc(s.tag)} の候補国を選択</div><div class="small">複数選択できます。確定済みのチーム、敗退決定チームは選択肢から除外されます。</div></div><button class="sheet-close" id="closeSheetBtn" type="button" aria-label="閉じる">×</button></div><div class="sheet-body">${options.length?options.map(id=>`<label class="opt"><input type="checkbox" value="${id}" ${s.sel.includes(id)?'checked':''}>${teamFlag(id)}<b>${esc(T[id][0])}</b></label>`).join(''):'<div class="small">選択可能な候補がありません。</div>'}</div><div class="sheet-actions"><button class="btn" id="clearSel">クリア</button><button class="btn primary" id="doneSel">反映</button></div>`;
   document.getElementById('doneSel').onclick=applySheet;
-  document.getElementById('clearSel').onclick=()=>{document.querySelectorAll('#sheet input').forEach(x=>x.checked=false)}
+  document.getElementById('clearSel').onclick=()=>{document.querySelectorAll('#sheet input').forEach(x=>x.checked=false)};
+  document.getElementById('closeSheetBtn').onclick=closeSheet;
 }
 function closeSheet(){document.getElementById('backdrop').classList.remove('show');document.getElementById('sheet').classList.remove('show');editing=null}
 function applySheet(){const s=findSlot(editing);if(s){s.sel=[...document.querySelectorAll('#sheet input:checked')].map(x=>x.value);s.confirmed=false;save();closeSheet();render()}}

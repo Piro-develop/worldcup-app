@@ -459,7 +459,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=8500;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_PIPELINE_VERSION='jp-news-curated-direct-v7';
+const NEWS_PIPELINE_VERSION='jp-news-curated-direct-v8';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -468,7 +468,11 @@ const CURATED_NEWS_SOURCES=[
   {name:'GOAL W杯',url:'https://www.goal.com/jp/%E3%83%AF%E3%83%BC%E3%83%AB%E3%83%88%E3%82%99%E3%82%AB%E3%83%83%E3%83%95%E3%82%9A/%E3%83%8B%E3%83%A5%E3%83%BC%E3%82%B9/70excpe1synn9kadnbppahdn7'},
   {name:'GOAL 最新',url:'https://www.goal.com/jp/%E3%83%8B%E3%83%A5%E3%83%BC%E3%82%B9'},
   {name:'スポーツナビ W杯',url:'https://soccer.yahoo.co.jp/wcup'},
-  {name:'Football ZONE',url:'https://www.football-zone.net/'}
+  {name:'Football ZONE',url:'https://www.football-zone.net/'},
+  {name:'フットボールチャンネル',url:'https://www.footballchannel.jp/'},
+  {name:'Qoly',url:'https://qoly.jp/'},
+  {name:'超WORLDサッカー',url:'https://web.ultra-soccer.jp/news/'},
+  {name:'日刊スポーツ サッカー',url:'https://www.nikkansports.com/soccer/world/news/'}
 ];
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
@@ -1042,6 +1046,12 @@ function newsProviderDomain(item){
   if(/goal/.test(src))return 'goal.com';
   if(/スポーツナビ|sports\s*navi|yahoo/.test(src))return 'soccer.yahoo.co.jp';
   if(/football\s*zone|フットボールゾーン/.test(src))return 'football-zone.net';
+  if(/football\s*channel|フットボールチャンネル/.test(src))return 'footballchannel.jp';
+  if(/qoly/.test(src))return 'qoly.jp';
+  if(/ultra|超world|超ワールド/.test(src))return 'web.ultra-soccer.jp';
+  if(/日刊スポーツ|nikkansports/.test(src))return 'nikkansports.com';
+  if(/スポニチ|sponichi/.test(src))return 'sponichi.co.jp';
+  if(/nhk/.test(src))return 'nhk.or.jp';
   try{
     const u=new URL(String(item&&item.url||''));
     const host=u.hostname.replace(/^www\./,'').toLowerCase();
@@ -2484,6 +2494,10 @@ function isLikelyArticlePath(url){
     if(host.includes('gekisaka.jp'))return /\/news\//.test(path)&&(/detail\//.test(path)||/\d+/.test(path))&&!/\/news\/?$|rsspage/.test(path);
     if(host.includes('goal.com'))return /\/jp\/%e3%83%8b%e3%83%a5%e3%83%bc%e3%82%b9\//.test(path)||/\/jp\/ニュース\//.test(decodeURIComponent(path));
     if(host.includes('football-zone.net'))return /\/archives\/\d+/.test(path);
+    if(host.includes('footballchannel.jp'))return !isListingNewsUrl(url)&&(/\/\d{4}\//.test(path)||/\/article\//.test(path)||/\/post\//.test(path)||/\/20\d{2}\//.test(path));
+    if(host.includes('qoly.jp'))return !isListingNewsUrl(url)&&(/\/\d{4}\//.test(path)||/\/news\//.test(path)||/\/article\//.test(path));
+    if(host.includes('ultra-soccer.jp'))return !isListingNewsUrl(url)&&(/\/news\/view\?/.test(path+u.search.toLowerCase())||/\/news\//.test(path));
+    if(host.includes('nikkansports.com'))return !isListingNewsUrl(url)&&(/\/news\//.test(path)||/\/soccer\//.test(path));
     if(host.includes('soccer.yahoo.co.jp'))return /\/wcup\/category\/2026\//.test(path)&&!/\/(schedule|standings|stats|cups|about)\/?$/i.test(path);
     if(host.includes('news.yahoo.co.jp'))return /\/articles\//.test(path)||/\/pickup\//.test(path);
     if(host==='news.google.com')return isGoogleNewsArticleUrl(url);
@@ -2530,17 +2544,60 @@ async function fetchCuratedJapaneseSoccerNewsItems(target){
   ));
   let out=[];
   settled.forEach(x=>{out.push(...parseCuratedNewsLinks(x.text,x.source,target));});
-  out=dedupeNews(out);
-  if(out.length>=3||!target||target==='all')return out;
-  // 国別で見つからない場合は、国名を含むGoogle News RSSへ進むため空を返す。
+  out=dedupeNews(out,80);
+  // ここでは20件に切らず、後段で提供元が偏らないように並べ替える。
+  return out;
+}
+
+
+function newsSourceKey(item){
+  const host=newsProviderDomain(item)||String(item&&item.domain||'').trim().toLowerCase()||'unknown';
+  return host||'unknown';
+}
+function countNewsSources(items){
+  return new Set((Array.isArray(items)?items:[]).map(newsSourceKey).filter(Boolean)).size;
+}
+function diversifyNewsBySource(items,limit=20,firstPassCap=4){
+  const base=dedupeNews(Array.isArray(items)?items:[],100);
+  const groups=new Map();
+  for(const item of base){
+    const key=newsSourceKey(item);
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(item);
+  }
+  const keys=Array.from(groups.keys()).sort((a,b)=>{
+    const da=(groups.get(a)||[]).length, db=(groups.get(b)||[]).length;
+    return db-da;
+  });
+  const out=[];
+  const used=new Set();
+  const push=item=>{
+    if(!item||used.has(item.url)||out.some(x=>isSimilarNews(item,x)))return false;
+    used.add(item.url); out.push(item); return true;
+  };
+  // 第1段階：1媒体だけで埋まらないよう、各媒体から少数ずつ採用。
+  for(let round=0; round<firstPassCap && out.length<limit; round++){
+    for(const key of keys){
+      const item=(groups.get(key)||[])[round];
+      if(item)push(item);
+      if(out.length>=limit)break;
+    }
+  }
+  // 第2段階：残りを新しい順の元リスト順で補完。
+  for(const item of base){
+    push(item);
+    if(out.length>=limit)break;
+  }
   return out;
 }
 
 async function fetchNewsItems(target){
   // 根本方針：まず「直接記事の一覧ページ」をJina Readerで読む。
   // Google News RSS / CORSプロキシは不安定なので、主経路ではなく補助に限定する。
-  const primary=dedupeNews(await promiseWithSoftTimeout(fetchCuratedJapaneseSoccerNewsItems(target),4300));
-  if(primary.length>=3)return primary;
+  const primaryRaw=dedupeNews(await promiseWithSoftTimeout(fetchCuratedJapaneseSoccerNewsItems(target),4700),80);
+  const primary=diversifyNewsBySource(primaryRaw,20,4);
+  if(primary.length>=8 && countNewsSources(primary)>=3)return primary;
+  if(primary.length>=12 && countNewsSources(primary)>=2)return primary;
 
   const fallbackLoaders=[
     ['Google News RSS2JSON JSONP',()=>fetchGoogleNewsRss2JsonpItems(target)],
@@ -2565,7 +2622,7 @@ async function fetchNewsItems(target){
       combined.push({title,url,image:'',seen:x.seen||'',domain:x.domain||r.name});
     });
   });
-  return dedupeNews(combined);
+  return diversifyNewsBySource(combined,20,4);
 }
 function toNewsArticleFromGdelt(a){
   const url=normalizeNewsArticleUrl(a.url||a.url_mobile||'');
@@ -2925,8 +2982,9 @@ function isSimilarNews(a,b){
   if(shorter.length>=10&&longer.includes(shorter))return true;
   return titleSimilarity(na,nb)>=0.72;
 }
-function dedupeNews(items){
+function dedupeNews(items,limit=20){
   const out=[];
+  const max=Math.max(1,Number(limit)||20);
   for(const item of items){
     if(!item.title||!item.url)continue;
     const clean=Object.assign({},item);
@@ -2937,7 +2995,7 @@ function dedupeNews(items){
     clean.image=isHttpNewsImage(clean.image)?clean.image:'';
     if(out.some(x=>isSimilarNews(clean,x)))continue;
     out.push(clean);
-    if(out.length>=20)break;
+    if(out.length>=max)break;
   }
   return out;
 }

@@ -440,13 +440,14 @@ const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Af
 const NEWS_COUNTRY_ORDER=['jp'].concat(Object.keys(T).filter(id=>id!=='jp').sort((a,b)=>String(T[a]?.[0]||a).localeCompare(String(T[b]?.[0]||b),'ja')));
 const GDELT_DOC_API='https://api.gdeltproject.org/api/v2/doc/doc';
 const GOOGLE_NEWS_RSS='https://news.google.com/rss/search';
+const JINA_SEARCH_API='https://s.jina.ai/';
 const RSS2JSON_API='https://api.rss2json.com/v1/api.json';
 const ALLORIGINS_RAW='https://api.allorigins.win/raw?url=';
 const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=10000;
 const NEWS_BG_IMAGE_LIMIT=6;
-const NEWS_PIPELINE_VERSION='jp-news-stable-rss-gdelt-v3';
+const NEWS_PIPELINE_VERSION='jp-news-jina-direct-v4';
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -2295,17 +2296,100 @@ function fallbackNewsSearchItems(target){
   }));
 }
 
+
+function jinaSearchUrlForQuery(query){
+  return JINA_SEARCH_API+encodeURIComponent(query);
+}
+function buildJinaSearchQueries(target){
+  if(!target||target==='all')return [
+    'ワールドカップ サッカー 最新 ニュース',
+    'W杯 サッカー 最新 ニュース',
+    'FIFAワールドカップ 2026 サッカー ニュース',
+    'ワールドカップ 決勝トーナメント サッカー ニュース'
+  ];
+  const jp=T[target]?.[0]||target;
+  return [
+    `${jp} サッカー 最新 ニュース`,
+    `${jp} ワールドカップ 最新 ニュース`,
+    `${jp} W杯 最新 ニュース`,
+    `${jp} 代表 サッカー ニュース`
+  ];
+}
+function parseJinaSearchJson(data,domain){
+  const out=[];
+  const arr=Array.isArray(data)?data:(Array.isArray(data?.data)?data.data:(Array.isArray(data?.results)?data.results:[]));
+  arr.forEach(x=>{
+    const title=cleanNewsTitle(x.title||x.name||x.heading||'');
+    const url=normalizeNewsArticleUrl(x.url||x.link||x.href||x.source||x.urlSource||'');
+    const image=isHttpNewsImage(x.image||x.thumbnail||x.image_url||x.ogImage||'')?(x.image||x.thumbnail||x.image_url||x.ogImage):'';
+    if(title&&url)out.push({title,url,image,seen:x.publishedDate||x.date||x.timestamp||'',domain:domain||x.siteName||x.domain||''});
+  });
+  return out;
+}
+function parseJinaSearchText(text,domain){
+  const raw=String(text||'').replace(/\r/g,'');
+  const out=[];
+  const seen=new Set();
+  try{
+    const json=JSON.parse(raw);
+    out.push(...parseJinaSearchJson(json,domain));
+  }catch(e){}
+  const add=(title,url,extra={})=>{
+    title=cleanNewsTitle(stripMarkdownLinks(title||''));
+    url=normalizeNewsArticleUrl(url||'');
+    if(!title||!url||seen.has(url))return;
+    if(!isUsableNewsTitle(title))return;
+    if(/^(画像|動画|写真|一覧|もっと見る|続きを読む|Google|ニュース|詳細|その他|ログイン)$/.test(title))return;
+    seen.add(url);
+    out.push({title,url,image:extra.image||'',seen:extra.seen||'',domain:extra.domain||domain||''});
+  };
+  // Search mode often returns blocks with "Title:" and "URL Source:" lines.
+  const blockRe=/(?:^|\n)(?:#+\s*)?(?:Title:\s*)?([^\n]{8,220})\n+(?:URL Source|URL|Source):\s*(https?:\/\/[^\s\n)]+)/gi;
+  let m;
+  while((m=blockRe.exec(raw)))add(m[1],m[2]);
+  // Markdown links, used by both r.jina.ai and s.jina.ai in some modes.
+  const linkRe=/\[([^\]]{8,240})\]\((https?:\/\/[^)\s]+)\)/g;
+  while((m=linkRe.exec(raw)))add(m[1],m[2]);
+  // Fallback: line immediately before a raw URL.
+  const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean);
+  for(let i=0;i<lines.length;i++){
+    const urlMatch=lines[i].match(/https?:\/\/[^\s)]+/);
+    if(!urlMatch)continue;
+    const prev=(lines[i-1]||'').replace(/^[-*#\d.\s]+/,'').trim();
+    if(prev)add(prev,urlMatch[0]);
+  }
+  return out;
+}
+async function fetchJinaSearchNewsItems(target){
+  const out=[];
+  for(const q of buildJinaSearchQueries(target)){
+    try{
+      const res=await fetch(jinaSearchUrlForQuery(q),{cache:'no-store',headers:{'Accept':'application/json,text/plain,*/*'}});
+      if(!res.ok)throw new Error('Jina Search HTTP '+res.status);
+      const text=await res.text();
+      out.push(...parseJinaSearchText(text,'Jina Search'));
+      if(dedupeNews(out).length>=20)break;
+    }catch(e){console.warn('Jina Search failed',q,e)}
+  }
+  return out;
+}
+
 async function fetchNewsItems(target){
   // 根本方針：検索結果ページをカード化しない一方、Googleニュースの「記事ページ」は許容する。
   // 直接記事URLだけに絞ると取得元の仕様変更で0件になりやすいため、記事一覧はRSS/GDELTから先に表示し、
   // Googleニュース経由URLの直接記事化は後段のバックグラウンド処理で行う。
   const loaders=[
+    // 1. Jina Search: CORSで壊れにくく、検索結果ページではなく記事URLと記事タイトルを返しやすい。
+    ['Jina Search',()=>fetchJinaSearchNewsItems(target)],
+    // 2. GDELT: 直接記事URLと画像URLが取れる場合がある。
     ['GDELT',()=>fetchGdeltNewsItems(target)],
+    // 3. Google News RSS: Googleニュースの記事ページを許容。検索結果ページは除外。
     ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
     ['Google News AllOrigins',()=>fetchGoogleNewsAllOriginsItems(target)],
     ['Google News AllOrigins GET',()=>fetchGoogleNewsAllOriginsGetItems(target)],
     ['Google News Codetabs',()=>fetchGoogleNewsCoddProxyItems(target)],
     ['Google News Reader',()=>fetchGoogleNewsItems(target)],
+    // 4. 最後の補助。直接記事URLが取れたものだけ残す。
     ['Google News Search Reader',()=>fetchGoogleNewsSearchReaderItems(target)],
     ['Yahoo News Search Reader',()=>fetchYahooNewsSearchReaderItems(target)]
   ];

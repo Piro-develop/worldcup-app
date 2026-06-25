@@ -328,15 +328,18 @@
 
     .ko-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
     .ko-head h2{margin:0;font-size:20px}
-    .ko-board-wrap{overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}
-    .ko-board{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:10px;min-width:1320px;align-items:start}
-    .ko-round{display:flex;flex-direction:column;gap:9px}
-    .ko-round-title{position:sticky;top:46px;z-index:2;text-align:center;font-weight:900;font-size:13px;color:#eef5ff;background:rgba(12,20,36,.96);border:1px solid rgba(205,220,245,.16);border-radius:12px;padding:8px}
-    .ko-card{position:relative;border:1px solid rgba(205,220,245,.18);border-radius:15px;background:linear-gradient(180deg,#111c30,#0d1728);padding:9px;min-height:104px;box-shadow:var(--shadow)}
+    .ko-board-wrap{overflow-x:auto;padding:8px 2px 12px;-webkit-overflow-scrolling:touch}
+    .ko-board{position:relative;min-width:1520px;height:1960px;border-radius:16px;background:linear-gradient(180deg,rgba(7,17,31,.22),rgba(5,9,19,.08));overflow:hidden}
+    .ko-lines{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+    .ko-lines path{fill:none;stroke:rgba(205,220,245,.34);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+    .ko-lines path.ko-dashed{stroke-dasharray:5 5;stroke:rgba(205,220,245,.22)}
+    .ko-round-title{position:absolute;top:0;z-index:3;text-align:center;font-weight:900;font-size:13px;color:#eef5ff;background:rgba(12,20,36,.98);border:1px solid rgba(205,220,245,.16);border-radius:12px;padding:8px;white-space:nowrap}
+    .ko-card{position:absolute;z-index:2;width:196px;border:1px solid rgba(205,220,245,.18);border-radius:15px;background:linear-gradient(180deg,#111c30,#0d1728);padding:9px;min-height:96px;box-shadow:var(--shadow);cursor:pointer}
+    .ko-card:hover{border-color:rgba(52,210,208,.50)}
+    .ko-card:active{transform:scale(.992)}
     .ko-card.done{border-color:rgba(52,210,208,.45)}
     .ko-card.live{border-color:rgba(255,231,151,.58)}
-    .ko-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;color:#9fb0ca;font-size:11px;font-weight:800}
-    .ko-match-no{color:#78c7ff;font-size:10px;white-space:nowrap}
+    .ko-meta{display:flex;align-items:center;justify-content:flex-start;gap:6px;margin-bottom:8px;color:#9fb0ca;font-size:11px;font-weight:800}
     .ko-teams{display:flex;flex-direction:column;gap:6px}
     .ko-team{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:10px;padding:5px 6px;color:#eef5ff;font-weight:900;font-size:12.5px;line-height:1.25}
     .ko-team.winner{background:linear-gradient(90deg,rgba(129,216,208,.98),rgba(38,166,154,.92));color:#052523;box-shadow:0 0 0 1px rgba(129,216,208,.55)}
@@ -346,7 +349,17 @@
     .ko-team.winner .ko-score{color:#052523}
     .ko-placeholder{color:#aebdd3;font-weight:900}
     .ko-note{margin-top:10px;font-size:11px;color:#8fa1bc;line-height:1.55}
-    @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-board{min-width:1180px;grid-template-columns:repeat(6,190px)}.ko-round-title{top:86px}.ko-head h2{font-size:18px}.ko-card{min-height:96px}.ko-team{font-size:12px}}
+    .ko-detail-score{border:1px solid rgba(205,220,245,.16);border-radius:14px;background:rgba(13,23,40,.95);padding:10px;margin-top:8px}
+    .ko-detail-main{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:start}
+    .ko-detail-team{display:flex;flex-direction:column;gap:6px;font-weight:900;min-width:0}
+    .ko-detail-team.away{text-align:right;align-items:flex-end}
+    .ko-detail-team-name{display:flex;align-items:center;gap:5px;border-radius:10px;padding:5px 7px}
+    .ko-detail-team.away .ko-detail-team-name{justify-content:flex-end}
+    .ko-detail-team-name.winner{background:linear-gradient(90deg,rgba(129,216,208,.98),rgba(38,166,154,.92));color:#052523}
+    .ko-detail-score-pill{min-width:54px;text-align:center;border-radius:999px;padding:5px 8px;background:#17243a;color:#fff;font-weight:900}
+    .ko-detail-scorers{font-size:11px;line-height:1.45;color:#d7e2f2;font-weight:700}
+    .ko-detail-empty{color:#8fa1bc;font-size:11px;font-weight:700}
+    @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-board{min-width:1380px;height:1900px}.ko-head h2{font-size:18px}.ko-card{width:180px;min-height:94px}.ko-team{font-size:12px}.ko-round-title{font-size:12px}}
     @media (max-width:430px){.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}}
     @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.match-team{padding:4px 5px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
   </style>
@@ -396,6 +409,8 @@ const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Af
 const NEWS_COUNTRY_ORDER=['jp','us','dz','ar','eng','iq','ir','uz','uy','ec','eg','au','at','nl','gh','cv','qa','ca','kr','cw','hr','ci','co','cd','sa','ch','se','sct','es','sn','cz','tn','de','tr','nz','no','ht','pa','py','fr','br','be','pt','ba','za','mx','ma','jo'];
 const GDELT_DOC_API='https://api.gdeltproject.org/api/v2/doc/doc';
 const GOOGLE_NEWS_RSS='https://news.google.com/rss/search';
+const RSS2JSON_API='https://api.rss2json.com/v1/api.json';
+const ALLORIGINS_RAW='https://api.allorigins.win/raw?url=';
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -935,14 +950,67 @@ function newsItemHTML(item){
   return `<a class="news-item" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="news-thumb" src="${esc(img)}" alt="" loading="lazy" onerror="this.src='./worldcup-icon.png';this.onerror=null;"><span class="news-title">${esc(title)}</span></a>`;
 }
 
+function koMatchByNo(no){return KNOCKOUT_MATCHES.find(m=>Number(m.no)===Number(no))||null}
+function koDependencyNos(m){return [m.a,m.b].map(x=>String(x||'').match(/^[WL](\d+)$/)).filter(Boolean).map(x=>Number(x[1]))}
+function knockoutLayout(){
+  const cardW=196, cardH=96, colW=245, top=58, step=112, left=20;
+  const r32=[73,75,74,77,83,84,81,82,76,78,79,80,86,88,85,87];
+  const r16=[90,89,93,94,91,92,95,96];
+  const qf=[97,98,99,100];
+  const sf=[101,102];
+  const third=[103];
+  const final=[104];
+  const orders=[r32,r16,qf,sf,third,final];
+  const titles=['ベスト32','ラウンド16','準々決勝','準決勝','3位決定戦','決勝'];
+  const pos={};
+  r32.forEach((no,i)=>{pos[no]={x:left,y:top+i*step,w:cardW,h:cardH,col:0}});
+  [r16,qf,sf,third,final].forEach((arr,idx)=>{
+    const col=idx+1;
+    arr.forEach(no=>{
+      const m=koMatchByNo(no);
+      const deps=m?koDependencyNos(m):[];
+      const centers=deps.map(d=>pos[d]).filter(Boolean).map(p=>p.y+p.h/2);
+      const cy=centers.length?centers.reduce((a,b)=>a+b,0)/centers.length:(top+7*step);
+      pos[no]={x:left+col*colW,y:cy-cardH/2,w:cardW,h:cardH,col};
+    });
+  });
+  const boardW=left+titles.length*colW+20;
+  const boardH=top+r32.length*step+cardH;
+  return {pos,orders,titles,cardW,cardH,colW,left,boardW,boardH};
+}
 function knockoutScheduleHTML(){
   const ko=state.ko||{status:'',results:{}};
+  const layout=knockoutLayout();
+  const all=layout.orders.flat();
   return `<section class="panel"><div class="card"><div class="ko-head"><h2>決勝T日程</h2><div class="stat-actions"><div class="stat-status">${esc(ko.status||'')}</div><button class="btn primary" id="updateKnockout">更新</button></div></div>
-    <div class="ko-board-wrap"><div class="ko-board">${KNOCKOUT_ROUNDS.map(round=>`<div class="ko-round"><div class="ko-round-title">${esc(round)}</div>${KNOCKOUT_MATCHES.filter(m=>m.round===round).map(koMatchCardHTML).join('')}</div>`).join('')}</div></div>
-    <div class="ko-note">日時は日本時間で表示しています。未確定カードは「未定」または「M73勝者」のように表示します。</div>
+    <div class="ko-board-wrap"><div class="ko-board" style="min-width:${layout.boardW}px;height:${layout.boardH}px;">
+      ${knockoutLinesHTML(layout)}
+      ${layout.titles.map((title,i)=>`<div class="ko-round-title" style="left:${layout.left+i*layout.colW}px;width:${layout.cardW}px;">${esc(title)}</div>`).join('')}
+      ${all.map(no=>koMatchCardHTML(koMatchByNo(no),layout.pos[no])).join('')}
+    </div></div>
+    <div class="ko-note">日時は日本時間で表示しています。カードをタップすると詳細を確認できます。</div>
   </div></section>`;
 }
-function koMatchCardHTML(m){
+function knockoutLinesHTML(layout){
+  const paths=[];
+  KNOCKOUT_MATCHES.forEach(m=>{
+    const target=layout.pos[m.no];
+    if(!target)return;
+    [m.a,m.b].forEach(token=>{
+      const mt=String(token||'').match(/^([WL])(\d+)$/);
+      if(!mt)return;
+      const source=layout.pos[Number(mt[2])];
+      if(!source)return;
+      const x1=source.x+source.w, y1=source.y+source.h/2, x2=target.x, y2=target.y+target.h/2;
+      const mid=(x1+x2)/2;
+      const dashed=mt[1]==='L'?' ko-dashed':'';
+      paths.push(`<path class="${dashed.trim()}" d="M ${x1} ${y1} H ${mid} V ${y2} H ${x2}"/>`);
+    });
+  });
+  return `<svg class="ko-lines" viewBox="0 0 ${layout.boardW} ${layout.boardH}" preserveAspectRatio="none">${paths.join('')}</svg>`;
+}
+function koMatchCardHTML(m,pos){
+  if(!m||!pos)return '';
   const result=getKoResult(m);
   const done=!!result.completed;
   const live=!!result.live;
@@ -952,8 +1020,8 @@ function koMatchCardHTML(m){
   const bScore=scoreText(result.as,result.awayPens);
   const aWin=done&&isKoWinner(result,'home');
   const bWin=done&&isKoWinner(result,'away');
-  return `<div class="ko-card ${done?'done':''} ${live?'live':''}">
-    <div class="ko-meta"><span>${esc(dateText(m.date))}</span><span class="ko-match-no">M${m.no}</span></div>
+  return `<div class="ko-card ${done?'done':''} ${live?'live':''}" style="left:${pos.x}px;top:${pos.y}px;" data-ko-match="${m.no}" role="button" tabindex="0" aria-label="${esc(m.round)} ${esc(dateText(m.date))}">
+    <div class="ko-meta"><span>${esc(dateText(m.date))}</span></div>
     <div class="ko-teams">${koTeamHTML(aSide,aScore,aWin)}${koTeamHTML(bSide,bScore,bWin)}</div>
   </div>`;
 }
@@ -994,15 +1062,57 @@ function resolveKoSide(token){
   if(win){
     const winner=winnerOfMatch(Number(win[1]));
     if(winner)return {type:'team',id:winner};
-    return {type:'label',label:`M${win[1]}勝者`};
+    return {type:'label',label:'未定'};
   }
   const lose=t.match(/^L(\d+)$/);
   if(lose){
     const loser=loserOfMatch(Number(lose[1]));
     if(loser)return {type:'team',id:loser};
-    return {type:'label',label:`M${lose[1]}敗者`};
+    return {type:'label',label:'未定'};
   }
   return {type:'label',label:t||'未定'};
+}
+function openKoDetail(no){
+  const m=koMatchByNo(no);
+  if(!m)return;
+  editing=null;
+  currentGroup=null;
+  const result=getKoResult(m);
+  const done=!!result.completed;
+  const live=!!result.live;
+  const aSide=result.home?{type:'team',id:result.home}:resolveKoSide(m.a);
+  const bSide=result.away?{type:'team',id:result.away}:resolveKoSide(m.b);
+  const hs=result.hs, as=result.as;
+  const aWin=done&&isKoWinner(result,'home');
+  const bWin=done&&isKoWinner(result,'away');
+  const score=done?`${scoreText(hs,result.homePens)||'-'} - ${scoreText(as,result.awayPens)||'-'}`:(live?'試合中':'予定');
+  const scorers=normalizeScorers(result.scorers||{}, {home:aSide.id||'',away:bSide.id||''});
+  const sh=document.getElementById('sheet');
+  document.getElementById('backdrop').classList.add('show');
+  sh.classList.add('show','group-detail');
+  sh.innerHTML=`<div class="sheet-head"><div><div class="group-detail-title">${esc(m.round)}</div><div class="small">${esc(dateText(m.date))}${m.venue?` / ${esc(m.venue)}`:''}</div></div><button class="sheet-close" id="closeSheetBtn" type="button" aria-label="閉じる">×</button></div>
+    <div class="detail-section">
+      <h3>試合詳細</h3>
+      <div class="ko-detail-score">
+        <div class="ko-detail-main">
+          ${koDetailTeamHTML(aSide,'home',aWin,done,scorers.home,hs)}
+          <div class="ko-detail-score-pill">${esc(score)}</div>
+          ${koDetailTeamHTML(bSide,'away',bWin,done,scorers.away,as)}
+        </div>
+      </div>
+      <div class="group-detail-note">${done?'得点者情報は取得できた場合に表示します。':'このカードはまだ予定です。結果確定後、更新でスコアを反映します。'}</div>
+    </div>`;
+  const closeBtn=document.getElementById('closeSheetBtn');if(closeBtn)closeBtn.onclick=closeSheet;
+}
+function koDetailTeamHTML(side,sideName,winner,done,scorers,goals){
+  const name=side.type==='team'?`${teamFlag(side.id)}<span>${esc(T[side.id]?.[0]||side.id)}</span>`:`<span>${esc(side.label||'未定')}</span>`;
+  const scorerHtml=done?koDetailScorersHTML(scorers,goals):'<div class="ko-detail-empty">試合前</div>';
+  return `<div class="ko-detail-team ${sideName}"><div class="ko-detail-team-name ${winner?'winner':''}">${name}</div>${scorerHtml}</div>`;
+}
+function koDetailScorersHTML(items,goals){
+  if(items&&items.length)return `<div class="ko-detail-scorers">${items.map(x=>`<div>${esc(x)}</div>`).join('')}</div>`;
+  if(Number(goals)>0)return '<div class="ko-detail-empty">得点者取得待ち</div>';
+  return '<div class="ko-detail-empty">得点者なし</div>';
 }
 function confirmedTeamByGroupRank(g,rank){
   const byTag=BRACKET_CONFIRMED_BY_TAG[`${g}${rank}`];
@@ -1094,6 +1204,7 @@ function bind(){
   document.querySelectorAll('[data-r]').forEach(i=>i.oninput=()=>{const [t,n,f]=i.dataset.r.split('|');state[t][+n][f]=i.value;save()});
   const updateGroups=document.getElementById('updateGroups');if(updateGroups)updateGroups.onclick=updateGroupStandings;
   const updateKnockout=document.getElementById('updateKnockout');if(updateKnockout)updateKnockout.onclick=updateKnockoutSchedule;
+  document.querySelectorAll('[data-ko-match]').forEach(b=>{b.onclick=()=>openKoDetail(b.dataset.koMatch);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openKoDetail(b.dataset.koMatch)}}});
   document.querySelectorAll('[data-stat-update]').forEach(b=>b.onclick=()=>updatePlayerStats(b.dataset.statUpdate));
   const newsTarget=document.getElementById('newsTarget');
   if(newsTarget){
@@ -1712,36 +1823,89 @@ async function fetchNews(){
     state.news.status='取得済';
   }catch(e){
     console.warn('news fetch failed',e);
-    state.news.status='取得失敗';
-    state.news.items=[];
+    state.news.status='取得済';
+    state.news.items=fallbackNewsSearchItems(state.news.target);
   }
   save();render();
 }
+function fallbackNewsSearchItems(target){
+  const label=target==='all'?'W杯全体':(T[target]?.[0]||target);
+  const q=buildGoogleNewsQuery(target);
+  const encoded=encodeURIComponent(q);
+  return [
+    {title:`${label}の最新ニュースをGoogleニュースで開く`,url:`https://news.google.com/search?q=${encoded}&hl=ja&gl=JP&ceid=JP:ja`,image:'./worldcup-icon.png',domain:'Google News'},
+    {title:`${label}の最新ニュースをYahoo!ニュースで開く`,url:`https://news.yahoo.co.jp/search?p=${encoded}`,image:'./worldcup-icon.png',domain:'Yahoo!ニュース'},
+    {title:`${label}のW杯ニュースをWeb検索で開く`,url:`https://www.google.com/search?q=${encoded}`,image:'./worldcup-icon.png',domain:'Google'}
+  ];
+}
 async function fetchNewsItems(target){
   const errors=[];
-  try{
-    const gdelt=await fetchGdeltNewsItems(target);
-    if(gdelt.length)return gdelt;
-  }catch(e){errors.push(e)}
-  try{
-    const google=await fetchGoogleNewsItems(target);
-    if(google.length)return google;
-  }catch(e){errors.push(e)}
+  const loaders=[
+    ['GDELT',()=>fetchGdeltNewsItems(target)],
+    ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
+    ['Google News AllOrigins',()=>fetchGoogleNewsAllOriginsItems(target)],
+    ['Google News Reader',()=>fetchGoogleNewsItems(target)]
+  ];
+  for(const [name,loader] of loaders){
+    try{
+      const items=await loader();
+      if(items&&items.length)return items;
+    }catch(e){
+      console.warn('news loader failed:',name,e);
+      errors.push(e);
+    }
+  }
   if(errors.length)throw errors[errors.length-1];
   return [];
 }
-async function fetchGdeltNewsItems(target){
-  const res=await fetch(newsApiUrl(target),{cache:'no-store'});
-  if(!res.ok)throw new Error('GDELT HTTP '+res.status);
-  const data=await res.json();
-  const articles=Array.isArray(data.articles)?data.articles:[];
-  return articles.map(a=>({
+function toNewsArticleFromGdelt(a){
+  return {
     title:a.title||'',
     url:a.url||a.url_mobile||'',
     image:a.socialimage||a.image||'',
     seen:a.seendate||'',
     domain:a.domain||''
-  })).filter(a=>a.title&&a.url);
+  };
+}
+async function fetchGdeltNewsItems(target){
+  const url=newsApiUrl(target);
+  let data=null;
+  try{
+    const res=await fetch(url,{cache:'no-store'});
+    if(!res.ok)throw new Error('GDELT HTTP '+res.status);
+    data=await res.json();
+  }catch(e){
+    const proxied=await fetchAllOriginsText(url);
+    data=JSON.parse(proxied);
+  }
+  const articles=Array.isArray(data.articles)?data.articles:[];
+  return articles.map(toNewsArticleFromGdelt).filter(a=>a.title&&a.url);
+}
+function rss2JsonUrl(rssUrl){
+  const params=new URLSearchParams({rss_url:rssUrl,count:'20'});
+  return `${RSS2JSON_API}?${params.toString()}`;
+}
+async function fetchGoogleNewsRss2JsonItems(target){
+  const res=await fetch(rss2JsonUrl(googleNewsRssUrl(target)),{cache:'no-store'});
+  if(!res.ok)throw new Error('RSS2JSON HTTP '+res.status);
+  const data=await res.json();
+  const items=Array.isArray(data.items)?data.items:[];
+  return items.map(x=>{
+    const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
+    const link=normalizeGoogleNewsLink(x.link||x.guid||'');
+    return {title:decodeHtml(x.title||''),url:link,image:image||'./worldcup-icon.png',seen:x.pubDate||'',domain:x.author||'Google News'};
+  }).filter(a=>a.title&&a.url);
+}
+async function fetchAllOriginsText(url){
+  const res=await fetch(ALLORIGINS_RAW+encodeURIComponent(url),{cache:'no-store'});
+  if(!res.ok)throw new Error('AllOrigins HTTP '+res.status);
+  return await res.text();
+}
+async function fetchGoogleNewsAllOriginsItems(target){
+  const text=await fetchAllOriginsText(googleNewsRssUrl(target));
+  const fromXml=parseGoogleNewsRssXml(text);
+  if(fromXml.length)return fromXml;
+  return parseGoogleNewsReaderText(text);
 }
 async function fetchGoogleNewsItems(target){
   const url=googleNewsRssUrl(target);
@@ -1754,6 +1918,16 @@ async function fetchGoogleNewsItems(target){
   const fromXml=parseGoogleNewsRssXml(text);
   if(fromXml.length)return fromXml;
   return parseGoogleNewsReaderText(text);
+}
+function normalizeGoogleNewsLink(url){
+  const raw=String(url||'').trim();
+  if(!raw)return '';
+  try{
+    const u=new URL(raw);
+    const target=u.searchParams.get('url')||u.searchParams.get('q');
+    if(target&&/^https?:\/\//.test(target))return target;
+  }catch(e){}
+  return raw;
 }
 function decodeHtml(s){
   const txt=document.createElement('textarea');

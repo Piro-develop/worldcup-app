@@ -340,6 +340,7 @@ const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
   goals:[
+    {name:'Soccer King 得点ランキング',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'},
     {name:'ESPN Stats',url:'https://www.espn.com/soccer/stats/_/league/fifa.world'},
     {name:'Google Search',url:'https://www.google.com/search?q=ワールドカップ+統計情報+得点ランキング'},
     {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+scorers'}
@@ -662,7 +663,7 @@ function simpleTab(tab){
   return `<div class="card"><h2>${title}</h2>
     <div class="stat-toolbar"><div class="stat-status">状態：${esc(status)}<span class="source-pill">無料自動取得を試行</span></div><button class="btn primary" data-stat-update="${tab}">更新</button></div>
     <table class="table stat-table"><thead><tr><th>順位</th><th>${label}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank||i+1}</td><td>${esc(r.value||'')}</td><td><span class="stat-player">${r.team?teamFlag(r.team):''}${esc(r.player||'')}</span>${r.team?` <span class="small">(${esc(T[r.team]?.[0]||r.team)})</span>`:''}</td></tr>`).join('')}</tbody></table>
-    <div class="stat-source-note">ESPN/Google検索ページをJina Reader経由で読み取り、表形式・行形式の統計データを抽出します。取得元の表示形式が変わる場合は失敗します。</div>
+    <div class="stat-source-note">得点ランキングはSoccer Kingを優先してJina Reader経由で読み取り、取得できない場合のみESPN/Google検索を試します。取得元の表示形式が変わる場合は失敗します。</div>
   </div>`
 }
 function bind(){
@@ -788,7 +789,6 @@ function openGroupDetail(g){
   document.getElementById('backdrop').classList.add('show');
   sh.classList.add('show','group-detail');
   renderGroupDetail(g);
-  loadGroupMatchDetails(g);
 }
 function renderGroupDetail(g){
   const sh=document.getElementById('sheet');
@@ -798,7 +798,7 @@ function renderGroupDetail(g){
       ${groupDetailTable(g)}
       <h3>試合結果・予定</h3>
       <div class="match-list">${(GROUP_MATCHES[g]||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).map(matchCardHTML).join('')}</div>
-      <div class="group-detail-note">得点者と得点時間は、外部データから取得できた場合に表示します。取得元の仕様・通信状況により表示されない場合があります。</div>
+      <div class="group-detail-note">試合結果・予定は取得可能な公開データをもとに表示します。</div>
     </div>`;
   const closeBtn=document.getElementById('closeSheetBtn');if(closeBtn)closeBtn.onclick=closeSheet;
 }
@@ -808,21 +808,13 @@ function matchCardHTML(m){
   const hs=cached.hs ?? m.hs;
   const as=cached.as ?? m.as;
   const score=done?`${hs ?? '-'} - ${as ?? '-'}`:'予定';
-  const byTeam=normalizeScorers(cached.scorers,m);
-  const homeScorers=scorerLines(byTeam.home);
-  const awayScorers=scorerLines(byTeam.away);
-  const hasGoals=done&&Number(hs||0)+Number(as||0)>0;
-  const loading=cached.loading;
-  const missing=hasGoals&&!loading&&!homeScorers&&!awayScorers;
-  const note=loading?'得点者を取得中...':(missing?'得点者情報は未取得です。':'');
   return `<div class="match-card">
     <div class="match-date">${dateText(m.date)}</div>
     <div class="match-main">
-      <div class="match-team home">${teamNameLine(m.home)}${homeScorers?`<div class="team-scorers">${homeScorers}</div>`:''}</div>
+      <div class="match-team home">${teamNameLine(m.home)}</div>
       <div class="match-score ${done?'done':''}">${score}</div>
-      <div class="match-team away">${teamNameLine(m.away)}${awayScorers?`<div class="team-scorers">${awayScorers}</div>`:''}</div>
+      <div class="match-team away">${teamNameLine(m.away)}</div>
     </div>
-    ${note?`<div class="scorers"><span class="scorer-empty">${note}</span></div>`:''}
   </div>`
 }
 function normalizeScorers(scorers,m){
@@ -1060,12 +1052,58 @@ async function fetchPlayerStats(kind){
   for(const src of sources){
     try{
       const txt=await fetchReaderText(src.url);
-      const rows=parseStatsText(txt,kind);
+      const rows=src.parser==='soccerking'?parseSoccerKingStats(txt,kind):parseStatsText(txt,kind);
       if(rows.length)return {source:src.name,rows};
       last=src.name+' は取得できましたが、表を解析できませんでした。';
     }catch(e){last=src.name+' 取得失敗';}
   }
   return {rows:[],message:last};
+}
+function stripMarkdownLinks(line){
+  return String(line||'')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g,'')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g,'$1')
+    .replace(/https?:\/\/\S+/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function parseSoccerKingStats(text,kind){
+  if(kind!=='goals')return [];
+  const lines=String(text||'').replace(/\r/g,'').split('\n').map(stripMarkdownLinks).filter(Boolean);
+  const start=Math.max(0,lines.findIndex(l=>/FIFAワールドカップ\s*2026\s*得点ランキング|得点ランキング/.test(l)));
+  const scope=lines.slice(start,start+120);
+  const rows=[];
+  const seen=new Set();
+  for(let i=0;i<scope.length-1;i++){
+    const line=scope[i].replace(/^[-*]\s*/,'').trim();
+    const rank=line.match(/^(\d{1,2})[\.\)]?\s+(.+)$/);
+    if(!rank)continue;
+    const player=cleanPlayerName(rank[2]);
+    if(!player||/順位|選手|得点|ランキング|INDEX|ワールドカップ/.test(player))continue;
+    for(let j=i+1;j<Math.min(scope.length,i+4);j++){
+      const stat=scope[j].replace(/^[-*]\s*/,'').trim();
+      // 例：アルゼンチン 5 0 170′ / 日本 2 1 168'
+      const m=stat.match(/^(.+?)\s+(\d{1,2})\s+(\d{1,2})\s+\d{1,4}\s*[′'’]?$/);
+      if(!m)continue;
+      const team=teamIdFromText(m[1]);
+      const value=Number(m[2]);
+      if(!team||!value)continue;
+      const key=player+'|'+team+'|'+value;
+      if(!seen.has(key)){seen.add(key);rows.push({player,team,value})}
+      break;
+    }
+    if(rows.length>=15)break;
+  }
+  return rows.sort((a,b)=>Number(b.value)-Number(a.value));
+}
+function cleanPlayerName(name){
+  return String(name||'')
+    .replace(/^[\d\s\.\)]+/,'')
+    .replace(/[#*`]/g,'')
+    .replace(/\[[^\]]+\]/g,'')
+    .replace(/^[：:・\-–—\s]+/,'')
+    .replace(/\s+/g,' ')
+    .trim();
 }
 function parseStatsText(text,kind){
   const cleaned=String(text||'').replace(/\r/g,'');

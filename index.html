@@ -459,7 +459,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=8500;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_PIPELINE_VERSION='jp-news-country-schedule-result-v12';
+const NEWS_PIPELINE_VERSION='jp-news-scored-fallback-v13';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -2066,42 +2066,71 @@ function buildNewsQuery(target){
   const jp=T[target]?.[0]||target;
   return `${jp} (ワールドカップ OR W杯) サッカー`;
 }
-function buildGdeltQueries(target){
-  if(!target||target==='all')return [
-    '2026 北中米ワールドカップ スタジアム 集客 大会',
-    'FIFAワールドカップ2026 大会運営 ルール 評価',
-    '北中米W杯 2026 世界 熱狂 盛り上がり',
-    'ワールドカップ2026 開催地 経済効果 課題'
-  ];
-  const jp=T[target]?.[0]||target;
+function newsTargetOpponentIds(target){
+  if(!target||target==='all')return [];
+  const g=TEAM_TO_GROUP[target];
+  const matches=(GROUP_MATCHES[g]||[]).filter(m=>m.home===target||m.away===target);
+  return uniq(matches.map(m=>m.home===target?m.away:m.home).filter(Boolean));
+}
+function newsTargetOpponentAliases(target){
+  return uniq(newsTargetOpponentIds(target).flatMap(id=>newsTargetAliasList(id)).filter(Boolean));
+}
+function buildWholeTournamentNewsQueries(){
   return [
-    `${jp} W杯 試合結果`,
-    `${jp} ワールドカップ 日程 結果`,
-    `${jp} 2026 W杯 監督 コメント`,
-    `${jp} 北中米W杯 選手 インタビュー`,
-    `${jp} ワールドカップ2026 怪我 コンディション`,
-    `${jp} W杯 2026 スタメン予想 次戦`
+    '北中米W杯 2026 スタジアム 開催地 観客 集客',
+    'FIFAワールドカップ2026 大会運営 ルール VAR 評価',
+    '2026 ワールドカップ 北中米 チケット 観客動員 経済効果',
+    '北中米ワールドカップ 2026 課題 批判 評価 開催都市',
+    'FIFAワールドカップ2026 世界 盛り上がり 熱狂 人気',
+    '2026年 ワールドカップ カナダ メキシコ アメリカ スタジアム'
   ];
+}
+function buildCountryNewsQueryTiers(target){
+  const jp=T[target]?.[0]||target;
+  const aliases=newsTargetAliasList(target).filter(Boolean);
+  const alias=aliases.find(a=>/[ぁ-んァ-ヶ一-龯]/.test(a))||jp;
+  const primary=[
+    `${alias} W杯 監督 コメント`,
+    `${alias} W杯 選手 インタビュー`,
+    `${alias} ワールドカップ 怪我 コンディション`,
+    `${alias} W杯 スタメン 先発 次戦`,
+    `${alias} W杯 練習 戦術 会見`,
+    `${alias} 代表 W杯 キーマン`
+  ];
+  const secondary=[
+    `${alias} W杯 試合結果`,
+    `${alias} ワールドカップ 日程 結果`,
+    `${alias} W杯 スコア 次戦`,
+    `${alias} W杯 グループステージ 突破 敗退`,
+    `${alias} W杯 決勝トーナメント`,
+    `${alias} 代表 ワールドカップ ニュース`
+  ];
+  const opponents=newsTargetOpponentAliases(target).filter(a=>/[ぁ-んァ-ヶ一-龯]/.test(a)).slice(0,6);
+  const tertiary=[];
+  opponents.forEach(op=>{
+    tertiary.push(`${alias} ${op} W杯`);
+    tertiary.push(`${alias} ${op} ワールドカップ`);
+  });
+  aliases.filter(a=>a!==alias).slice(0,5).forEach(a=>{
+    tertiary.push(`${a} W杯`);
+    tertiary.push(`${a} ワールドカップ`);
+  });
+  return {primary:uniq(primary),secondary:uniq(secondary),tertiary:uniq(tertiary)};
+}
+function flattenNewsQueryTiers(tiers){
+  if(Array.isArray(tiers))return tiers;
+  return uniq([...(tiers.primary||[]),...(tiers.secondary||[]),...(tiers.tertiary||[])]).slice(0,18);
+}
+function buildGdeltQueries(target){
+  if(!target||target==='all')return buildWholeTournamentNewsQueries();
+  return flattenNewsQueryTiers(buildCountryNewsQueryTiers(target));
 }
 function buildGoogleNewsQuery(target){
   return buildGoogleNewsQueries(target)[0];
 }
 function buildGoogleNewsQueries(target){
-  if(!target||target==='all')return [
-    '2026 北中米ワールドカップ スタジアム 集客 大会',
-    'FIFAワールドカップ2026 大会運営 ルール 評価',
-    '北中米W杯 2026 世界 熱狂 盛り上がり',
-    'ワールドカップ2026 開催地 経済効果 課題'
-  ];
-  const jp=T[target]?.[0]||target;
-  return [
-    `${jp} W杯 試合結果`,
-    `${jp} ワールドカップ 日程 結果`,
-    `${jp} 2026 W杯 監督 コメント`,
-    `${jp} 北中米W杯 選手 インタビュー`,
-    `${jp} ワールドカップ2026 怪我 コンディション`,
-    `${jp} W杯 2026 スタメン予想 次戦`
-  ];
+  if(!target||target==='all')return buildWholeTournamentNewsQueries();
+  return flattenNewsQueryTiers(buildCountryNewsQueryTiers(target));
 }
 function hasJapaneseText(s){
   return /[ぁ-んァ-ヶ一-龯]/.test(String(s||''));
@@ -2381,19 +2410,8 @@ function jinaSearchUrlForQuery(query){
   return JINA_SEARCH_API+encodeURIComponent(query);
 }
 function buildJinaSearchQueries(target){
-  if(!target||target==='all')return [
-    'ワールドカップ スタジアム 集客 大会 ニュース',
-    'FIFAワールドカップ 大会運営 ルール 評価 ニュース',
-    'ワールドカップ 世界 熱狂 盛り上がり ニュース',
-    'ワールドカップ 開催地 経済効果 課題 ニュース'
-  ];
-  const jp=T[target]?.[0]||target;
-  return [
-    `${jp} W杯 監督 コメント ニュース`,
-    `${jp} W杯 選手 インタビュー ニュース`,
-    `${jp} W杯 怪我 コンディション ニュース`,
-    `${jp} W杯 スタメン予想 次戦 ニュース`
-  ];
+  const qs=buildGoogleNewsQueries(target).map(q=>`${q} ニュース`);
+  return uniq(qs).slice(0,14);
 }
 function parseJinaSearchJson(data,domain){
   const out=[];
@@ -2472,7 +2490,7 @@ function newsTargetAliasList(target){
     hr:['クロアチア'],
     es:['スペイン'],
     at:['オーストリア'],
-    us:['アメリカ','米国','アメリカ代表','米国代表'],
+    us:['アメリカ','米国','アメリカ代表','米国代表','USA','USMNT','United States'],
     be:['ベルギー'],
     ci:['コートジボワール','コートジボワール代表'],
     no:['ノルウェー'],
@@ -2486,24 +2504,24 @@ function newsTargetAliasList(target){
     nl:['オランダ'],
     se:['スウェーデン'],
     tn:['チュニジア'],
-    cz:['チェコ'],
+    cz:['チェコ','チェコ代表','Czechia','CZE'],
     qa:['カタール'],
     ba:['ボスニア','ボスニア・ヘルツェゴビナ'],
     ht:['ハイチ'],
     sct:['スコットランド'],
     tr:['トルコ'],
     ec:['エクアドル'],
-    cw:['キュラソー'],
+    cw:['キュラソー','キュラソー代表','Curacao','Curaçao','CUW'],
     ir:['イラン'],
-    nz:['ニュージーランド'],
+    nz:['ニュージーランド','ニュージーランド代表','New Zealand','NZL'],
     sa:['サウジアラビア','サウジ'],
-    cv:['カーボベルデ'],
+    cv:['カーボベルデ','カーボベルデ代表','Cape Verde','CPV'],
     sn:['セネガル'],
     iq:['イラク'],
-    dz:['アルジェリア'],
+    dz:['アルジェリア','アルジェリア代表','Algeria','DZA'],
     jo:['ヨルダン'],
     uz:['ウズベキスタン'],
-    cd:['DRコンゴ','コンゴ民主共和国','コンゴ'],
+    cd:['DRコンゴ','コンゴ民主共和国','コンゴ','コンゴ民主共和国代表','DR Congo','COD'],
     gh:['ガーナ'],
     pa:['パナマ']
   }[target]||[];
@@ -2547,7 +2565,7 @@ function hasWholeTournamentEditorialTopic(text){
 function mentionsAnyCountryAlias(text,targetToIgnore){
   let t=String(text||'').toLowerCase();
   // 全体ニュースで使われやすい時刻・開催地表現は、国別記事と誤判定しないよう除外します。
-  t=t.replace(/日本時間/g,'').replace(/現地時間/g,'').replace(/北米中/g,'').replace(/開催国/g,'');
+  t=t.replace(/日本時間/g,'').replace(/現地時間/g,'').replace(/北米中/g,'').replace(/北中米/g,'').replace(/開催国/g,'').replace(/開催地/g,'').replace(/開催都市/g,'');
   for(const id of Object.keys(T)){
     if(id===targetToIgnore)continue;
     const aliases=newsTargetAliasList(id).filter(a=>String(a||'').length>=2);
@@ -2560,31 +2578,74 @@ function mentionsAnyCountryAlias(text,targetToIgnore){
   }
   return false;
 }
-function isWholeTournamentNews(title,url,source){
-  const text=cleanNewsTitle(title)+' '+String(url||'')+' '+String(source&&source.name||source||'');
-  if(isImageOnlyNewsTitle(title))return false;
-  if(!hasCurrentMensWorldCup2026Context(text))return false;
-  if(hasUtilityOnlyNewsTopic(text))return false;
-  if(!hasWholeTournamentEditorialTopic(text))return false;
-  // W杯全体では、個別国の次戦・選手・監督中心の記事は除外します。
-  if(mentionsAnyCountryAlias(text,'' )&&hasCountryEditorialTopic(text))return false;
-  return true;
+function newsHardRejectsText(text,title){
+  if(isImageOnlyNewsTitle(title||text))return true;
+  if(hasExcludedWorldCupCategory(text))return true;
+  return false;
 }
-function newsMatchesRequestedScope(item,target,source){
+function countryOpponentMatchesNewsTarget(text,target){
+  if(!target||target==='all')return false;
+  const t=String(text||'').toLowerCase();
+  return newsTargetOpponentAliases(target).some(a=>{
+    const x=String(a||'').toLowerCase();
+    return x.length>=2&&t.includes(x);
+  });
+}
+function scoreWholeTournamentNews(item,target,source){
   const title=cleanNewsTitle(item&&item.title||'');
   const url=String(item&&item.url||'');
   const text=title+' '+url+' '+String(source&&source.name||source||'')+' '+String(item&&item.domain||'');
-  if(!isUsableNewsTitle(title))return false;
-  if(isImageOnlyNewsTitle(title))return false;
-  if(!target||target==='all'){
-    if(!hasCurrentMensWorldCup2026Context(text))return false;
-    return isWholeTournamentNews(title,url,source);
-  }
-  if(!titleMatchesNewsTarget(text,target))return false;
-  if(!hasCountryWorldCupNewsContext(text,target))return false;
-  // 国別は、インタビュー・負傷・スタメン等に加えて、日程・結果系も許可する。
-  // ただし、似た記事は dedupeNews / prepareNewsItems 側で除外する。
-  return hasCountryEditorialTopic(text)||hasCountryScheduleResultTopic(text)||hasUtilityOnlyNewsTopic(text);
+  if(!isUsableNewsTitle(title))return {score:-999,category:'reject'};
+  if(newsHardRejectsText(text,title))return {score:-999,category:'reject'};
+  if(!hasCurrentMensWorldCup2026Context(text))return {score:-999,category:'reject'};
+  let score=0;
+  if(/(FIFAワールドカップ|ワールドカップ|W杯|World Cup|worldcup|wcup)/i.test(text))score+=22;
+  if(/(2026|北米中|北中米|カナダ|メキシコ|アメリカ|米国|開催都市|開催地|スタジアム)/i.test(text))score+=26;
+  if(hasWholeTournamentEditorialTopic(text))score+=42;
+  if(/(FIFA|大会|運営|開催|会場|観客|チケット|ルール|VAR|審判|経済効果|スポンサー|放映権|セキュリティ)/.test(text))score+=12;
+  if(hasUtilityOnlyNewsTopic(text))score-=55;
+  // 個別国の選手・監督・次戦記事は、W杯全体ではなく国別ニュースに寄せます。
+  if(mentionsAnyCountryAlias(text,'')&&hasCountryEditorialTopic(text))score-=60;
+  if(/(試合結果|結果速報|スコア|日程|放送|中継|順位表|得点ランキング|アシストランキング)/.test(text)&&!hasWholeTournamentEditorialTopic(text))score-=45;
+  return {score,category:'whole'};
+}
+function scoreCountryNews(item,target,source){
+  const title=cleanNewsTitle(item&&item.title||'');
+  const url=String(item&&item.url||'');
+  const text=title+' '+url+' '+String(source&&source.name||source||'')+' '+String(item&&item.domain||'');
+  if(!isUsableNewsTitle(title))return {score:-999,category:'reject'};
+  if(newsHardRejectsText(text,title))return {score:-999,category:'reject'};
+  const aliasHit=titleMatchesNewsTarget(text,target);
+  const opponentHit=countryOpponentMatchesNewsTarget(text,target);
+  if(!aliasHit&&!opponentHit)return {score:-999,category:'reject'};
+  const editorial=hasCountryEditorialTopic(text);
+  const schedule=hasCountryScheduleResultTopic(text)||hasUtilityOnlyNewsTopic(text);
+  // 国名＋対戦相手名＋試合/次戦系の記事は、タイトルにW杯の語がなくても救済します。
+  // 例：「アメリカ対トルコの見どころ」「アルジェリアがオーストリア戦へ調整」など。
+  if(!hasCountryWorldCupNewsContext(text,target)&&!(aliasHit&&opponentHit&&(schedule||editorial)))return {score:-999,category:'reject'};
+  let score=0;
+  if(aliasHit)score+=36;
+  if(opponentHit)score+=14;
+  if(/(FIFAワールドカップ|ワールドカップ|W杯|World Cup|worldcup|wcup)/i.test(text))score+=30;
+  if(/(2026|北米中|北中米|category\/2026|\/wcup|\/worldcup|Soccer King W杯|ゲキサカ W杯|GOAL W杯|スポーツナビ W杯)/i.test(text))score+=12;
+  if(editorial)score+=36;
+  if(schedule)score+=18;
+  if(/(次戦|次の試合|対戦相手|決勝トーナメント|突破|敗退|グループステージ)/.test(text))score+=10;
+  if(/(監督|指揮官|会見|コメント|インタビュー|負傷|怪我|ケガ|コンディション|スタメン|先発|戦術|練習)/.test(text))score+=10;
+  const category=editorial?'editorial':(schedule?'schedule':'fallback');
+  return {score,category};
+}
+function scoreNewsItemForTarget(item,target,source){
+  if(!target||target==='all')return scoreWholeTournamentNews(item,target,source);
+  return scoreCountryNews(item,target,source);
+}
+function isWholeTournamentNews(title,url,source){
+  return scoreWholeTournamentNews({title,url,domain:String(source&&source.name||source||'')},'all',source).score>=45;
+}
+function newsMatchesRequestedScope(item,target,source){
+  const scored=scoreNewsItemForTarget(item,target,source);
+  // ここでは「候補として残すか」だけを緩めに判定し、最終表示は prepareNewsItems で段階的に選別します。
+  return scored.score>=45;
 }
 function parseNewsDateValueFromString(s){
   const raw=String(s||'');
@@ -2624,8 +2685,35 @@ function sortNewsLatestFirst(items){
     .map(x=>x.item);
 }
 function prepareNewsItems(items,target,limit=20){
-  const filtered=(Array.isArray(items)?items:[]).filter(item=>newsMatchesRequestedScope(item,target,item&&item.domain));
-  return dedupeNews(sortNewsLatestFirst(filtered),Math.max(limit*3,60)).slice(0,limit);
+  const scored=(Array.isArray(items)?items:[]).map((item,idx)=>{
+    const x=Object.assign({},item);
+    const s=scoreNewsItemForTarget(x,target,x.domain);
+    x._newsScore=s.score;
+    x._newsCategory=s.category;
+    x._order=Number.isFinite(+x._order)?+x._order:idx;
+    return x;
+  }).filter(x=>x._newsScore>=45);
+
+  let selected=[];
+  if(!target||target==='all'){
+    // W杯全体は、大会運営・開催地・観客・ルール・評価などに絞る。件数不足でも個別国の試合記事には戻さない。
+    selected=scored.filter(x=>x._newsScore>=45);
+  }else{
+    // 国別はまず選手/監督/負傷/スタメン等を優先。少ない国だけ、日程・結果・対戦相手系まで自動緩和。
+    const editorial=scored.filter(x=>x._newsCategory==='editorial'&&x._newsScore>=70);
+    const schedule=scored.filter(x=>x._newsCategory==='schedule'&&x._newsScore>=60);
+    const fallback=scored.filter(x=>x._newsScore>=45);
+    selected=editorial.slice();
+    if(dedupeNews(sortNewsLatestFirst(selected),limit).length<8)selected=selected.concat(schedule);
+    if(dedupeNews(sortNewsLatestFirst(selected),limit).length<8)selected=selected.concat(fallback);
+  }
+  const cleaned=sortNewsLatestFirst(selected).map(item=>{
+    const x=Object.assign({},item);
+    delete x._newsScore;
+    delete x._newsCategory;
+    return x;
+  });
+  return dedupeNews(cleaned,Math.max(limit*3,80)).slice(0,limit);
 }
 function isLikelyArticlePath(url){
   try{

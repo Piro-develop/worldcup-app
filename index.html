@@ -155,6 +155,9 @@
     .opt .flag-img{width:22px;height:15px;margin-right:0}
 
     .toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px}
+    .panel-title{margin:0 0 10px;font-size:20px;line-height:1.25;font-weight:900;color:#eef5ff}
+    .panel-head-title{margin:0;font-size:20px;line-height:1.25;font-weight:900;color:#eef5ff;white-space:nowrap}
+    .group-toolbar-helper{margin:-4px 2px 10px;font-size:11px;color:var(--muted);font-weight:800;line-height:1.45}
     .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.56);z-index:100;display:none}.sheet-backdrop.show{display:block}.sheet{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(520px,calc(100vw - 18px));max-height:78vh;overflow:auto;border:1px solid var(--line2);border-radius:18px;background:#07111f;box-shadow:0 28px 70px rgba(0,0,0,.55);z-index:101;display:none}.sheet.show{display:block}.sheet-head{position:sticky;top:0;background:#07111f;border-bottom:1px solid var(--line);padding:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.sheet-title{font-weight:900}.sheet-close{flex:0 0 auto;width:34px;height:34px;border:1px solid var(--line);border-radius:999px;background:#111c30;color:#fff;font-size:20px;font-weight:900;line-height:1;display:inline-flex;align-items:center;justify-content:center}.sheet-body{padding:10px}.opt{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(205,220,245,.12);border-radius:12px;margin-bottom:7px;background:#0d1728}.opt input{accent-color:var(--accent);transform:scale(1.15)}.sheet-actions{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#07111f}.sheet-actions .btn{flex:1}
 
     .card{border:1px solid var(--line);border-radius:16px;background:rgba(12,20,36,.9);padding:14px;margin:10px 0;box-shadow:var(--shadow)}.stat-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 10px}.stat-status{font-size:11px;color:var(--muted);line-height:1.5}.source-pill{display:inline-flex;align-items:center;margin-left:6px;padding:2px 6px;border-radius:999px;background:#14233a;color:#b7c8df;font-size:10px}.stat-table .flag-img{width:18px;height:12px;margin-right:4px}.stat-player{font-weight:900}.stat-source-note{margin-top:10px;font-size:11px;color:#8fa1bc;line-height:1.5}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{border-bottom:1px solid rgba(205,220,245,.12);padding:8px;text-align:left}.stat-table th{text-align:center;white-space:nowrap}.stat-table th:nth-child(1),.stat-table td:nth-child(1){width:46px;min-width:46px;text-align:center;white-space:nowrap}.stat-table th:nth-child(2),.stat-table td:nth-child(2){width:58px;min-width:58px;text-align:center;white-space:nowrap}.stat-table th:nth-child(3){text-align:center;white-space:nowrap}.stat-table td:nth-child(3){text-align:left}.input{width:100%;border:1px solid var(--line);border-radius:8px;background:#07111f;color:#fff;padding:8px}.small{font-size:12px;color:var(--muted);line-height:1.6}
@@ -221,8 +224,11 @@
       justify-content:space-between;
       gap:8px;
       margin:8px 2px 10px;
+      flex-wrap:nowrap;
     }
     .group-status{font-size:11px;color:var(--muted);line-height:1.5}
+    .group-toolbar-left{font-size:12px;color:#d6e4f7;font-weight:900;white-space:nowrap}
+    .group-toolbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;flex:0 0 auto}
 
 
     .group-box{cursor:pointer}
@@ -294,13 +300,17 @@
     .match-score{
       align-self:flex-start;
       margin-top:4px;
-      min-width:42px;
+      min-width:46px;
       text-align:center;
       border-radius:999px;
       padding:3px 6px;
       background:#17243a;
       color:#fff;
       font-weight:900;
+      white-space:nowrap;
+      word-break:keep-all;
+      overflow-wrap:normal;
+      box-sizing:border-box;
     }
     .match-score.done{background:#f6d87f;color:#15120a}
     .scorers{
@@ -332,7 +342,7 @@
     .news-empty{font-size:12px;color:var(--muted);line-height:1.6;padding:12px;border:1px dashed rgba(205,220,245,.22);border-radius:12px;background:rgba(13,23,40,.72)}
 
     .ko-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
-    .ko-head h2{margin:0;font-size:20px}
+    .ko-head h2{margin:0;font-size:20px;line-height:1.25;white-space:nowrap}
     .ko-viewbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 8px}
     .ko-nav-btn{appearance:none;width:38px;height:38px;border:1px solid rgba(205,220,245,.24);border-radius:999px;background:#111c30;color:#eef5ff;font-size:24px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.22)}
     .ko-nav-btn:disabled{opacity:.35;cursor:not-allowed}
@@ -381,8 +391,8 @@
     .ko-detail-scorers{font-size:11px;line-height:1.45;color:#d7e2f2;font-weight:700}
     .ko-detail-empty{color:#8fa1bc;font-size:11px;font-weight:700}
     @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-head h2{font-size:18px}.ko-card{min-height:90px;padding:7px}.ko-team{font-size:11px;padding:5px 4px}.ko-round-title{font-size:11px;padding:7px 3px}.ko-meta{font-size:10px}.ko-card-label{font-size:9px;padding:2px 5px}}
-    @media (max-width:430px){.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-spacer{min-width:8px}}
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 32px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:1px}.scorer-minute{padding-left:0}.match-score{min-width:32px;padding:3px 3px}}
+    @media (max-width:430px){.group-toolbar{gap:6px}.group-toolbar-left{font-size:11px;letter-spacing:-.03em}.panel-head-title{font-size:17px;letter-spacing:-.04em}.group-toolbar-helper{font-size:10.5px;margin-top:-6px}.group-toolbar-actions .group-status{font-size:10px;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-spacer{min-width:8px}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:1px}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
   </style>
 </head>
 <body>
@@ -861,7 +871,11 @@ function bracketHTML(){
   const leftSlots=state.bracket.left.flatMap((m,mi)=>m.map((slot,si)=>slotHTML(slot,'left',mi,si))).join('');
   const rightSlots=state.bracket.right.flatMap((m,mi)=>m.map((slot,si)=>slotHTML(slot,'right',mi,si))).join('');
   return `<section class="panel">
-    <div class="toolbar"><div class="group-status">${esc(state.bracketStatus||'')}</div><div style="display:flex;gap:8px"><button class="btn primary" id="updateBracket">更新</button><button class="btn" id="reset">初期表示に戻す</button></div></div>
+    <div class="group-toolbar">
+      <h2 class="panel-head-title">決勝トーナメント表</h2>
+      <div class="group-toolbar-actions"><div class="group-status">${esc(state.bracketStatus||'')}</div><button class="btn primary" id="updateBracket">更新</button><button class="btn" id="reset">初期表示に戻す</button></div>
+    </div>
+    <div class="group-toolbar-helper">未確定枠は手動入力可能</div>
     <div class="bracket-card">
       <div class="bracket">
         ${linesSVG()}
@@ -936,9 +950,10 @@ function isQualifiedTeam(id){
 function groupsHTML(){
   return `<section class="panel">
     <div class="group-toolbar">
-      <div class="group-status">${esc(state.groupStatus||'')}</div>
-      <button class="btn primary" id="updateGroups">更新</button>
+      <h2 class="panel-head-title">グループステージ結果</h2>
+      <div class="group-toolbar-actions"><div class="group-status">${esc(state.groupStatus||'')}</div><button class="btn primary" id="updateGroups">更新</button></div>
     </div>
+    <div class="group-toolbar-helper">試合結果は各グループをタップ</div>
     <div class="group-grid">
       ${GROUPS.map(g=>groupBoxHTML(g,state.groups[g]||[])).join('')}
     </div>
@@ -1119,7 +1134,8 @@ function knockoutScheduleHTML(){
   }else{
     boardHtml=`<div class="ko-stage" style="height:${layout.boardH}px;"><div class="ko-board ko-current ko-static" data-ko-view="${layout.viewCol}" style="height:${layout.boardH}px;">${koBoardInnerHTML(layout)}</div></div>`;
   }
-  return `<section class="panel"><div class="card"><div class="ko-head"><h2>決勝T日程</h2><div class="stat-actions"><div class="stat-status">${esc(ko.status||'')}</div><button class="btn primary" id="updateKnockout">更新</button></div></div>
+  return `<section class="panel"><div class="card"><div class="ko-head"><h2>決勝トーナメント日程・結果</h2><div class="group-toolbar-actions"><div class="group-status">${esc(ko.status||'')}</div><button class="btn primary" id="updateKnockout">更新</button></div></div>
+    <div class="group-toolbar-helper">試合結果は各カードをタップ</div>
     <div class="ko-viewbar"><button class="ko-nav-btn" data-ko-nav="-1" ${prevDisabled} aria-label="左へ">‹</button><div class="ko-view-spacer" aria-hidden="true"></div><button class="ko-nav-btn" data-ko-nav="1" ${nextDisabled} aria-label="右へ">›</button></div>
     <div class="ko-board-wrap">${boardHtml}</div>
   </div></section>`;
@@ -1282,11 +1298,18 @@ async function updateKnockoutSchedule(){
   state.ko.status='更新中・・・';
   save();render();
   try{
-    const results=await fetchKnockoutResults();
-    state.ko.results=Object.assign({},state.ko.results||{},results);
+    const [standingsResult, knockoutResults]=await Promise.all([
+      fetchLatestStandings().catch(e=>{console.warn('決勝T日程・進出国更新失敗',e);return null}),
+      fetchKnockoutResults().catch(e=>{console.warn('決勝T日程・試合結果更新失敗',e);return null})
+    ]);
+    if(standingsResult&&standingsResult.groups)state.groups=standingsResult.groups;
+    // 決勝T表タブと同じ確定枠ロジックをここでも通し、日程タブ側の表示と整合させます。
+    applyConfirmedBracketSlots();
+    if(knockoutResults)state.ko.results=Object.assign({},state.ko.results||{},knockoutResults);
     state.ko.status='更新済';
   }catch(e){
     console.warn('決勝T日程更新失敗',e);
+    applyConfirmedBracketSlots();
     state.ko.status='更新失敗';
   }
   save();render();

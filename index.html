@@ -37,8 +37,8 @@
     body{background:radial-gradient(circle at 50% -10%,rgba(58,98,150,.32),transparent 34%),linear-gradient(180deg,#070c16 0%,#050913 100%)}
     .wrap{max-width:1180px;margin:0 auto;padding:12px 8px 28px}
     .hero{padding:8px 6px 4px}.eyebrow{font-size:10px;letter-spacing:.22em;color:#78c7ff;font-weight:800}.title{font-size:22px;margin:5px 0 2px;font-weight:900}.lead{font-size:12px;color:var(--muted);margin:0;line-height:1.55}
-    .tabs{display:flex;gap:6px;overflow-x:auto;position:sticky;top:0;z-index:50;margin-top:10px;padding:7px;border:1px solid var(--line);border-radius:14px;background:rgba(7,12,22,.82);backdrop-filter:blur(14px)}
-    .tab{border:1px solid transparent;border-radius:10px;padding:8px 10px;background:transparent;color:#c8d6ea;font-size:12px;font-weight:800;white-space:nowrap}.tab.active{background:rgba(52,210,208,.16);border-color:rgba(52,210,208,.45);color:#fff}
+    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;overflow:visible;position:sticky;top:0;z-index:50;margin-top:10px;padding:7px;border:1px solid var(--line);border-radius:14px;background:rgba(7,12,22,.82);backdrop-filter:blur(14px)}
+    .tab{width:100%;min-width:0;border:1px solid transparent;border-radius:10px;padding:8px 2px;background:transparent;color:#c8d6ea;font-size:12px;font-weight:800;white-space:nowrap;text-align:center}.tab.active{background:rgba(52,210,208,.16);border-color:rgba(52,210,208,.45);color:#fff}
     .panel{margin-top:10px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 2px}.btn{border:1px solid var(--line);border-radius:10px;background:#111c30;color:#eaf3ff;padding:8px 10px;font-weight:800;font-size:12px}.btn.primary{background:linear-gradient(180deg,#1b8a94,#155c66);border-color:rgba(52,210,208,.44)}
 
     .bracket-card{
@@ -302,7 +302,7 @@
     .scorer-empty{color:#8fa1bc}
     .group-detail-note{font-size:11px;color:#8fa1bc;line-height:1.45;margin-top:6px}
 
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:9px}.toolbar{display:none}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:9px}.toolbar{display:none}.tabs{gap:4px;padding:6px}.tab{font-size:11px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:4px}.team-scorers{font-size:9.5px}.match-score{min-width:36px;padding:3px 4px}}
   </style>
 </head>
 <body>
@@ -335,7 +335,7 @@ const ELIMINATED=['tr','ht','tn','pa','jo'];
 const uniq=a=>[...new Set(a)];
 const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
-const tabs=[['bracket','決勝トーナメント'],['groups','グループリーグ'],['goals','得点ランキング'],['assists','アシストランキング'],['flash','速報'],['news','最新ニュース']];
+const tabs=[['bracket','決勝T'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ']];
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -646,7 +646,7 @@ function groupsHTML(){
 }
 function groupBoxHTML(g,rows){
   return `<div class="group-box" data-group="${g}" role="button" tabindex="0" aria-label="Group ${g} 詳細">
-    <div class="group-title"><span>Group ${g}</span><span>${rows.length}チーム</span></div>
+    <div class="group-title"><span>Group ${g}</span></div>
     <table class="group-table">
       <thead><tr><th class="rank-col">順</th><th class="flag-col">国</th><th class="team-col">国名</th><th class="rec-col">勝敗</th><th class="num-col">得</th><th class="num-col">失</th><th class="num-col">差</th><th class="pts-col">点</th></tr></thead>
       <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="team-cell">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.d}-${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
@@ -808,12 +808,14 @@ function matchCardHTML(m){
   const hs=cached.hs ?? m.hs;
   const as=cached.as ?? m.as;
   const score=done?`${hs ?? '-'} - ${as ?? '-'}`:'予定';
+  const homeWin=done&&Number(hs)>Number(as);
+  const awayWin=done&&Number(as)>Number(hs);
   return `<div class="match-card">
     <div class="match-date">${dateText(m.date)}</div>
     <div class="match-main">
-      <div class="match-team home">${teamNameLine(m.home)}</div>
+      <div class="match-team home ${homeWin?'winner':''}">${teamNameLine(m.home)}</div>
       <div class="match-score ${done?'done':''}">${score}</div>
-      <div class="match-team away">${teamNameLine(m.away)}</div>
+      <div class="match-team away ${awayWin?'winner':''}">${teamNameLine(m.away)}</div>
     </div>
   </div>`
 }

@@ -447,7 +447,13 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=8500;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_PIPELINE_VERSION='jp-news-fast-direct-noimage-v5';
+const NEWS_PIPELINE_VERSION='jp-news-curated-direct-v6';
+const CURATED_NEWS_SOURCES=[
+  {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
+  {name:'ゲキサカ W杯',url:'https://web.gekisaka.jp/news/worldcup'},
+  {name:'ゲキサカ 最新',url:'https://web.gekisaka.jp/news'},
+  {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'}
+];
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -2372,24 +2378,143 @@ async function fetchJinaSearchNewsItems(target){
   return out;
 }
 
+function newsTargetAliasList(target){
+  if(!target||target==='all')return [];
+  const jp=T[target]?.[0]||target;
+  const en=NEWS_EN[target]||'';
+  const aliases=[jp,en];
+  const extras={
+    jp:['日本代表','SAMURAI BLUE','森保ジャパン'],
+    kr:['韓国代表','韓国'],
+    za:['南アフリカ'],
+    ch:['スイス'],
+    ca:['カナダ'],
+    br:['ブラジル'],
+    ma:['モロッコ'],
+    co:['コロンビア'],
+    pt:['ポルトガル'],
+    hr:['クロアチア'],
+    es:['スペイン'],
+    at:['オーストリア'],
+    us:['アメリカ','米国','アメリカ代表','米国代表'],
+    be:['ベルギー'],
+    ci:['コートジボワール','コートジボワール代表'],
+    no:['ノルウェー'],
+    mx:['メキシコ'],
+    eng:['イングランド','イングランド代表'],
+    ar:['アルゼンチン'],
+    uy:['ウルグアイ'],
+    au:['オーストラリア'],
+    py:['パラグアイ'],
+    eg:['エジプト'],
+    nl:['オランダ'],
+    se:['スウェーデン'],
+    tn:['チュニジア'],
+    cz:['チェコ'],
+    qa:['カタール'],
+    ba:['ボスニア','ボスニア・ヘルツェゴビナ'],
+    ht:['ハイチ'],
+    sct:['スコットランド'],
+    tr:['トルコ'],
+    ec:['エクアドル'],
+    cw:['キュラソー'],
+    ir:['イラン'],
+    nz:['ニュージーランド'],
+    sa:['サウジアラビア','サウジ'],
+    cv:['カーボベルデ'],
+    sn:['セネガル'],
+    iq:['イラク'],
+    dz:['アルジェリア'],
+    jo:['ヨルダン'],
+    uz:['ウズベキスタン'],
+    cd:['DRコンゴ','コンゴ民主共和国','コンゴ'],
+    gh:['ガーナ'],
+    pa:['パナマ']
+  }[target]||[];
+  return Array.from(new Set(aliases.concat(extras).filter(Boolean)));
+}
+function titleMatchesNewsTarget(title,target){
+  if(!target||target==='all')return true;
+  const t=String(title||'').toLowerCase();
+  return newsTargetAliasList(target).some(a=>a&&t.includes(String(a).toLowerCase()));
+}
+function isLikelyArticlePath(url){
+  try{
+    const u=new URL(String(url||''));
+    const host=u.hostname.replace(/^www\./,'').toLowerCase();
+    const path=u.pathname.toLowerCase();
+    if(host.includes('soccer-king.jp'))return /\/news\//.test(path)&&/\/(\d{6,}|\d{4}\/\d{2}\/\d{2})/.test(path)&&!/\/news\/world\/wc\/?$/.test(path);
+    if(host.includes('gekisaka.jp'))return /\/news\//.test(path)&&(/detail\//.test(path)||/\d+/.test(path))&&!/\/news\/?$|rsspage/.test(path);
+    if(host==='news.google.com')return isGoogleNewsArticleUrl(url);
+    return !isListingNewsUrl(url);
+  }catch(e){return false}
+}
+function parseCuratedNewsLinks(text,source,target){
+  const raw=String(text||'').replace(/\r/g,'');
+  const out=[];
+  const seen=new Set();
+  const add=(title,url)=>{
+    title=cleanNewsTitle(stripMarkdownLinks(title||''));
+    url=normalizeNewsArticleUrl(normalizeGoogleNewsMaybeRelativeUrl(url||''));
+    if(!title||!url||seen.has(url))return;
+    if(!isUsableNewsTitle(title))return;
+    if(!titleMatchesNewsTarget(title,target))return;
+    if(!isLikelyArticlePath(url))return;
+    if(/^(画像|動画|写真|一覧|もっと見る|続きを読む|Google|ニュース|詳細|その他|ログイン|ホーム|トップ)$/.test(title))return;
+    if(/記事一覧|ニュース一覧|特設ページ|出場国一覧|試合日程・結果|ルール変更|順位表$/.test(title))return;
+    seen.add(url);
+    out.push({title,url,image:'',seen:'',domain:source.name});
+  };
+  const linkRe=/\[([^\]]{8,260})\]\(((?:https?:\/\/|\/)[^)\s]+)\)/g;
+  let m;
+  while((m=linkRe.exec(raw))){
+    const url=m[2].startsWith('/')?new URL(m[2],source.url).href:m[2];
+    add(m[1],url);
+    if(out.length>=30)break;
+  }
+  const htmlLinkRe=/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  while((m=htmlLinkRe.exec(raw))){
+    const title=decodeHtml(m[2].replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim());
+    const url=m[1].startsWith('/')?new URL(m[1],source.url).href:m[1];
+    add(title,url);
+    if(out.length>=30)break;
+  }
+  return out;
+}
+async function fetchCuratedJapaneseSoccerNewsItems(target){
+  const settled=await Promise.all(CURATED_NEWS_SOURCES.map(source=>
+    promiseWithSoftTimeout(fetchReaderText(source.url),3600)
+      .then(text=>({source,text}))
+      .catch(()=>({source,text:''}))
+  ));
+  let out=[];
+  settled.forEach(x=>{out.push(...parseCuratedNewsLinks(x.text,x.source,target));});
+  out=dedupeNews(out);
+  if(out.length>=3||!target||target==='all')return out;
+  // 国別で見つからない場合は、国名を含むGoogle News RSSへ進むため空を返す。
+  return out;
+}
+
 async function fetchNewsItems(target){
-  // 根本方針：ニュース一覧表示を最優先にし、重いサムネイル解析・直接記事化処理は行わない。
-  // Google検索結果ページは除外するが、Googleニュースの記事ページは表示対象にする。
-  const fastLoaders=[
+  // 根本方針：まず「直接記事の一覧ページ」をJina Readerで読む。
+  // Google News RSS / CORSプロキシは不安定なので、主経路ではなく補助に限定する。
+  const primary=dedupeNews(await promiseWithSoftTimeout(fetchCuratedJapaneseSoccerNewsItems(target),4300));
+  if(primary.length>=3)return primary;
+
+  const fallbackLoaders=[
+    ['Google News RSS2JSON JSONP',()=>fetchGoogleNewsRss2JsonpItems(target)],
     ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
-    ['Google News AllOrigins GET',()=>fetchGoogleNewsAllOriginsGetItems(target)],
-    ['Google News AllOrigins RAW',()=>fetchGoogleNewsAllOriginsItems(target)],
-    ['Google News Reader',()=>fetchGoogleNewsItems(target)],
-    ['Google News Codetabs',()=>fetchGoogleNewsCoddProxyItems(target)],
     ['GDELT',()=>fetchGdeltNewsItems(target)],
+    ['Google News Reader',()=>fetchGoogleNewsItems(target)],
+    ['Google News AllOrigins GET',()=>fetchGoogleNewsAllOriginsGetItems(target)],
     ['Jina Search',()=>fetchJinaSearchNewsItems(target)]
   ];
-  const settled=await Promise.all(fastLoaders.map(([name,loader])=>
-    promiseWithSoftTimeout(loader(),5200)
+  const settled=await Promise.all(fallbackLoaders.map(([name,loader])=>
+    promiseWithSoftTimeout(loader(),3600)
       .then(items=>({name,items:Array.isArray(items)?items:[],error:null}))
       .catch(error=>({name,items:[],error}))
   ));
-  const combined=[];
+  const combined=primary.slice();
   settled.forEach(r=>{
     if(r.error)console.warn('news loader failed:',r.name,r.error);
     (r.items||[]).forEach(x=>{
@@ -2465,6 +2590,39 @@ async function fetchGdeltNewsItems(target){
 function rss2JsonUrl(rssUrl){
   const params=new URLSearchParams({rss_url:rssUrl,count:'50'});
   return `${RSS2JSON_API}?${params.toString()}`;
+}
+
+function fetchJsonp(url,timeout=4200){
+  return new Promise((resolve,reject)=>{
+    const cb='__jsonp_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const sep=url.includes('?')?'&':'?';
+    const script=document.createElement('script');
+    let done=false;
+    const cleanup=()=>{try{delete window[cb]}catch(e){window[cb]=undefined} if(script.parentNode)script.parentNode.removeChild(script)};
+    const timer=setTimeout(()=>{if(done)return;done=true;cleanup();reject(new Error('JSONP timeout'))},timeout);
+    window[cb]=data=>{if(done)return;done=true;clearTimeout(timer);cleanup();resolve(data)};
+    script.onerror=()=>{if(done)return;done=true;clearTimeout(timer);cleanup();reject(new Error('JSONP load error'))};
+    script.src=url+sep+'callback='+encodeURIComponent(cb);
+    document.head.appendChild(script);
+  });
+}
+async function fetchGoogleNewsRss2JsonpItems(target){
+  const out=[];
+  for(const q of buildGoogleNewsQueries(target)){
+    try{
+      const data=await fetchJsonp(rss2JsonUrl(googleNewsRssUrlForQuery(q)),4200);
+      if(data.status&&String(data.status).toLowerCase()==='error')throw new Error(data.message||'RSS2JSON JSONP error');
+      const items=Array.isArray(data.items)?data.items:[];
+      out.push(...items.map(x=>{
+        const image=x.thumbnail||((String(x.description||'').match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1])||'';
+        const link=normalizeNewsUrl(normalizeGoogleNewsMaybeRelativeUrl(x.link||x.guid||''));
+        const img=absolutizeNewsImageUrl(image,link);
+        return {title:decodeHtml(x.title||''),url:link,image:isHttpNewsImage(img)?img:'',seen:x.pubDate||'',domain:x.author||'Google News'};
+      }).filter(a=>a.title&&a.url));
+      if(dedupeNews(out).length>=20)break;
+    }catch(e){console.warn('RSS2JSON JSONP query failed',q,e)}
+  }
+  return out;
 }
 async function fetchGoogleNewsRss2JsonItems(target){
   const out=[];

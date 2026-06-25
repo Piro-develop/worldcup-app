@@ -459,7 +459,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=8500;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_PIPELINE_VERSION='jp-news-filtered-latest-v9';
+const NEWS_PIPELINE_VERSION='jp-news-focused-editorial-v10';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -2068,16 +2068,17 @@ function buildNewsQuery(target){
 }
 function buildGdeltQueries(target){
   if(!target||target==='all')return [
-    'ワールドカップ 決勝トーナメント',
-    'W杯 日程 結果',
-    'FIFAワールドカップ 組み合わせ',
-    'ワールドカップ 得点ランキング'
+    'ワールドカップ スタジアム 集客 大会',
+    'FIFAワールドカップ 大会運営 ルール 評価',
+    'ワールドカップ 世界 熱狂 盛り上がり',
+    'ワールドカップ 開催地 経済効果 課題'
   ];
   const jp=T[target]?.[0]||target;
   return [
-    `${jp} ワールドカップ`,
-    `${jp} W杯`,
-    `${jp} ワールドカップ サッカー`
+    `${jp} W杯 監督 コメント`,
+    `${jp} W杯 選手 インタビュー`,
+    `${jp} W杯 怪我 コンディション`,
+    `${jp} W杯 スタメン予想 次戦`
   ];
 }
 function buildGoogleNewsQuery(target){
@@ -2085,16 +2086,17 @@ function buildGoogleNewsQuery(target){
 }
 function buildGoogleNewsQueries(target){
   if(!target||target==='all')return [
-    'ワールドカップ 決勝トーナメント',
-    'W杯 日程 結果',
-    'FIFAワールドカップ 組み合わせ',
-    'ワールドカップ 得点ランキング'
+    'ワールドカップ スタジアム 集客 大会',
+    'FIFAワールドカップ 大会運営 ルール 評価',
+    'ワールドカップ 世界 熱狂 盛り上がり',
+    'ワールドカップ 開催地 経済効果 課題'
   ];
   const jp=T[target]?.[0]||target;
   return [
-    `${jp} ワールドカップ`,
-    `${jp} W杯`,
-    `${jp} ワールドカップ サッカー`
+    `${jp} W杯 監督 コメント`,
+    `${jp} W杯 選手 インタビュー`,
+    `${jp} W杯 怪我 コンディション`,
+    `${jp} W杯 スタメン予想 次戦`
   ];
 }
 function hasJapaneseText(s){
@@ -2328,17 +2330,14 @@ function fallbackNewsSearchItems(target){
   const jp=target==='all'?'ワールドカップ':(T[target]?.[0]||target);
   const base=target==='all'?
     [
-      'ワールドカップ サッカー 最新','W杯 サッカー 最新','FIFAワールドカップ 最新','ワールドカップ 決勝トーナメント',
-      'ワールドカップ 試合結果','ワールドカップ 日程','ワールドカップ 得点ランキング','ワールドカップ アシストランキング',
-      'ワールドカップ 日本時間','ワールドカップ 速報','ワールドカップ 代表 メンバー','ワールドカップ 監督 コメント',
-      'ワールドカップ 怪我 情報','ワールドカップ スタメン','ワールドカップ ハイライト','ワールドカップ 展望',
-      'ワールドカップ グループステージ','ワールドカップ ベスト32','ワールドカップ ラウンド16','ワールドカップ 決勝'
+      'ワールドカップ スタジアム 集客','ワールドカップ 観客 動員','FIFAワールドカップ 大会運営','ワールドカップ ルール 評価',
+      'ワールドカップ レギュレーション 課題','ワールドカップ 世界 熱狂','ワールドカップ 盛り上がり','ワールドカップ 経済効果',
+      'ワールドカップ 開催地 スタジアム','ワールドカップ 大会全体 評価','FIFA ワールドカップ 運営 問題','ワールドカップ チケット 集客'
     ]:
     [
-      `${jp} ワールドカップ 最新`,`${jp} W杯 最新`,`${jp} サッカー ニュース`,`${jp} 試合 結果`,`${jp} 決勝トーナメント`,
-      `${jp} 代表 メンバー`,`${jp} 監督 コメント`,`${jp} 怪我 情報`,`${jp} スタメン`,`${jp} ハイライト`,
-      `${jp} ワールドカップ 日程`,`${jp} ワールドカップ 速報`,`${jp} W杯 展望`,`${jp} W杯 組み合わせ`,`${jp} ワールドカップ 得点者`,
-      `${jp} ワールドカップ アシスト`,`${jp} W杯 勝ち上がり`,`${jp} ワールドカップ 対戦相手`,`${jp} W杯 決勝トーナメント`,`${jp} サッカー代表 最新`
+      `${jp} W杯 監督 コメント`,`${jp} W杯 選手 インタビュー`,`${jp} W杯 怪我 情報`,`${jp} W杯 コンディション`,
+      `${jp} W杯 次戦 準備`,`${jp} W杯 スタメン予想`,`${jp} W杯 先発予想`,`${jp} W杯 練習`,
+      `${jp} W杯 戦術`,`${jp} W杯 キーマン`,`${jp} W杯 会見`,`${jp} W杯 負傷`
     ];
   return base.slice(0,20).map((q,i)=>({
     title:`${label}：${q} の日本語ニュースを開く`,
@@ -2355,17 +2354,17 @@ function jinaSearchUrlForQuery(query){
 }
 function buildJinaSearchQueries(target){
   if(!target||target==='all')return [
-    'ワールドカップ 決勝トーナメント ニュース',
-    'W杯 日程 結果 ニュース',
-    'FIFAワールドカップ 組み合わせ ニュース',
-    'ワールドカップ 得点ランキング ニュース'
+    'ワールドカップ スタジアム 集客 大会 ニュース',
+    'FIFAワールドカップ 大会運営 ルール 評価 ニュース',
+    'ワールドカップ 世界 熱狂 盛り上がり ニュース',
+    'ワールドカップ 開催地 経済効果 課題 ニュース'
   ];
   const jp=T[target]?.[0]||target;
   return [
-    `${jp} ワールドカップ 最新 ニュース`,
-    `${jp} W杯 最新 ニュース`,
-    `${jp} ワールドカップ サッカー ニュース`,
-    `${jp} W杯 代表 ニュース`
+    `${jp} W杯 監督 コメント ニュース`,
+    `${jp} W杯 選手 インタビュー ニュース`,
+    `${jp} W杯 怪我 コンディション ニュース`,
+    `${jp} W杯 スタメン予想 次戦 ニュース`
   ];
 }
 function parseJinaSearchJson(data,domain){
@@ -2489,12 +2488,25 @@ function titleMatchesNewsTarget(title,target){
 }
 function hasWorldCupNewsContext(text,url,source){
   const t=String(text||'')+' '+String(url||'')+' '+String(source&&source.name||source||'');
-  return /(ワールドカップ|W杯|ＦＩＦＡ|FIFA|北米中|決勝トーナメント|グループステージ|ベスト32|ラウンド16|準々決勝|準決勝|決勝|3位決定戦|３位決定戦|組み合わせ|勝ち上がり|大会|出場国|得点ランキング|アシストランキング|wcup|worldcup|world-cup|world cup)/i.test(t);
+  return /(ワールドカップ|W杯|ＦＩＦＡ|FIFA|北米中|決勝トーナメント|グループステージ|ベスト32|ラウンド16|準々決勝|準決勝|決勝|3位決定戦|３位決定戦|組み合わせ|勝ち上がり|大会|出場国|wcup|worldcup|world-cup|world cup)/i.test(t);
+}
+function hasUtilityOnlyNewsTopic(text){
+  const t=String(text||'');
+  // ニュースタブでは、他タブで見られる日程・結果・放送・ランキング等だけの記事は除外します。
+  return /(日程|試合日程|放送|テレビ|配信|中継|地上波|ABEMA|DAZN|視聴方法|何時|キックオフ|日本時間|速報|試合結果|結果速報|スコア|勝敗|順位表|勝ち点|組み合わせ|トーナメント表|得点ランキング|アシストランキング|得点者一覧|ハイライト|出場国一覧|対戦カード|全試合|ラウンド16の日程|準々決勝の日程)/.test(t);
+}
+function hasCountryEditorialTopic(text){
+  const t=String(text||'');
+  return /(インタビュー|コメント|語る|明かす|会見|取材|監督|指揮官|選手|主将|キャプテン|エース|スター|キーマン|負傷|怪我|ケガ|けが|離脱|欠場|出場微妙|復帰|コンディション|体調|調整|練習|合流|別メニュー|非公開練習|次戦|次の試合|準備|警戒|対策|戦術|布陣|スタメン|先発|先発予想|スタメン予想|メンバー|起用|招集|サスペンション|出場停止)/.test(t);
+}
+function hasWholeTournamentEditorialTopic(text){
+  const t=String(text||'');
+  return /(スタジアム|会場|開催地|集客|観客|動員|チケット|入場者|大会運営|運営|ルール|レギュレーション|VAR|審判|判定|評価|批判|問題|課題|懸念|改善|経済効果|スポンサー|放映権|FIFA|世界中|世界各国|海外メディア|熱狂|盛り上がり|過熱感|人気|安全対策|交通|宿泊|開催都市|気候|暑さ|ピッチ|芝|セキュリティ)/.test(t);
 }
 function mentionsAnyCountryAlias(text,targetToIgnore){
   let t=String(text||'').toLowerCase();
   // 全体ニュースで使われやすい時刻・開催地表現は、国別記事と誤判定しないよう除外します。
-  t=t.replace(/日本時間/g,'').replace(/米国時間/g,'').replace(/現地時間/g,'').replace(/北米中/g,'').replace(/開催国/g,'');
+  t=t.replace(/日本時間/g,'').replace(/現地時間/g,'').replace(/北米中/g,'').replace(/開催国/g,'');
   for(const id of Object.keys(T)){
     if(id===targetToIgnore)continue;
     const aliases=newsTargetAliasList(id).filter(a=>String(a||'').length>=2);
@@ -2510,19 +2522,22 @@ function mentionsAnyCountryAlias(text,targetToIgnore){
 function isWholeTournamentNews(title,url,source){
   const text=cleanNewsTitle(title)+' '+String(url||'')+' '+String(source&&source.name||source||'');
   if(!hasWorldCupNewsContext(text,url,source))return false;
-  const mentionsCountry=mentionsAnyCountryAlias(text,'');
-  const hasGeneralTheme=/(日程|結果一覧|全試合|組み合わせ|順位|得点ランキング|アシストランキング|出場国|大会|全体|開幕|閉幕|登録メンバー|放送|視聴|開催地|スタジアム|ルール|レギュレーション|抽選|トーナメント表)/.test(text);
-  // 個別国・個別代表の記事は、丸ごとW杯全体には出さない。日程・組み合わせなど全体情報だけは許可。
-  if(mentionsCountry&&!hasGeneralTheme)return false;
-  return hasGeneralTheme||!mentionsCountry;
+  if(hasUtilityOnlyNewsTopic(text))return false;
+  if(!hasWholeTournamentEditorialTopic(text))return false;
+  // W杯全体では、個別国の次戦・選手・監督中心の記事は除外します。
+  if(mentionsAnyCountryAlias(text,'' )&&hasCountryEditorialTopic(text))return false;
+  return true;
 }
 function newsMatchesRequestedScope(item,target,source){
   const title=cleanNewsTitle(item&&item.title||'');
   const url=String(item&&item.url||'');
+  const text=title+' '+url+' '+String(source&&source.name||source||'');
   if(!isUsableNewsTitle(title))return false;
-  if(!hasWorldCupNewsContext(title,url,source))return false;
+  if(!hasWorldCupNewsContext(text,url,source))return false;
   if(!target||target==='all')return isWholeTournamentNews(title,url,source);
-  return titleMatchesNewsTarget(title,target);
+  if(!titleMatchesNewsTarget(text,target))return false;
+  if(hasUtilityOnlyNewsTopic(text)&&!hasCountryEditorialTopic(text))return false;
+  return hasCountryEditorialTopic(text);
 }
 function parseNewsDateValueFromString(s){
   const raw=String(s||'');
@@ -3059,7 +3074,7 @@ function isSimilarNews(a,b){
   const shorter=na.length<nb.length?na:nb;
   const longer=na.length<nb.length?nb:na;
   if(shorter.length>=10&&longer.includes(shorter))return true;
-  return titleSimilarity(na,nb)>=0.72;
+  return titleSimilarity(na,nb)>=0.62;
 }
 function dedupeNews(items,limit=20){
   const out=[];

@@ -356,6 +356,9 @@ const STAT_SOURCES={
     {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+assists'}
   ]
 };
+const YAHOO_SCHEDULE_URL='https://soccer.yahoo.co.jp/wcup/category/2026/schedule';
+const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
+const SCORER_CACHE_VERSION=2;
 
 
 const SOCCERKING_FALLBACK_STATS={
@@ -576,13 +579,17 @@ function load(){
   }
   const preserved=migrateSavedBracket();
   if(preserved)merged.bracket=preserved;
+  if(!tabs.some(([id])=>id===merged.active))merged.active='bracket';
+  if(!merged.bracket||!Array.isArray(merged.bracket.left)||!Array.isArray(merged.bracket.right))merged.bracket=clone(initial);
   if(!merged.groups)merged.groups=buildGroupRows(initialGroups);
-  if(!merged.matchCache)merged.matchCache={};
+  if(!merged.matchCache||typeof merged.matchCache!=='object')merged.matchCache={};
   return merged;
 }
 function save(){
-  localStorage.setItem(STORE,JSON.stringify(state));
-  if(state&&state.bracket)localStorage.setItem(BRACKET_STORE,JSON.stringify(state.bracket));
+  try{
+    localStorage.setItem(STORE,JSON.stringify(state));
+    if(state&&state.bracket)localStorage.setItem(BRACKET_STORE,JSON.stringify(state.bracket));
+  }catch(e){console.warn('localStorage保存失敗',e)}
 }
 function rows(){return Array.from({length:10},(_,i)=>({rank:i+1,value:'',player:'',team:''}))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -830,6 +837,7 @@ function openGroupDetail(g){
   document.getElementById('backdrop').classList.add('show');
   sh.classList.add('show','group-detail');
   renderGroupDetail(g);
+  setTimeout(()=>loadGroupMatchDetails(g).catch(e=>console.warn('得点者取得失敗',e)),0);
 }
 function renderGroupDetail(g){
   const sh=document.getElementById('sheet');
@@ -851,14 +859,25 @@ function matchCardHTML(m){
   const score=done?`${hs ?? '-'} - ${as ?? '-'}`:'予定';
   const homeWin=done&&Number(hs)>Number(as);
   const awayWin=done&&Number(as)>Number(hs);
+  const scorers=normalizeScorers(cached.scorers,m);
+  const loading=!!cached.loading;
+  const fetched=!!cached.fetched;
   return `<div class="match-card">
     <div class="match-date">${dateText(m.date)}</div>
     <div class="match-main">
-      <div class="match-team home ${homeWin?'winner':''}">${teamNameLine(m.home)}</div>
+      <div class="match-team home ${homeWin?'winner':''}">${teamNameLine(m.home)}${scorerBlock(scorers.home,done,hs,loading,fetched)}</div>
       <div class="match-score ${done?'done':''}">${score}</div>
-      <div class="match-team away ${awayWin?'winner':''}">${teamNameLine(m.away)}</div>
+      <div class="match-team away ${awayWin?'winner':''}">${teamNameLine(m.away)}${scorerBlock(scorers.away,done,as,loading,fetched)}</div>
     </div>
   </div>`
+}
+function scorerBlock(items,done,goals,loading,fetched){
+  if(!done)return '';
+  const goalCount=Number(goals)||0;
+  if(items&&items.length)return `<div class="team-scorers">${scorerLines(items)}</div>`;
+  if(goalCount>0&&loading)return `<div class="team-scorers"><div class="scorer-empty">得点者取得中…</div></div>`;
+  if(goalCount>0&&fetched)return `<div class="team-scorers"><div class="scorer-empty">得点者取得不可</div></div>`;
+  return '';
 }
 function normalizeScorers(scorers,m){
   const out={home:[],away:[]};
@@ -896,20 +915,26 @@ async function loadGroupMatchDetails(g){
   state.matchCache=state.matchCache||{};
   const matches=(GROUP_MATCHES[g]||[]).filter(m=>m.status==='done');
   let changed=false;
-  matches.forEach(m=>{if(!state.matchCache[m.id]){state.matchCache[m.id]={loading:true};changed=true}});
+  matches.forEach(m=>{
+    const cache=state.matchCache[m.id];
+    if(!cache||cache.scorerVersion!==SCORER_CACHE_VERSION){
+      state.matchCache[m.id]=Object.assign({},cache||{},{loading:true});
+      changed=true;
+    }
+  });
   if(changed){save();if(currentGroup===g)renderGroupDetail(g)}
   await Promise.all(matches.map(async m=>{
-    if(state.matchCache[m.id]&&!state.matchCache[m.id].loading&&state.matchCache[m.id].fetched)return;
+    if(state.matchCache[m.id]&&!state.matchCache[m.id].loading&&state.matchCache[m.id].fetched&&state.matchCache[m.id].scorerVersion===SCORER_CACHE_VERSION)return;
     try{
       const data=await fetchESPNEventSummary(m.id);
-      let parsed=Object.assign({fetched:true},parseMatchSummary(data,m));
+      let parsed=Object.assign({fetched:true,scorerVersion:SCORER_CACHE_VERSION},parseMatchSummary(data,m));
       if(hasNoScorers(parsed)&&((Number(parsed.hs)||Number(m.hs)||0)+(Number(parsed.as)||Number(m.as)||0)>0)){
         const extra=await fetchMatchPageScorers(m);
         if(extra&&(extra.home.length||extra.away.length))parsed.scorers=extra;
       }
       state.matchCache[m.id]=parsed;
     }catch(e){
-      state.matchCache[m.id]=Object.assign({fetched:true,completed:true,hs:m.hs,as:m.as,scorers:[]});
+      state.matchCache[m.id]=Object.assign({fetched:true,scorerVersion:SCORER_CACHE_VERSION,completed:true,hs:m.hs,as:m.as,scorers:[]});
     }
   }));
   save();if(currentGroup===g)renderGroupDetail(g);
@@ -938,6 +963,14 @@ async function fetchReaderText(url){
   return await r.text();
 }
 async function fetchMatchPageScorers(m){
+  const yahooUrl=await findYahooMatchUrl(m).catch(()=>null);
+  if(yahooUrl){
+    try{
+      const txt=await fetchReaderText(yahooUrl);
+      const parsed=parseYahooSummaryScorers(txt,m);
+      if(parsed.home.length||parsed.away.length)return parsed;
+    }catch(e){console.warn('Yahoo得点者取得失敗',e)}
+  }
   const urls=[
     `https://www.espn.com/soccer/match/_/gameId/${m.id}`,
     `https://www.espn.com/soccer/commentary/_/gameId/${m.id}`,
@@ -951,6 +984,83 @@ async function fetchMatchPageScorers(m){
     }catch(e){}
   }
   return {home:[],away:[]};
+}
+async function findYahooMatchUrl(m){
+  const cached=(state.matchCache||{})[m.id]||{};
+  if(cached.yahooUrl)return cached.yahooUrl;
+  const txt=await fetchReaderText(YAHOO_SCHEDULE_URL);
+  const lines=String(txt||'').replace(/\r/g,'').split('\n');
+  const home=String(T[m.home]?.[0]||'');
+  const away=String(T[m.away]?.[0]||'');
+  for(const raw of lines){
+    const line=raw.replace(/\s+/g,' ');
+    if(!line.includes(home)||!line.includes(away))continue;
+    const url=(line.match(/https:\/\/soccer\.yahoo\.co\.jp\/wcup\/(?:category\/2026\/)?game\/(\d+)(?:\/summary\?gk=18)?/i)||[])[0];
+    const id=(line.match(/\/game\/(\d+)/)||[])[1];
+    if(id){
+      const resolved=YAHOO_SUMMARY_BASE+id+'/summary?gk=18';
+      state.matchCache=state.matchCache||{};
+      state.matchCache[m.id]=Object.assign({},state.matchCache[m.id]||{},{yahooUrl:resolved});
+      return resolved;
+    }
+    if(url)return url;
+  }
+  return null;
+}
+function readerPlainLines(text){
+  return String(text||'').replace(/\r/g,'').split('\n').map(line=>{
+    return line
+      .replace(/!\[[^\]]*\]\([^)]*\)/g,'')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'$1')
+      .replace(/cite\d+†([^]+)/g,'$1')
+      .replace(/https?:\/\/\S+/g,'')
+      .replace(/[＊*]/g,'')
+      .replace(/^[\-・\s]+/,'')
+      .replace(/\s+/g,' ')
+      .trim();
+  });
+}
+function cleanYahooScorer(line){
+  const s=String(line||'')
+    .replace(/^[-・\s]+/,'')
+    .replace(/^(前半|後半)(\d{1,3})分\s*/,'')
+    .replace(/\b\d+\s*-\s*\d+\b/g,'')
+    .replace(/^(前|後)\s*/,'$1 ')
+    .replace(/\s+/g,' ')
+    .trim();
+  if(!s||/試合|順位|動画|戦評|フォーメーション|スタッツ|テキスト速報|ハイライト|FIFAランキング/.test(s))return '';
+  if(!/(前|後)\s*\d{1,3}'/.test(s)&&!/(前半|後半)\d{1,3}分/.test(s))return '';
+  return s.replace(/(前半|後半)(\d{1,3})分/g,(m,h,n)=>`${h==='前半'?'前':'後'} ${n}'`);
+}
+function parseYahooSummaryScorers(text,m){
+  const out={home:[],away:[]};
+  const lines=readerPlainLines(text);
+  const endIdx=lines.findIndex(l=>/試合／無料|最新確定値|試合情報|マン・オブ・ザ・マッチ|## 動画/.test(l));
+  const startIdx=lines.findIndex(l=>l==='試合終了');
+  const scope=lines.slice(startIdx>=0?startIdx:endIdx>=0?0:0,endIdx>0?endIdx:Math.min(lines.length,150));
+  const groups=[];
+  let current=[];
+  scope.forEach(l=>{
+    const s=cleanYahooScorer(l);
+    if(s){current.push(s);return;}
+    if(current.length){groups.push(current);current=[];}
+  });
+  if(current.length)groups.push(current);
+  const hs=Number(m.hs)||0, as=Number(m.as)||0;
+  if(groups.length>=2){
+    out.home=groups[0].slice(0,Math.max(hs,groups[0].length));
+    out.away=groups[1].slice(0,Math.max(as,groups[1].length));
+  }else if(groups.length===1){
+    if(hs>0&&as===0)out.home=groups[0];
+    else if(hs===0&&as>0)out.away=groups[0];
+    else if(hs>0&&as>0){
+      out.home=groups[0].slice(0,hs);
+      out.away=groups[0].slice(hs,hs+as);
+    }
+  }
+  out.home=[...new Set(out.home.filter(Boolean))];
+  out.away=[...new Set(out.away.filter(Boolean))];
+  return out;
 }
 function parseScorersFromText(text,m){
   const out={home:[],away:[]};
@@ -1303,8 +1413,15 @@ function openSheet(id){
 }
 function closeSheet(){document.getElementById('backdrop').classList.remove('show');const sh=document.getElementById('sheet');sh.classList.remove('show','group-detail');editing=null;currentGroup=null}
 function applySheet(){const s=findSlot(editing);if(s){s.sel=[...document.querySelectorAll('#sheet input:checked')].map(x=>x.value);s.confirmed=false;save();closeSheet();render()}}
-document.getElementById('backdrop').onclick=closeSheet;
-render();
+const backdropEl=document.getElementById('backdrop');
+if(backdropEl)backdropEl.onclick=closeSheet;
+try{
+  render();
+}catch(e){
+  console.error('初期表示エラー',e);
+  const app=document.getElementById('app');
+  if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=20 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
+}
 })();
 </script>
 </body>

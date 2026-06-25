@@ -446,6 +446,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=10000;
 const NEWS_BG_IMAGE_LIMIT=6;
+const NEWS_PIPELINE_VERSION='jp-news-stable-rss-gdelt-v3';
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const STAT_SOURCES={
@@ -812,7 +813,7 @@ function migrateSavedBracket(){
   return null;
 }
 function load(){
-  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{},news:{target:'all',status:'',items:[]},ko:{status:'',results:{},viewCol:0}};
+  const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{},news:{target:'all',status:'',items:[],version:NEWS_PIPELINE_VERSION},ko:{status:'',results:{},viewCol:0}};
   const saved=readSaved(STORE);
   const merged=Object.assign(base,saved||{});
   if(!String(merged.statStatus?.assists||'').includes('スポーツナビ')&&!String(merged.statStatus?.assists||'').includes('Yahoo')){
@@ -829,11 +830,16 @@ function load(){
   if(!['','更新中・・・','更新済'].includes(merged.bracketStatus||''))merged.bracketStatus='';
   merged.statStatus=Object.assign({goals:'',assists:''},merged.statStatus||{});
   ['goals','assists'].forEach(k=>{if(!['','更新中・・・','更新済'].includes(merged.statStatus[k]||''))merged.statStatus[k]='';});
-  if(!merged.news||typeof merged.news!=='object')merged.news={target:'all',status:'',items:[]};
+  if(!merged.news||typeof merged.news!=='object')merged.news={target:'all',status:'',items:[],version:NEWS_PIPELINE_VERSION};
   if(merged.news.target!=='all'&&!NEWS_COUNTRY_ORDER.includes(merged.news.target))merged.news.target='all';
+  if(merged.news.version!==NEWS_PIPELINE_VERSION){
+    merged.news={target:merged.news.target||'all',status:'',items:[],version:NEWS_PIPELINE_VERSION};
+  }
   if(!Array.isArray(merged.news.items))merged.news.items=[];
-  merged.news.items=merged.news.items.filter(item=>item&&hasJapaneseText(item.title));
-  if(!merged.news.items.length&&merged.news.status==='取得済')merged.news.status='';
+  merged.news.items=merged.news.items
+    .map(item=>item&&Object.assign({},item,{title:cleanNewsTitle(item.title||''),url:normalizeNewsArticleUrl(item.url||'')}))
+    .filter(item=>item&&isUsableNewsTitle(item.title)&&item.url);
+  if(!merged.news.items.length&&/^取得済/.test(merged.news.status||''))merged.news.status='';
   if(!['','取得中・・・','取得済','取得失敗','ニュース取得失敗','取得済（検索リンク）'].includes(merged.news.status||'')&&!/^取得済/.test(merged.news.status||''))merged.news.status='';
   if(!merged.ko||typeof merged.ko!=='object')merged.ko={status:'',results:{}};
   if(!merged.ko.results||typeof merged.ko.results!=='object')merged.ko.results={};
@@ -987,10 +993,10 @@ function newsHTML(){
   </div>`;
 }
 function newsEmptyHTML(target,status){
-  if(status==='ニュース取得失敗'){
+  if(String(status||'').includes('失敗')||String(status||'').includes('直接記事なし')){
     const q=target==='all'?'ワールドカップ サッカー 最新':`${newsTargetLabel(target)} ワールドカップ サッカー 最新`;
     const url=`https://news.google.com/search?q=${encodeURIComponent(q)}&hl=ja&gl=JP&ceid=JP:ja`;
-    return `<div class="news-empty">ニュース一覧を取得できませんでした。<br><a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:#9df7f5;font-weight:900">Googleニュースで確認する</a></div>`;
+    return `<div class="news-empty">ニュース一覧を取得できませんでした。<br><span>取得元側の制限・一時停止の可能性があります。</span><br><a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:#9df7f5;font-weight:900">Googleニュースで確認する</a></div>`;
   }
   return '<div class="news-empty">対象を選んで「取得」を押すと、最新ニュースを最大20件表示します。</div>';
 }
@@ -2039,7 +2045,9 @@ function hasJapaneseText(s){
 }
 function cleanNewsTitle(title){
   return decodeHtml(String(title||''))
-    .replace(/\s*[-｜|]\s*(Google\s*ニュース|Yahoo!?ニュース|スポーツナビ|サッカーキング|ゲキサカ|Football\s*ZONE|GOAL)\s*$/i,'')
+    .replace(/\s*[-｜|]\s*(Google\s*ニュース|Yahoo!?ニュース|スポーツナビ|サッカーキング|ゲキサカ|Football\s*ZONE|GOAL|日刊スポーツ|スポニチ|毎日新聞|読売新聞|朝日新聞|日本経済新聞|NHK|共同通信|時事通信)\s*$/i,'')
+    .replace(/\s+-\s+[^-｜|]{2,28}$/,'')
+    .replace(/\s+[｜|]\s+[^-｜|]{2,28}$/,'')
     .replace(/\s+/g,' ')
     .trim();
 }
@@ -2167,7 +2175,7 @@ async function fetchTextViaCoddProxy(url){
 function isGoogleNewsArticleUrl(url){
   try{
     const u=new URL(String(url||''));
-    return u.hostname.replace(/^www\./,'').toLowerCase()==='news.google.com'&&/\/articles\//i.test(u.pathname);
+    return u.hostname.replace(/^www\./,'').toLowerCase()==='news.google.com'&&/(?:^|\/)articles\//i.test(u.pathname);
   }catch(e){return false}
 }
 async function resolveGoogleNewsArticleUrl(url){
@@ -2206,10 +2214,11 @@ async function enrichNewsImagesSequential(items,target){
 }
 
 async function fetchNews(){
-  state.news=state.news||{target:'all',status:'',items:[]};
+  state.news=state.news||{target:'all',status:'',items:[],version:NEWS_PIPELINE_VERSION};
   const sel=document.getElementById('newsTarget');
   if(sel)state.news.target=sel.value||'all';
   const target=state.news.target;
+  state.news.version=NEWS_PIPELINE_VERSION;
   state.news.status='取得中・・・';
   state.news.items=[];
   save();render();
@@ -2220,8 +2229,8 @@ async function fetchNews(){
       state.news.items=deduped.map(item=>Object.assign({},item,{image:newsInitialImage(item,target)}));
       state.news.status=`取得済 ${deduped.length}件`;
       save();render();
-      // 記事一覧の表示を待たせないため、画像補完は最大6件だけバックグラウンドで軽く実行する。
-      enhanceNewsImagesInBackground(target);
+      // 一覧表示を優先する。Googleニュース経由URLの直接記事化と画像補完は最大6件だけ裏側で行う。
+      enhanceNewsLinksAndImagesInBackground(target);
     }else{
       state.news.items=[];
       state.news.status='取得失敗';
@@ -2233,22 +2242,33 @@ async function fetchNews(){
   }
   save();render();
 }
-async function enhanceNewsImagesInBackground(target){
+async function enhanceNewsLinksAndImagesInBackground(target){
   const current=(state.news&&state.news.target)||'all';
   if(current!==target||!Array.isArray(state.news.items)||!state.news.items.length)return;
-  const targets=state.news.items.map((item,idx)=>({item,idx})).filter(x=>isNewsPlaceholderImage(x.item.image,x.item,target)).slice(0,NEWS_BG_IMAGE_LIMIT);
-  if(!targets.length)return;
-  const results=await Promise.all(targets.map(x=>promiseWithSoftTimeout(fetchArticleImage(x.item.url),3500).then(img=>({idx:x.idx,img})).catch(()=>({idx:x.idx,img:''}))));
+  const targets=state.news.items.map((item,idx)=>({item,idx})).slice(0,NEWS_BG_IMAGE_LIMIT);
+  const results=await Promise.all(targets.map(async x=>{
+    const resolved=isGoogleNewsArticleUrl(x.item.url)?await promiseWithSoftTimeout(resolveGoogleNewsArticleUrl(x.item.url),2600):'';
+    const articleUrl=normalizeNewsArticleUrl(resolved)||x.item.url;
+    const img=isNewsPlaceholderImage(x.item.image,x.item,target)?await promiseWithSoftTimeout(fetchArticleImage(articleUrl),3000):'';
+    return {idx:x.idx,url:articleUrl,img};
+  }).map(p=>p.catch(()=>({idx:-1,url:'',img:''}))));
   if(!state.news||state.news.target!==target||!Array.isArray(state.news.items))return;
   let changed=false;
   for(const r of results){
-    if(isHttpNewsImage(r.img)&&state.news.items[r.idx]){
-      state.news.items[r.idx].image=r.img;
+    const item=state.news.items[r.idx];
+    if(!item)continue;
+    if(r.url&&r.url!==item.url&&!isListingNewsUrl(r.url)){
+      item.url=r.url;
+      changed=true;
+    }
+    if(isHttpNewsImage(r.img)){
+      item.image=r.img;
       changed=true;
     }
   }
   if(changed){save();render();}
 }
+async function enhanceNewsImagesInBackground(target){return enhanceNewsLinksAndImagesInBackground(target)}
 function fallbackNewsSearchItems(target){
   const label=newsTargetLabel(target);
   const jp=target==='all'?'ワールドカップ':(T[target]?.[0]||target);
@@ -2276,6 +2296,9 @@ function fallbackNewsSearchItems(target){
 }
 
 async function fetchNewsItems(target){
+  // 根本方針：検索結果ページをカード化しない一方、Googleニュースの「記事ページ」は許容する。
+  // 直接記事URLだけに絞ると取得元の仕様変更で0件になりやすいため、記事一覧はRSS/GDELTから先に表示し、
+  // Googleニュース経由URLの直接記事化は後段のバックグラウンド処理で行う。
   const loaders=[
     ['GDELT',()=>fetchGdeltNewsItems(target)],
     ['Google News RSS2JSON',()=>fetchGoogleNewsRss2JsonItems(target)],
@@ -2283,6 +2306,7 @@ async function fetchNewsItems(target){
     ['Google News AllOrigins GET',()=>fetchGoogleNewsAllOriginsGetItems(target)],
     ['Google News Codetabs',()=>fetchGoogleNewsCoddProxyItems(target)],
     ['Google News Reader',()=>fetchGoogleNewsItems(target)],
+    ['Google News Search Reader',()=>fetchGoogleNewsSearchReaderItems(target)],
     ['Yahoo News Search Reader',()=>fetchYahooNewsSearchReaderItems(target)]
   ];
   const settled=await Promise.all(loaders.map(([name,loader])=>
@@ -2291,16 +2315,14 @@ async function fetchNewsItems(target){
       .catch(error=>({name,items:[],error}))
   ));
   const combined=[];
-  const errors=[];
   settled.forEach(r=>{
-    if(r.error){console.warn('news loader failed:',r.name,r.error);errors.push(r.error);return;}
-    const usable=(r.items||[]).map(x=>Object.assign({},x,{title:cleanNewsTitle(x.title),url:normalizeNewsArticleUrl(x.url)})).filter(x=>x&&isUsableNewsTitle(x.title)&&x.url);
+    if(r.error){console.warn('news loader failed:',r.name,r.error);return;}
+    const usable=(r.items||[])
+      .map(x=>Object.assign({},x,{title:cleanNewsTitle(x.title),url:normalizeNewsArticleUrl(x.url)}))
+      .filter(x=>x&&isUsableNewsTitle(x.title)&&x.url&&!isListingNewsUrl(x.url));
     combined.push(...usable);
   });
-  const deduped=dedupeNews(combined);
-  if(deduped.length)return deduped;
-  if(errors.length)throw errors[errors.length-1];
-  return [];
+  return dedupeNews(combined);
 }
 function toNewsArticleFromGdelt(a){
   const url=normalizeNewsArticleUrl(a.url||a.url_mobile||'');
@@ -2625,8 +2647,8 @@ function dedupeNews(items){
     const clean=Object.assign({},item);
     clean.title=decodeHtml(stripMarkdownLinks(clean.title)).replace(/\s+-\s+[^-]{2,30}$/,'').trim()||clean.title;
     if(!hasJapaneseText(clean.title))continue;
-    clean.url=normalizeNewsUrl(clean.url);
-    if(!clean.url)continue;
+    clean.url=normalizeNewsArticleUrl(clean.url);
+    if(!clean.url||isListingNewsUrl(clean.url))continue;
     clean.image=isHttpNewsImage(clean.image)?clean.image:'';
     if(out.some(x=>isSimilarNews(clean,x)))continue;
     out.push(clean);

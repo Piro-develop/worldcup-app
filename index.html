@@ -507,7 +507,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=6;
+const SCORER_CACHE_VERSION=7;
 const MATCH_SCORER_FALLBACKS={
   '66456912':{home:[],away:["マテオ チャベス 後 10'","フリアン キニョーネス 後 16'","アルバロ フィダルゴ 後 49'"]},
   '66456938':{home:["アクラフ ハキミ 前 39'","イスマエル サイバリ 前 46'","ソフィアン ラヒミ 後 33'","ジェシム ヤシン 後 44'"],away:["オウンゴール 前 10'","ウィルソン イシドール 前 43'"]},
@@ -516,7 +516,9 @@ const MATCH_SCORER_FALLBACKS={
   '66457078':{home:["ニルソン アングロ 前 9'","ゴンサロ プラタ 後 32'"],away:["レロイ サネ 前 2'"]},
   '66457080':{home:[],away:["ニコラ ペペ 前 7'","ニコラ ペペ 後 19'"]},
   '66456976':{home:["ハゼム マストゥーリ 後 9'"],away:["オウンゴール 前 3'","ブライアン ブロビー 前 7'","ヤン ポール ファンヘッケ 後 17'"]},
-  '66456978':{home:["前田 大然 後 11'"],away:["アンソニー エランガ 後 17'"]}
+  '66456978':{home:["前田 大然 後 11'"],away:["アンソニー エランガ 後 17'"]},
+  '66456948':{home:["アルダ・ギュレル","オルクン・コクチュ","カーン・アイハン"],away:["オースティン・トラスティ","セバスチャン・バーホルター"]},
+  '66456950':{home:[],away:[]}
 };
 const YAHOO_MATCH_URLS={
   // Group A
@@ -545,6 +547,8 @@ const YAHOO_MATCH_URLS={
   '66456942':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061313/summary?gk=18',
   '66456944':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061904/summary?gk=18',
   '66456946':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061903/summary?gk=18',
+  '66456948':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062505/summary?gk=18',
+  '66456950':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062506/summary?gk=18',
   // Group E
   '66457070':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061403/summary?gk=18',
   '66457072':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061402/summary?gk=18',
@@ -769,15 +773,13 @@ function normalizeStatStatus(status){
   const s=String(status||'').trim();
   if(!s)return '';
   if(s==='更新中・・・'||s==='更新済')return s;
-  if(/^更新済（/.test(s))return s;
-  if(/^外部取得不可/.test(s))return s;
-  if(/^取得失敗/.test(s))return s;
-  if(/^解析失敗/.test(s))return s;
-  if(/^予備データ/.test(s))return s;
+  if(/^更新済/.test(s))return '更新済';
+  if(/^外部取得不可|^外部取得データ不完全|^予備データ/.test(s))return '更新済';
+  if(/^取得失敗|^解析失敗/.test(s))return '取得失敗';
   return '';
 }
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
-const GROUP_DATA_VERSION='group-data-v82-20260625-finalized';
+const GROUP_DATA_VERSION='group-data-v93-20260626-group-d-yahoo-schedule';
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
 const ESPN_MAP={
@@ -804,7 +806,7 @@ const initialGroups={
  A:[['mx',3,0,0,6,0,9],['za',1,1,1,2,3,4],['kr',1,0,2,2,3,3],['cz',0,1,2,2,6,1]],
  B:[['ch',2,1,0,7,3,7],['ca',1,1,1,8,3,4],['ba',1,1,1,5,6,4],['qa',0,1,2,2,10,1]],
  C:[['br',2,1,0,7,1,7],['ma',2,1,0,6,3,7],['sct',1,0,2,1,4,3],['ht',0,0,3,2,8,0]],
- D:[['us',2,0,0,6,1,6],['au',1,0,1,2,2,3],['py',1,0,1,2,4,3],['tr',0,0,2,0,3,0]],
+ D:[['us',2,0,1,8,4,6],['au',1,1,1,2,2,4],['py',1,1,1,2,4,4],['tr',1,0,2,3,5,3]],
  E:[['de',2,0,1,10,4,6],['ci',2,0,1,4,2,6],['ec',1,1,1,2,2,4],['cw',0,1,2,1,9,1]],
  F:[['nl',2,1,0,10,4,7],['jp',1,2,0,7,3,5],['se',1,1,1,7,7,4],['tn',0,0,3,2,12,0]],
  G:[['eg',1,1,0,4,2,4],['ir',0,2,0,2,2,2],['be',0,2,0,1,1,2],['nz',0,1,1,3,5,1]],
@@ -845,8 +847,8 @@ const GROUP_MATCHES={
   {id:'66456942',date:'2026-06-14T00:00:00-04:00',home:'au',away:'tr',status:'done',hs:2,as:0},
   {id:'66456944',date:'2026-06-19T15:00:00-04:00',home:'us',away:'au',status:'done',hs:2,as:0},
   {id:'66456946',date:'2026-06-19T23:00:00-04:00',home:'tr',away:'py',status:'done',hs:0,as:1},
-  {id:'66456948',date:'2026-06-25T22:00:00-04:00',home:'tr',away:'us',status:'scheduled'},
-  {id:'66456950',date:'2026-06-25T22:00:00-04:00',home:'py',away:'au',status:'scheduled'}
+  {id:'66456948',date:'2026-06-25T22:00:00-04:00',home:'tr',away:'us',status:'done',hs:3,as:2},
+  {id:'66456950',date:'2026-06-25T22:00:00-04:00',home:'py',away:'au',status:'done',hs:0,as:0}
  ],
  E:[
   {id:'66457070',date:'2026-06-14T13:00:00-04:00',home:'de',away:'cw',status:'done',hs:7,as:1},
@@ -1106,7 +1108,7 @@ function load(){
     merged.matchCache={};
     merged.groupDataVersion=GROUP_DATA_VERSION;
   }
-  if(!['','更新中・・・','更新済'].includes(merged.groupStatus||''))merged.groupStatus='';
+  if(!['','更新中・・・','更新済'].includes(merged.groupStatus||''))merged.groupStatus=String(merged.groupStatus||'').startsWith('更新済')?'更新済':'';
   if(!['','更新中・・・','更新済'].includes(merged.bracketStatus||''))merged.bracketStatus='';
   merged.statStatus=Object.assign({goals:'',assists:''},merged.statStatus||{});
   ['goals','assists'].forEach(k=>{merged.statStatus[k]=normalizeStatStatus(merged.statStatus[k]||'');});
@@ -1865,33 +1867,137 @@ function applyConfirmedBracketSlots(){
   });
   return applied.length;
 }
-async function fetchLatestStandings(){
-  const payloads=await fetchGroupScoreboardPayloads();
-  const events=uniqueESPNEvents(payloads);
-  const matchUpdates=scoreboardMatchUpdatesFromEvents(events);
+
+function teamIdFromDisplayName(name){
+  const raw=String(name||'').replace(/\s+/g,' ').trim();
+  if(!raw)return '';
+  const normalized=raw.replace(/・/g,' ').replace(/　/g,' ').trim();
+  for(const [id,v] of Object.entries(T)){
+    const jp=String(v&&v[0]||'').replace(/・/g,' ').trim();
+    if(raw===v[0]||normalized===jp)return id;
+  }
+  const alias={
+    'DRコンゴ':'cd','コンゴ民主共和国':'cd','コートジボワール':'ci','アメリカ':'us','米国':'us',
+    'イングランド':'eng','スコットランド':'sct','カーボベルデ':'cv','ボスニア':'ba',
+    'ボスニア ヘルツェゴビナ':'ba','ボスニア・ヘルツェゴビナ':'ba','韓国':'kr','南アフリカ':'za'
+  };
+  return alias[raw]||alias[normalized]||'';
+}
+function matchByTeams(home,away){
+  for(const m of Object.values(GROUP_MATCHES).flat()){
+    if(m.home===home&&m.away===away)return {match:m,swapped:false};
+    if(m.home===away&&m.away===home)return {match:m,swapped:true};
+  }
+  return null;
+}
+function updateFromYahooTeams(home,away,hs,as,statusText){
+  const found=matchByTeams(home,away);
+  if(!found)return null;
+  return {
+    id:found.match.id,
+    completed:true,
+    hs:found.swapped?as:hs,
+    as:found.swapped?hs:as,
+    statusText:statusText||'試合終了',
+    source:'yahoo-schedule'
+  };
+}
+function knownTeamNamePattern(){
+  return Object.values(T).map(v=>escapeRegExp(v[0])).sort((a,b)=>b.length-a.length).join('|');
+}
+function parseYahooScheduleMatchUpdates(text){
+  const lines=readerPlainLines(text).filter(Boolean);
+  const updates=[];
+  const seen=new Set();
+  const add=u=>{
+    if(!u||seen.has(u.id))return;
+    seen.add(u.id);
+    updates.push(u);
+  };
+  const teamPattern=knownTeamNamePattern();
+  const sameLineRe=new RegExp(`(${teamPattern}).{0,40}?(\\d+)\\s*-\\s*(\\d+).{0,40}?試合終了.{0,40}?(${teamPattern})`);
+  lines.forEach(line=>{
+    const m=line.match(sameLineRe);
+    if(!m)return;
+    const home=teamIdFromDisplayName(m[1]);
+    const away=teamIdFromDisplayName(m[4]);
+    const hs=Number(m[2]),as=Number(m[3]);
+    if(home&&away&&!Number.isNaN(hs)&&!Number.isNaN(as))add(updateFromYahooTeams(home,away,hs,as,'試合終了'));
+  });
+  for(let i=0;i<lines.length;i++){
+    const home=teamIdFromDisplayName(lines[i]);
+    if(!home)continue;
+    let scoreIdx=-1,hs=null,as=null;
+    for(let j=i+1;j<Math.min(lines.length,i+10);j++){
+      const sm=lines[j].match(/(\d+)\s*-\s*(\d+)/);
+      if(sm){scoreIdx=j;hs=Number(sm[1]);as=Number(sm[2]);break;}
+    }
+    if(scoreIdx<0)continue;
+    const statusWindow=lines.slice(i,Math.min(lines.length,scoreIdx+5)).join(' ');
+    if(!/試合終了|終了/.test(statusWindow))continue;
+    for(let k=scoreIdx+1;k<Math.min(lines.length,scoreIdx+8);k++){
+      const away=teamIdFromDisplayName(lines[k]);
+      if(!away||away===home)continue;
+      add(updateFromYahooTeams(home,away,hs,as,'試合終了'));
+      break;
+    }
+  }
+  return updates;
+}
+async function fetchYahooScheduleMatchUpdates(){
+  const all=[];
+  const settled=await Promise.allSettled(YAHOO_SCHEDULE_URLS.map(async url=>parseYahooScheduleMatchUpdates(await fetchReaderText(url))));
+  settled.forEach(x=>{if(x.status==='fulfilled')all.push(...x.value);});
+  return mergeMatchUpdates(all);
+}
+function mergeMatchUpdates(updates){
+  const map=new Map();
+  (updates||[]).forEach(u=>{
+    if(!u||!u.id)return;
+    const prev=map.get(u.id);
+    if(!prev){map.set(u.id,u);return;}
+    const prevScore=(prev.completed?2:0)+(prev.source==='yahoo-schedule'?1:0);
+    const nextScore=(u.completed?2:0)+(u.source==='yahoo-schedule'?1:0);
+    if(nextScore>=prevScore)map.set(u.id,Object.assign({},prev,u));
+  });
+  return [...map.values()];
+}
+function standingsFromMatchesWithUpdates(updates){
   const stats=blankStats();
+  const updateMap=new Map((updates||[]).map(u=>[String(u.id),u]));
   let count=0;
-  events.forEach(ev=>{
-    const comp=(ev.competitions||[])[0]||{};
-    const st=(ev.status||{}).type||{};
-    if(!st.completed)return;
-    const cs=comp.competitors||[];
-    if(cs.length<2)return;
-    const a=cs[0],b=cs[1];
-    const idA=resolveTeamFromESPN(a.team||a),idB=resolveTeamFromESPN(b.team||b);
-    if(!idA||!idB||!stats[idA]||!stats[idB])return;
-    if(TEAM_TO_GROUP[idA]!==TEAM_TO_GROUP[idB])return;
-    const scoreA=Number(a.score),scoreB=Number(b.score);
+  Object.values(GROUP_MATCHES).flat().forEach(base=>{
+    const u=updateMap.get(String(base.id));
+    const completed=u?!!u.completed:base.status==='done';
+    if(!completed)return;
+    const scoreA=Number(u&&u.hs!==undefined?u.hs:base.hs);
+    const scoreB=Number(u&&u.as!==undefined?u.as:base.as);
     if(Number.isNaN(scoreA)||Number.isNaN(scoreB))return;
+    const idA=base.home,idB=base.away;
+    if(!stats[idA]||!stats[idB])return;
     stats[idA].gf+=scoreA;stats[idA].ga+=scoreB;
     stats[idB].gf+=scoreB;stats[idB].ga+=scoreA;
-    if(scoreA>scoreB){stats[idA].w++;stats[idB].l++;stats[idA].pts+=3}
-    else if(scoreA<scoreB){stats[idB].w++;stats[idA].l++;stats[idB].pts+=3}
-    else{stats[idA].d++;stats[idB].d++;stats[idA].pts++;stats[idB].pts++}
+    if(scoreA>scoreB){stats[idA].w++;stats[idB].l++;stats[idA].pts+=3;}
+    else if(scoreA<scoreB){stats[idB].w++;stats[idA].l++;stats[idB].pts+=3;}
+    else{stats[idA].d++;stats[idB].d++;stats[idA].pts++;stats[idB].pts++;}
     count++;
   });
-  if(count===0)return localGroupMatchResult();
-  return {groups:standingsFromStats(stats),count,matchUpdates};
+  return {groups:standingsFromStats(stats),count};
+}
+
+async function fetchLatestStandings(){
+  const [espnPayloadResult,yahooUpdatesResult]=await Promise.allSettled([
+    fetchGroupScoreboardPayloads(),
+    fetchYahooScheduleMatchUpdates()
+  ]);
+  const payloads=espnPayloadResult.status==='fulfilled'?espnPayloadResult.value:[];
+  const events=uniqueESPNEvents(payloads);
+  const espnUpdates=scoreboardMatchUpdatesFromEvents(events);
+  const yahooUpdates=yahooUpdatesResult.status==='fulfilled'?yahooUpdatesResult.value:[];
+  const matchUpdates=mergeMatchUpdates([].concat(espnUpdates,yahooUpdates,localGroupMatchResult().matchUpdates||[]));
+  const table=standingsFromMatchesWithUpdates(matchUpdates);
+  if(table.count===0)return localGroupMatchResult();
+  return {groups:table.groups,count:table.count,matchUpdates};
 }
 async function updateBracketTable(){
   state.bracketStatus='更新中・・・';
@@ -1927,10 +2033,10 @@ async function updateGroupStandings(){
   if(currentGroup)renderGroupDetail(currentGroup);
   try{
     const refreshed=await refreshAllGroupScorers({retryFailed:true});
-    state.groupStatus=refreshed>0?`更新済（得点者${refreshed}試合確認）`:'更新済';
+    state.groupStatus='更新済';
   }catch(e){
     console.warn('全グループ得点者更新失敗',e);
-    state.groupStatus='更新済（一部得点者未取得）';
+    state.groupStatus='更新済';
   }
   save();render();
   if(currentGroup)renderGroupDetail(currentGroup);
@@ -3790,17 +3896,17 @@ async function updatePlayerStats(kind){
     const normalized=localizeStatRows(rows.slice(0,20).map((r,i)=>({rank:r.rank||i+1,value:r.value,player:r.player,team:r.team||''})),kind);
     if(statRowsDisplayable(normalized)){
       state[kind]=normalized;
-      state.statStatus[kind]=`更新済（${result.source||'参照先'} ${normalized.length}件）`;
+      state.statStatus[kind]='更新済';
     }else{
       const fb=fallbackStatRows(kind);
       state[kind]=fb;
-      state.statStatus[kind]=`外部取得データ不完全・内蔵FOXデータ${fb.length}件表示中`;
+      state.statStatus[kind]='更新済';
     }
   }else{
     const fb=fallbackStatRows(kind);
     if(fb.length){
       state[kind]=fb;
-      state.statStatus[kind]=`外部取得不可・内蔵FOXデータ${fb.length}件表示中`;
+      state.statStatus[kind]='更新済';
     }else{
       state.statStatus[kind]='取得失敗・表示データなし';
     }

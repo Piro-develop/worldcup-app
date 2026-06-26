@@ -698,27 +698,69 @@ function normalizePlayerAlias(name){
     .trim()
     .toLowerCase();
 }
-function localizeStatPlayerName(name){
-  const raw=String(name||'').trim();
-  if(!raw)return '';
-  if(/[ぁ-んァ-ヶ一-龯]/.test(raw))return raw;
-  const direct=STAT_PLAYER_JA[raw.toLowerCase()]||STAT_PLAYER_JA[normalizePlayerAlias(raw)];
-  return direct||raw;
+function stripStatImageNoise(name){
+  let s=String(name||'');
+  try{s=decodeHtml(s)}catch(e){}
+  // r.jina.ai や一部サイトの画像altが選手名の前に残るケースを除去します。
+  // 例："![Image 50] マティアス..." / "!!Image 50 マティアス..."
+  s=s.replace(/!\[([^\]]*)\]\([^)]*\)/g,' $1 ');
+  s=s.replace(/\[([^\]]*)\]\([^)]*\)/g,' $1 ');
+  s=s.replace(/[!！]*\s*\[?\s*Image\s*\d+\s*\]?/gi,' ');
+  s=s.replace(/[!！]*\s*\[?\s*画像\s*\d+\s*\]?/g,' ');
+  s=s.replace(/^[!！\s:：・|｜-]+/,'');
+  return s.replace(/\s+/g,' ').trim();
 }
-function localizeStatRows(rows){
-  return (Array.isArray(rows)?rows:[]).map((r,i)=>Object.assign({},r,{rank:r.rank||i+1,player:localizeStatPlayerName(r.player||'')}));
+function hasStatImageNoise(name){
+  return /[!！]*\s*\[?\s*Image\s*\d+|[!！]*\s*\[?\s*画像\s*\d+/i.test(String(name||''));
+}
+function localizeStatPlayerName(name){
+  const raw=stripStatImageNoise(name);
+  if(!raw)return '';
+  const direct=STAT_PLAYER_JA[raw.toLowerCase()]||STAT_PLAYER_JA[normalizePlayerAlias(raw)];
+  if(direct)return direct;
+  if(/[ぁ-んァ-ヶ一-龯]/.test(raw))return raw;
+  return raw;
+}
+function statPlayerKeyForLookup(name){
+  return normalizePlayerAlias(stripStatImageNoise(localizeStatPlayerName(name))).replace(/[・･]/g,' ').replace(/\s+/g,' ').trim();
+}
+function statFallbackTeamForPlayer(player,kind){
+  const key=statPlayerKeyForLookup(player);
+  const pools=[];
+  if(kind&&FOX_STATIC_FALLBACK_STATS[kind])pools.push(FOX_STATIC_FALLBACK_STATS[kind]);
+  pools.push(FOX_STATIC_FALLBACK_STATS.goals||[],FOX_STATIC_FALLBACK_STATS.assists||[]);
+  for(const rows of pools){
+    for(const r of rows||[]){
+      if(statPlayerKeyForLookup(r.player)===key&&r.team)return r.team;
+    }
+  }
+  return '';
+}
+function localizeStatRows(rows,kind){
+  return (Array.isArray(rows)?rows:[]).map((r,i)=>{
+    const player=localizeStatPlayerName(r&&r.player||'');
+    const team=(r&&r.team)||statFallbackTeamForPlayer(player,kind)||'';
+    return Object.assign({},r||{},{rank:(r&&r.rank)||i+1,value:(r&&r.value)||'',player,team});
+  }).filter(r=>r.player&&!hasStatImageNoise(r.player));
+}
+function statRowsDisplayable(rows){
+  const list=Array.isArray(rows)?rows.filter(r=>r&&r.player&&Number(r.value)>0):[];
+  if(!list.length)return false;
+  const teamCount=list.filter(r=>r.team).length;
+  // 国旗・国名列を表示する表なので、国がほぼ空の解析結果は採用しません。
+  return teamCount>=Math.min(10,list.length);
 }
 function fallbackStatRows(kind){
   const key=kind==='assists'?'assists':'goals';
-  const rows=localizeStatRows((FOX_STATIC_FALLBACK_STATS[key]||[]).map(r=>Object.assign({},r)));
+  const rows=localizeStatRows((FOX_STATIC_FALLBACK_STATS[key]||[]).map(r=>Object.assign({},r)),key);
   if(rows.length)return rows.slice(0,20);
-  if(kind==='assists')return yahooAssistFallbackRows();
-  return SOCCERKING_FALLBACK_STATS.rows
+  if(kind==='assists')return localizeStatRows(yahooAssistFallbackRows(),kind);
+  return localizeStatRows(SOCCERKING_FALLBACK_STATS.rows
     .filter(r=>Number(r.goals)>0)
     .slice()
     .sort((a,b)=>Number(b.goals)-Number(a.goals)||Number(a.rank)-Number(b.rank))
     .slice(0,20)
-    .map((r,i)=>({rank:i+1,value:r.goals,player:r.player,team:r.team}));
+    .map((r,i)=>({rank:i+1,value:r.goals,player:r.player,team:r.team})),kind);
 }
 function normalizeStatStatus(status){
   const s=String(status||'').trim();
@@ -1046,8 +1088,10 @@ function load(){
   if(!Array.isArray(merged.goals)||merged.goals.length<20){
     merged.goals=fallbackStatRows('goals');
   }
-  merged.goals=localizeStatRows(merged.goals);
-  merged.assists=localizeStatRows(merged.assists);
+  merged.goals=localizeStatRows(merged.goals,'goals');
+  merged.assists=localizeStatRows(merged.assists,'assists');
+  if(!statRowsDisplayable(merged.goals))merged.goals=fallbackStatRows('goals');
+  if(!statRowsDisplayable(merged.assists))merged.assists=fallbackStatRows('assists');
   const preserved=migrateSavedBracket();
   if(preserved)merged.bracket=preserved;
   if(!tabs.some(([id])=>id===merged.active))merged.active='bracket';
@@ -3668,9 +3712,15 @@ async function updatePlayerStats(kind){
   const result=await fetchPlayerStats(kind).catch(e=>({rows:[],message:(e&&e.message)||'取得失敗'}));
   const rows=Array.isArray(result.rows)?result.rows:[];
   if(rows.length){
-    const normalized=localizeStatRows(rows.slice(0,20).map((r,i)=>({rank:r.rank||i+1,value:r.value,player:r.player,team:r.team||''})));
-    state[kind]=normalized;
-    state.statStatus[kind]=`更新済（${result.source||'参照先'} ${normalized.length}件）`;
+    const normalized=localizeStatRows(rows.slice(0,20).map((r,i)=>({rank:r.rank||i+1,value:r.value,player:r.player,team:r.team||''})),kind);
+    if(statRowsDisplayable(normalized)){
+      state[kind]=normalized;
+      state.statStatus[kind]=`更新済（${result.source||'参照先'} ${normalized.length}件）`;
+    }else{
+      const fb=fallbackStatRows(kind);
+      state[kind]=fb;
+      state.statStatus[kind]=`外部取得データ不完全・内蔵FOXデータ${fb.length}件表示中`;
+    }
   }else{
     const fb=fallbackStatRows(kind);
     if(fb.length){
@@ -4028,12 +4078,12 @@ async function fetchStatSourceText(url){
   throw lastErr||new Error('ランキング取得失敗');
 }
 function stripMarkdownLinks(line){
-  return String(line||'')
-    .replace(/!\[[^\]]*\]\([^)]*\)/g,'')
+  return stripStatImageNoise(String(line||'')
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g,' $1 ')
     .replace(/\[([^\]]+)\]\([^)]*\)/g,'$1')
     .replace(/https?:\/\/\S+/g,'')
     .replace(/\s+/g,' ')
-    .trim();
+    .trim());
 }
 function parseSoccerKingStats(text,kind){
   if(kind!=='goals')return [];
@@ -4084,7 +4134,7 @@ function normalizeArticleLine(line){
     .trim();
 }
 function cleanPlayerName(name){
-  return normalizeArticleLine(name)
+  return stripStatImageNoise(normalizeArticleLine(name))
     .replace(/^[-–—・\s]+/,'')
     .replace(/\s*\|.*$/,'')
     .replace(/\s+/g,' ')

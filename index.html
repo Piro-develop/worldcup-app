@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>2026北中米W杯観戦アプリ</title>
+  <title>26北中米観戦アプリ</title>
   <link rel="icon" type="image/png" href="./worldcup-icon.png">
   <link rel="apple-touch-icon" href="./worldcup-icon.png">
   <link rel="shortcut icon" href="./worldcup-icon.png">
@@ -754,6 +754,71 @@ const GROUP_MATCHES={
  ]
 };
 
+const GROUP_MATCH_BY_ID={};
+Object.values(GROUP_MATCHES).flat().forEach(m=>GROUP_MATCH_BY_ID[m.id]=m);
+function matchCacheFor(id){return (state.matchCache&&state.matchCache[id])||{};}
+function isMatchCompleted(m){
+  const cached=matchCacheFor(m.id);
+  if(typeof cached.completed==='boolean')return cached.completed;
+  return m.status==='done';
+}
+function matchHomeScore(m){
+  const cached=matchCacheFor(m.id);
+  return cached.hs ?? m.hs;
+}
+function matchAwayScore(m){
+  const cached=matchCacheFor(m.id);
+  return cached.as ?? m.as;
+}
+function applyScoreboardMatchUpdates(updates){
+  if(!updates||!updates.length)return 0;
+  state.matchCache=state.matchCache||{};
+  let changed=0;
+  updates.forEach(u=>{
+    if(!u||!u.id||!GROUP_MATCH_BY_ID[u.id])return;
+    const prev=state.matchCache[u.id]||{};
+    const next=Object.assign({},prev,{completed:!!u.completed,hs:u.hs,as:u.as,statusText:u.statusText||'',scoreUpdatedAt:Date.now()});
+    if(u.completed&&prev.completed!==true){
+      delete next.loading;
+      delete next.fetched;
+      delete next.scorerVersion;
+      delete next.scorers;
+    }
+    if(JSON.stringify(prev)!==JSON.stringify(next)){
+      state.matchCache[u.id]=next;
+      changed++;
+    }
+  });
+  return changed;
+}
+function scoreboardMatchUpdatesFromPayloads(payloads){
+  const updates=[];
+  (payloads||[]).flatMap(p=>p.events||[]).forEach(ev=>{
+    const id=String(ev.id||'');
+    const base=GROUP_MATCH_BY_ID[id];
+    if(!base)return;
+    const comp=(ev.competitions||[])[0]||{};
+    const st=(ev.status||{}).type||{};
+    const cs=comp.competitors||[];
+    if(cs.length<2)return;
+    const scores={};
+    cs.forEach(c=>{
+      const tid=resolveTeamFromESPN(c.team||c);
+      const score=Number(c.score);
+      if(tid&&!Number.isNaN(score))scores[tid]=score;
+    });
+    if(scores[base.home]===undefined||scores[base.away]===undefined)return;
+    updates.push({id,completed:!!st.completed,hs:scores[base.home],as:scores[base.away],statusText:st.detail||st.shortDetail||st.description||''});
+  });
+  return updates;
+}
+function groupMatchesFor(g){
+  return (GROUP_MATCHES[g]||[]).map(m=>Object.assign({},m,{
+    status:isMatchCompleted(m)?'done':m.status,
+    hs:matchHomeScore(m),
+    as:matchAwayScore(m)
+  }));
+}
 function buildGroupRows(src){
   const out={};
   GROUPS.forEach(g=>out[g]=(src[g]||[]).map((r,i)=>({team:r[0],w:r[1],d:r[2],l:r[3],gf:r[4],ga:r[5],pts:r[6],rank:i+1})));
@@ -1543,6 +1608,7 @@ function applyConfirmedBracketSlots(){
 }
 async function fetchLatestStandings(){
   const payloads=await Promise.all(ESPN_DATES.map(d=>fetch(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`).then(r=>r.ok?r.json():{events:[]})));
+  const matchUpdates=scoreboardMatchUpdatesFromPayloads(payloads);
   const stats=blankStats();
   let count=0;
   payloads.flatMap(p=>p.events||[]).forEach(ev=>{
@@ -1565,7 +1631,7 @@ async function fetchLatestStandings(){
     count++;
   });
   if(count===0)throw new Error('no matches');
-  return {groups:standingsFromStats(stats),count};
+  return {groups:standingsFromStats(stats),count,matchUpdates};
 }
 async function updateBracketTable(){
   state.bracketStatus='更新中・・・';
@@ -1573,6 +1639,8 @@ async function updateBracketTable(){
   try{
     const result=await fetchLatestStandings();
     state.groups=result.groups;
+    applyScoreboardMatchUpdates(result.matchUpdates);
+    applyScoreboardMatchUpdates(result.matchUpdates);
     applyConfirmedBracketSlots();
   }catch(e){
     console.warn('決勝T表更新失敗',e);
@@ -1594,6 +1662,10 @@ async function updateGroupStandings(){
   }
   state.groupStatus='更新済';
   save();render();
+  if(currentGroup){
+    renderGroupDetail(currentGroup);
+    setTimeout(()=>loadGroupMatchDetails(currentGroup).catch(e=>console.warn('得点者取得失敗',e)),0);
+  }
 }
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
 function confirmedIds(currentSlot){
@@ -1643,7 +1715,7 @@ function renderGroupDetail(g){
       <h3>順位表</h3>
       ${groupDetailTable(g)}
       <h3>試合結果・予定</h3>
-      <div class="match-list">${(GROUP_MATCHES[g]||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).map(matchCardHTML).join('')}</div>
+      <div class="match-list">${groupMatchesFor(g).slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).map(matchCardHTML).join('')}</div>
       <div class="group-detail-note">試合結果・予定は取得可能な公開データをもとに表示します。</div>
     </div>`;
   const closeBtn=document.getElementById('closeSheetBtn');if(closeBtn)closeBtn.onclick=closeSheet;
@@ -1748,7 +1820,7 @@ function scoreStringTeam(label,m){
 }
 async function loadGroupMatchDetails(g){
   state.matchCache=state.matchCache||{};
-  const matches=(GROUP_MATCHES[g]||[]).filter(m=>m.status==='done');
+  const matches=groupMatchesFor(g).filter(m=>isMatchCompleted(m));
   let changed=false;
   matches.forEach(m=>{
     const cache=state.matchCache[m.id];
@@ -1765,7 +1837,7 @@ async function loadGroupMatchDetails(g){
   if(changed){save();if(currentGroup===g)renderGroupDetail(g)}
   await Promise.all(matches.map(async m=>{
     if(state.matchCache[m.id]&&!state.matchCache[m.id].loading&&state.matchCache[m.id].fetched&&state.matchCache[m.id].scorerVersion===SCORER_CACHE_VERSION)return;
-    let parsed={fetched:true,scorerVersion:SCORER_CACHE_VERSION,completed:true,hs:m.hs,as:m.as,scorers:{home:[],away:[]}};
+    let parsed={fetched:true,scorerVersion:SCORER_CACHE_VERSION,completed:true,hs:matchHomeScore(m),as:matchAwayScore(m),scorers:{home:[],away:[]}};
     try{
       const yahooScorers=await fetchMatchPageScorers(m);
       if(yahooScorers&&(yahooScorers.home.length||yahooScorers.away.length)){

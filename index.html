@@ -3613,15 +3613,15 @@ async function fetchPlayerStats(kind){
   }
   for(const src of sources.filter(src=>src.parser!=='fifa')){
     try{
-      const fetched=await fetchStatSourceText(src.url);
-      const rows=src.parser==='soccerking'?parseSoccerKingStatsText(fetched.text,kind):src.parser==='yahoo'?parseYahooStatsText(fetched.text,kind):src.parser==='fox'?parseFoxStatsText(fetched.text,kind):parseStatsText(fetched.text,kind);
+      const fetched=await fetchRowsFromStatSource(src,kind);
+      const rows=Array.isArray(fetched.rows)?fetched.rows:[];
       if(rows.length){
         rememberSingle(src.name,rows,fetched.method,rows.length>=20?'':`${src.name}は${rows.length}件`);
         if(bestSingle&&bestSingle.source===src.name&&bestSingle.rows.length>=20)return bestSingle;
       }else{
         last=src.name+' は取得できましたが、表を解析できませんでした。';
       }
-    }catch(e){last=src.name+' 取得失敗';}
+    }catch(e){last=src.name+' 取得失敗: '+((e&&e.message)||'');}
   }
   if(bestSingle)return bestSingle;
   return {rows:[],message:last};
@@ -3867,8 +3867,7 @@ function parseFifaStatsFromPlainText(text,kind){
 }
 
 async function fetchReaderTextNoStore(url){
-  const target=cacheBustUrl(url);
-  const r=await fetch(readerUrl(target),{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
+  const r=await fetch(readerUrl(url),{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
   if(!r.ok)throw new Error('Reader HTTP '+r.status);
   return await r.text();
 }
@@ -3881,18 +3880,52 @@ function statPlainText(raw){
     return (doc.body&&(doc.body.innerText||doc.body.textContent))||text;
   }catch(e){return text}
 }
-async function fetchStatSourceText(url){
+function statSourceAttempts(url){
   const freshUrl=cacheBustUrl(url);
-  const attempts=[
-    {method:'Jina Reader fresh',loader:()=>fetchReaderTextNoStore(url)},
+  return [
+    // Jina Reader は元URLのクエリを壊さないため、URL自体には余計な _ パラメータを足さず、no-storeヘッダーで再取得を促します。
+    {method:'Jina Reader no-store',loader:()=>fetchReaderTextNoStore(url)},
     {method:'AllOrigins raw fresh',loader:()=>fetchAllOriginsText(freshUrl).then(statPlainText)},
     {method:'AllOrigins get fresh',loader:()=>fetchAllOriginsGetText(freshUrl).then(statPlainText)},
     {method:'Codetabs fresh',loader:()=>fetchTextViaCoddProxy(freshUrl).then(statPlainText)}
   ];
+}
+function parseStatRowsBySource(src,text,kind){
+  if(!src)return [];
+  if(src.parser==='soccerking')return parseSoccerKingStatsText(text,kind);
+  if(src.parser==='yahoo')return parseYahooStatsText(text,kind);
+  if(src.parser==='fox')return parseFoxStatsText(text,kind);
+  return parseStatsText(text,kind);
+}
+async function fetchRowsFromStatSource(src,kind){
+  const attempts=statSourceAttempts(src.url);
+  let best={rows:[],method:'',message:''};
   let lastErr=null;
   for(const a of attempts){
     try{
-      const text=await promiseWithSoftTimeout(a.loader(),5200);
+      const text=await promiseWithSoftTimeout(a.loader(),6500);
+      if(!text||!String(text).trim()){
+        lastErr=new Error(a.method+' empty');
+        continue;
+      }
+      const rows=parseStatRowsBySource(src,text,kind);
+      const ranked=rankStatRows(rows).slice(0,20);
+      if(ranked.length>best.rows.length)best={rows:ranked,method:a.method,message:`${a.method} ${ranked.length}件`};
+      if(ranked.length>=20)return best;
+      lastErr=new Error(a.method+' parsed '+ranked.length+' rows');
+      // ここで止めない。取得できたテキストが検索ページ・空表・ブロック画面だった場合に、別ルートで再取得する。
+    }catch(e){lastErr=e;}
+  }
+  if(best.rows.length)return best;
+  throw lastErr||new Error((src.name||'参照先')+' ランキング取得失敗');
+}
+async function fetchStatSourceText(url){
+  // 既存関数名を残すための互換用。ランキング更新本体では fetchRowsFromStatSource を使います。
+  const attempts=statSourceAttempts(url);
+  let lastErr=null;
+  for(const a of attempts){
+    try{
+      const text=await promiseWithSoftTimeout(a.loader(),6500);
       if(text&&String(text).trim())return {text,method:a.method};
       lastErr=new Error(a.method+' empty');
     }catch(e){lastErr=e;}

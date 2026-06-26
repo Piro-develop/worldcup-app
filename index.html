@@ -617,6 +617,16 @@ function fallbackStatRows(kind){
     .slice(0,20)
     .map((r,i)=>({rank:i+1,value:r[key],player:r.player,team:r.team}));
 }
+function normalizeStatStatus(status){
+  const s=String(status||'').trim();
+  if(!s)return '';
+  if(s==='更新中・・・'||s==='更新済')return s;
+  if(/^更新済（/.test(s))return s;
+  if(/^取得失敗/.test(s))return s;
+  if(/^解析失敗/.test(s))return s;
+  if(/^予備データ/.test(s))return s;
+  return '';
+}
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
 const GROUP_DATA_VERSION='group-data-v82-20260625-finalized';
 const TEAM_TO_GROUP={};
@@ -944,7 +954,7 @@ function load(){
   if(!['','更新中・・・','更新済'].includes(merged.groupStatus||''))merged.groupStatus='';
   if(!['','更新中・・・','更新済'].includes(merged.bracketStatus||''))merged.bracketStatus='';
   merged.statStatus=Object.assign({goals:'',assists:''},merged.statStatus||{});
-  ['goals','assists'].forEach(k=>{if(!['','更新中・・・','更新済'].includes(merged.statStatus[k]||''))merged.statStatus[k]='';});
+  ['goals','assists'].forEach(k=>{merged.statStatus[k]=normalizeStatStatus(merged.statStatus[k]||'');});
   if(!merged.news||typeof merged.news!=='object')merged.news={target:'all',status:'',items:[],version:NEWS_PIPELINE_VERSION};
   if(merged.news.target!=='all'&&!NEWS_COUNTRY_ORDER.includes(merged.news.target))merged.news.target='all';
   if(merged.news.version!==NEWS_PIPELINE_VERSION){
@@ -3518,14 +3528,17 @@ async function updatePlayerStats(kind){
   state.statStatus=state.statStatus||{};
   state.statStatus[kind]='更新中・・・';
   save();render();
-  const result=await fetchPlayerStats(kind);
-  if(result.rows.length){
-    state[kind]=result.rows.slice(0,20).map((r,i)=>({rank:r.rank||i+1,value:r.value,player:r.player,team:r.team||''}));
-    state.statStatus[kind]='更新済';
+  const result=await fetchPlayerStats(kind).catch(e=>({rows:[],message:(e&&e.message)||'取得失敗'}));
+  const rows=Array.isArray(result.rows)?result.rows:[];
+  if(rows.length){
+    const normalized=rows.slice(0,20).map((r,i)=>({rank:r.rank||i+1,value:r.value,player:r.player,team:r.team||''}));
+    state[kind]=normalized;
+    state.statStatus[kind]=`更新済（${result.source||'参照先'} ${normalized.length}件）`;
   }else{
     const fb=fallbackStatRows(kind);
     if(fb.length)state[kind]=fb;
-    state.statStatus[kind]='更新済';
+    state.statStatus[kind]='取得失敗・予備データ表示中';
+    console.warn('ランキング取得失敗',kind,result.message||'');
   }
   save();render();
 }
@@ -3534,13 +3547,46 @@ async function fetchPlayerStats(kind){
   let last='';
   for(const src of sources){
     try{
-      const txt=await fetchReaderText(src.url);
-      const rows=src.parser==='soccerking'?parseSoccerKingStatsText(txt,kind):src.parser==='yahoo'?parseYahooStatsText(txt,kind):parseStatsText(txt,kind);
-      if(rows.length)return {source:src.name,rows};
+      const fetched=await fetchStatSourceText(src.url);
+      const rows=src.parser==='soccerking'?parseSoccerKingStatsText(fetched.text,kind):src.parser==='yahoo'?parseYahooStatsText(fetched.text,kind):parseStatsText(fetched.text,kind);
+      if(rows.length)return {source:src.name,rows,method:fetched.method};
       last=src.name+' は取得できましたが、表を解析できませんでした。';
     }catch(e){last=src.name+' 取得失敗';}
   }
   return {rows:[],message:last};
+}
+async function fetchReaderTextNoStore(url){
+  const target=cacheBustUrl(url);
+  const r=await fetch(readerUrl(target),{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
+  if(!r.ok)throw new Error('Reader HTTP '+r.status);
+  return await r.text();
+}
+function statPlainText(raw){
+  const text=String(raw||'');
+  if(!/<\s*(html|head|body|table|tr|td|script|style)\b/i.test(text))return text;
+  try{
+    const doc=new DOMParser().parseFromString(text,'text/html');
+    doc.querySelectorAll('script,style,noscript,svg').forEach(el=>el.remove());
+    return (doc.body&&(doc.body.innerText||doc.body.textContent))||text;
+  }catch(e){return text}
+}
+async function fetchStatSourceText(url){
+  const freshUrl=cacheBustUrl(url);
+  const attempts=[
+    {method:'Jina Reader fresh',loader:()=>fetchReaderTextNoStore(url)},
+    {method:'AllOrigins raw fresh',loader:()=>fetchAllOriginsText(freshUrl).then(statPlainText)},
+    {method:'AllOrigins get fresh',loader:()=>fetchAllOriginsGetText(freshUrl).then(statPlainText)},
+    {method:'Codetabs fresh',loader:()=>fetchTextViaCoddProxy(freshUrl).then(statPlainText)}
+  ];
+  let lastErr=null;
+  for(const a of attempts){
+    try{
+      const text=await promiseWithSoftTimeout(a.loader(),5200);
+      if(text&&String(text).trim())return {text,method:a.method};
+      lastErr=new Error(a.method+' empty');
+    }catch(e){lastErr=e;}
+  }
+  throw lastErr||new Error('ランキング取得失敗');
 }
 function stripMarkdownLinks(line){
   return String(line||'')

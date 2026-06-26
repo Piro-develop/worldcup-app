@@ -1640,7 +1640,6 @@ async function updateBracketTable(){
     const result=await fetchLatestStandings();
     state.groups=result.groups;
     applyScoreboardMatchUpdates(result.matchUpdates);
-    applyScoreboardMatchUpdates(result.matchUpdates);
     applyConfirmedBracketSlots();
   }catch(e){
     console.warn('決勝T表更新失敗',e);
@@ -1656,6 +1655,7 @@ async function updateGroupStandings(){
   try{
     const result=await fetchLatestStandings();
     state.groups=result.groups;
+    applyScoreboardMatchUpdates(result.matchUpdates);
   }catch(e){
     console.warn('グループ順位更新失敗',e);
     if(!state.groups)state.groups=buildGroupRows(initialGroups);

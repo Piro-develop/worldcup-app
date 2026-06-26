@@ -618,6 +618,7 @@ function fallbackStatRows(kind){
     .map((r,i)=>({rank:i+1,value:r[key],player:r.player,team:r.team}));
 }
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
+const GROUP_DATA_VERSION='group-data-v82-20260625-finalized';
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
 const ESPN_MAP={
@@ -645,8 +646,8 @@ const initialGroups={
  B:[['ch',2,1,0,7,3,7],['ca',1,1,1,8,3,4],['ba',1,1,1,5,6,4],['qa',0,1,2,2,10,1]],
  C:[['br',2,1,0,7,1,7],['ma',2,1,0,6,3,7],['sct',1,0,2,1,4,3],['ht',0,0,3,2,8,0]],
  D:[['us',2,0,0,6,1,6],['au',1,0,1,2,2,3],['py',1,0,1,2,4,3],['tr',0,0,2,0,3,0]],
- E:[['de',2,0,0,9,2,6],['ci',1,0,1,2,2,3],['ec',0,1,1,0,1,1],['cw',0,1,1,1,7,1]],
- F:[['nl',1,1,0,7,3,4],['jp',1,1,0,6,2,4],['se',1,0,1,6,6,3],['tn',0,0,2,1,9,0]],
+ E:[['de',2,0,1,10,4,6],['ci',2,0,1,4,2,6],['ec',1,1,1,2,2,4],['cw',0,1,2,1,9,1]],
+ F:[['nl',2,1,0,10,4,7],['jp',1,2,0,7,3,5],['se',1,1,1,7,7,4],['tn',0,0,3,2,12,0]],
  G:[['eg',1,1,0,4,2,4],['ir',0,2,0,2,2,2],['be',0,2,0,1,1,2],['nz',0,1,1,3,5,1]],
  H:[['es',1,1,0,4,0,4],['uy',0,2,0,3,3,2],['cv',0,2,0,2,2,2],['sa',0,1,1,1,5,1]],
  I:[['fr',2,0,0,6,1,6],['no',2,0,0,7,3,6],['sn',0,0,2,3,6,0],['iq',0,0,2,1,7,0]],
@@ -693,16 +694,16 @@ const GROUP_MATCHES={
   {id:'66457072',date:'2026-06-14T19:00:00-04:00',home:'ci',away:'ec',status:'done',hs:1,as:0},
   {id:'66457074',date:'2026-06-20T16:00:00-04:00',home:'de',away:'ci',status:'done',hs:2,as:1},
   {id:'66457076',date:'2026-06-20T20:00:00-04:00',home:'ec',away:'cw',status:'done',hs:0,as:0},
-  {id:'66457078',date:'2026-06-25T16:00:00-04:00',home:'ec',away:'de',status:'scheduled'},
-  {id:'66457080',date:'2026-06-25T16:00:00-04:00',home:'cw',away:'ci',status:'scheduled'}
+  {id:'66457078',date:'2026-06-25T16:00:00-04:00',home:'ec',away:'de',status:'done',hs:2,as:1},
+  {id:'66457080',date:'2026-06-25T16:00:00-04:00',home:'cw',away:'ci',status:'done',hs:0,as:2}
  ],
  F:[
   {id:'66456968',date:'2026-06-14T16:00:00-04:00',home:'nl',away:'jp',status:'done',hs:2,as:2},
   {id:'66456970',date:'2026-06-14T22:00:00-04:00',home:'se',away:'tn',status:'done',hs:5,as:1},
   {id:'66456972',date:'2026-06-20T13:00:00-04:00',home:'nl',away:'se',status:'done',hs:5,as:1},
   {id:'66456974',date:'2026-06-21T00:00:00-04:00',home:'tn',away:'jp',status:'done',hs:0,as:4},
-  {id:'66456976',date:'2026-06-25T19:00:00-04:00',home:'tn',away:'nl',status:'scheduled'},
-  {id:'66456978',date:'2026-06-25T19:00:00-04:00',home:'jp',away:'se',status:'scheduled'}
+  {id:'66456976',date:'2026-06-25T19:00:00-04:00',home:'tn',away:'nl',status:'done',hs:1,as:3},
+  {id:'66456978',date:'2026-06-25T19:00:00-04:00',home:'jp',away:'se',status:'done',hs:1,as:1}
  ],
  G:[
   {id:'66456982',date:'2026-06-15T15:00:00-04:00',home:'be',away:'eg',status:'done',hs:1,as:1},
@@ -759,15 +760,22 @@ Object.values(GROUP_MATCHES).flat().forEach(m=>GROUP_MATCH_BY_ID[m.id]=m);
 function matchCacheFor(id){return (state.matchCache&&state.matchCache[id])||{};}
 function isMatchCompleted(m){
   const cached=matchCacheFor(m.id);
-  if(typeof cached.completed==='boolean')return cached.completed;
-  return m.status==='done';
+  // 保存済みキャッシュが「予定」のまま残っていても、アプリ側の基礎データが終了済みなら終了を優先する。
+  if(m.status==='done')return true;
+  if(cached.completed===true)return true;
+  if(cached.completed===false)return false;
+  return false;
 }
 function matchHomeScore(m){
   const cached=matchCacheFor(m.id);
+  if(cached.completed===true&&cached.hs!==undefined)return cached.hs;
+  if(m.status==='done'&&m.hs!==undefined)return m.hs;
   return cached.hs ?? m.hs;
 }
 function matchAwayScore(m){
   const cached=matchCacheFor(m.id);
+  if(cached.completed===true&&cached.as!==undefined)return cached.as;
+  if(m.status==='done'&&m.as!==undefined)return m.as;
   return cached.as ?? m.as;
 }
 function applyScoreboardMatchUpdates(updates){
@@ -776,9 +784,15 @@ function applyScoreboardMatchUpdates(updates){
   let changed=0;
   updates.forEach(u=>{
     if(!u||!u.id||!GROUP_MATCH_BY_ID[u.id])return;
+    const base=GROUP_MATCH_BY_ID[u.id];
+    const baseCompleted=base.status==='done';
+    const completed=!!u.completed||baseCompleted;
+    // 参照先/CDNが古い「予定」を返しても、基礎データ側で終了済みの試合を予定へ戻さない。
+    const hs=completed?(u.completed&&u.hs!==undefined?u.hs:base.hs):u.hs;
+    const as=completed?(u.completed&&u.as!==undefined?u.as:base.as):u.as;
     const prev=state.matchCache[u.id]||{};
-    const next=Object.assign({},prev,{completed:!!u.completed,hs:u.hs,as:u.as,statusText:u.statusText||'',scoreUpdatedAt:Date.now()});
-    if(u.completed&&prev.completed!==true){
+    const next=Object.assign({},prev,{completed,hs,as,statusText:u.statusText||'',scoreUpdatedAt:Date.now()});
+    if(completed&&prev.completed!==true){
       delete next.loading;
       delete next.fetched;
       delete next.scorerVersion;
@@ -791,9 +805,9 @@ function applyScoreboardMatchUpdates(updates){
   });
   return changed;
 }
-function scoreboardMatchUpdatesFromPayloads(payloads){
+function scoreboardMatchUpdatesFromEvents(events){
   const updates=[];
-  (payloads||[]).flatMap(p=>p.events||[]).forEach(ev=>{
+  (events||[]).forEach(ev=>{
     const id=String(ev.id||'');
     const base=GROUP_MATCH_BY_ID[id];
     if(!base)return;
@@ -811,6 +825,9 @@ function scoreboardMatchUpdatesFromPayloads(payloads){
     updates.push({id,completed:!!st.completed,hs:scores[base.home],as:scores[base.away],statusText:st.detail||st.shortDetail||st.description||''});
   });
   return updates;
+}
+function scoreboardMatchUpdatesFromPayloads(payloads){
+  return scoreboardMatchUpdatesFromEvents(uniqueESPNEvents(payloads));
 }
 function groupMatchesFor(g){
   return (GROUP_MATCHES[g]||[]).map(m=>Object.assign({},m,{
@@ -919,6 +936,11 @@ function load(){
   if(!merged.bracket||!Array.isArray(merged.bracket.left)||!Array.isArray(merged.bracket.right))merged.bracket=clone(initial);
   if(!merged.groups)merged.groups=buildGroupRows(initialGroups);
   if(!merged.matchCache||typeof merged.matchCache!=='object')merged.matchCache={};
+  if(merged.groupDataVersion!==GROUP_DATA_VERSION){
+    merged.groups=buildGroupRows(initialGroups);
+    merged.matchCache={};
+    merged.groupDataVersion=GROUP_DATA_VERSION;
+  }
   if(!['','更新中・・・','更新済'].includes(merged.groupStatus||''))merged.groupStatus='';
   if(!['','更新中・・・','更新済'].includes(merged.bracketStatus||''))merged.bracketStatus='';
   merged.statStatus=Object.assign({goals:'',assists:''},merged.statStatus||{});
@@ -1444,9 +1466,10 @@ async function updateKnockoutSchedule(){
 }
 async function fetchKnockoutResults(){
   const ids=new Set(KNOCKOUT_MATCHES.map(m=>String(m.id||''))); 
-  const payloads=await Promise.all(KNOCKOUT_ESPN_DATES.map(d=>fetch(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`).then(r=>r.ok?r.json():{events:[]}).catch(()=>({events:[]}))));
+  const settled=await Promise.allSettled(KNOCKOUT_ESPN_DATES.map(d=>fetchJSONNoStore(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`)));
+  const payloads=settled.filter(x=>x.status==='fulfilled').map(x=>x.value);
   const out={};
-  payloads.flatMap(p=>p.events||[]).forEach(ev=>{
+  uniqueESPNEvents(payloads).forEach(ev=>{
     const eid=String(ev.id||'');
     if(!ids.has(eid))return;
     const comp=(ev.competitions||[])[0]||{};
@@ -1542,6 +1565,59 @@ function resolveTeamFromESPN(team){
   const name=String(team?.displayName||team?.shortDisplayName||team?.name||team?.team?.displayName||team?.team?.shortDisplayName||'').toLowerCase().replace(/[’']/g,'').trim();
   return NAME_MAP[name]||'';
 }
+function cacheBustUrl(url){
+  const sep=url.includes('?')?'&':'?';
+  return `${url}${sep}_=${Date.now()}`;
+}
+async function fetchJSONNoStore(url){
+  const r=await fetch(cacheBustUrl(url),{cache:'no-store'});
+  if(!r.ok)throw new Error(`fetch failed ${r.status}`);
+  return r.json();
+}
+function espnEventPriority(ev){
+  const type=(ev?.status||{}).type||{};
+  const statusScore=type.completed?3:(type.inProgress?2:1);
+  const t=Date.parse(ev?.date||'')||0;
+  return statusScore*10000000000000+t;
+}
+function uniqueESPNEvents(payloads){
+  const map=new Map();
+  (payloads||[]).forEach(p=>(p?.events||[]).forEach(ev=>{
+    const id=String(ev?.id||'');
+    if(!id)return;
+    const prev=map.get(id);
+    if(!prev||espnEventPriority(ev)>=espnEventPriority(prev))map.set(id,ev);
+  }));
+  return [...map.values()];
+}
+async function fetchGroupScoreboardPayloads(){
+  const range=`${ESPN_DATES[0]}-${ESPN_DATES[ESPN_DATES.length-1]}`;
+  const urls=[`${ESPN_SCOREBOARD}?dates=${range}&limit=200`].concat(
+    ESPN_DATES.map(d=>`${ESPN_SCOREBOARD}?dates=${d}&limit=100`)
+  );
+  const settled=await Promise.allSettled(urls.map(u=>fetchJSONNoStore(u)));
+  return settled.filter(x=>x.status==='fulfilled').map(x=>x.value);
+}
+function localGroupMatchResult(){
+  const stats=blankStats();
+  const updates=[];
+  let count=0;
+  Object.values(GROUP_MATCHES).flat().forEach(m=>{
+    if(m.status!=='done'||m.hs===undefined||m.as===undefined)return;
+    const idA=m.home,idB=m.away;
+    if(!stats[idA]||!stats[idB])return;
+    const scoreA=Number(m.hs),scoreB=Number(m.as);
+    if(Number.isNaN(scoreA)||Number.isNaN(scoreB))return;
+    stats[idA].gf+=scoreA;stats[idA].ga+=scoreB;
+    stats[idB].gf+=scoreB;stats[idB].ga+=scoreA;
+    if(scoreA>scoreB){stats[idA].w++;stats[idB].l++;stats[idA].pts+=3}
+    else if(scoreA<scoreB){stats[idB].w++;stats[idA].l++;stats[idB].pts+=3}
+    else{stats[idA].d++;stats[idB].d++;stats[idA].pts++;stats[idB].pts++}
+    updates.push({id:m.id,completed:true,hs:scoreA,as:scoreB,statusText:'終了'});
+    count++;
+  });
+  return {groups:standingsFromStats(stats),count,matchUpdates:updates};
+}
 function blankStats(){
   const obj={};
   Object.entries(G).forEach(([g,ids])=>{
@@ -1607,11 +1683,12 @@ function applyConfirmedBracketSlots(){
   return applied.length;
 }
 async function fetchLatestStandings(){
-  const payloads=await Promise.all(ESPN_DATES.map(d=>fetch(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`).then(r=>r.ok?r.json():{events:[]})));
-  const matchUpdates=scoreboardMatchUpdatesFromPayloads(payloads);
+  const payloads=await fetchGroupScoreboardPayloads();
+  const events=uniqueESPNEvents(payloads);
+  const matchUpdates=scoreboardMatchUpdatesFromEvents(events);
   const stats=blankStats();
   let count=0;
-  payloads.flatMap(p=>p.events||[]).forEach(ev=>{
+  events.forEach(ev=>{
     const comp=(ev.competitions||[])[0]||{};
     const st=(ev.status||{}).type||{};
     if(!st.completed)return;
@@ -1630,7 +1707,7 @@ async function fetchLatestStandings(){
     else{stats[idA].d++;stats[idB].d++;stats[idA].pts++;stats[idB].pts++}
     count++;
   });
-  if(count===0)throw new Error('no matches');
+  if(count===0)return localGroupMatchResult();
   return {groups:standingsFromStats(stats),count,matchUpdates};
 }
 async function updateBracketTable(){

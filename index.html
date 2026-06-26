@@ -460,7 +460,7 @@ const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=18000;
 const NEWS_BG_IMAGE_LIMIT=0;
 const NEWS_MIN_STABLE_RESULTS=8;
-const NEWS_PIPELINE_VERSION='jp-news-direct-article-stable-v19';
+const NEWS_PIPELINE_VERSION='jp-news-real-articles-only-v20';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -870,7 +870,7 @@ function load(){
     .map(item=>item&&Object.assign({},item,{title:cleanNewsTitle(item.title||''),url:normalizeNewsArticleUrl(item.url||'')}))
     .filter(item=>item&&isUsableNewsTitle(item.title)&&item.url);
   if(!merged.news.items.length&&/^取得済/.test(merged.news.status||''))merged.news.status='';
-  if(!['','取得中・・・','取得済','取得失敗','ニュース取得失敗','取得済（検索リンク）'].includes(merged.news.status||'')&&!/^取得済/.test(merged.news.status||''))merged.news.status='';
+  if(!['','取得中・・・','取得済','取得失敗','ニュース取得失敗'].includes(merged.news.status||'')&&!/^取得済/.test(merged.news.status||''))merged.news.status='';
   if(!merged.ko||typeof merged.ko!=='object')merged.ko={status:'',results:{}};
   if(!merged.ko.results||typeof merged.ko.results!=='object')merged.ko.results={};
   if(!['','更新中・・・','更新済','更新失敗'].includes(merged.ko.status||''))merged.ko.status='';
@@ -1024,9 +1024,7 @@ function newsHTML(){
 }
 function newsEmptyHTML(target,status){
   if(String(status||'').includes('失敗')||String(status||'').includes('直接記事なし')){
-    const q=target==='all'?'ワールドカップ サッカー 最新':`${newsTargetLabel(target)} ワールドカップ サッカー 最新`;
-    const url=`https://news.google.com/search?q=${encodeURIComponent(q)}&hl=ja&gl=JP&ceid=JP:ja`;
-    return `<div class="news-empty">ニュース一覧を取得できませんでした。<br><span>取得元側の制限・一時停止の可能性があります。</span><br><a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:#9df7f5;font-weight:900">Googleニュースで確認する</a></div>`;
+    return '<div class="news-empty">ニュース記事を取得できませんでした。<br><span>記事リンクのみを表示対象にしています。時間をおいて再取得してください。</span></div>';
   }
   return '<div class="news-empty">対象を選んで「取得」を押すと、最新ニュースを最大20件表示します。</div>';
 }
@@ -2428,20 +2426,11 @@ async function enhanceNewsLinksAndImagesInBackground(target){
   if(changed){save();render();}
 }
 async function enhanceNewsImagesInBackground(target){return enhanceNewsLinksAndImagesInBackground(target)}
-function fallbackNewsSearchItems(target){
-  // 検索結果ページを「ニュース記事」として表示しないため、カード用の検索リンク補完は廃止します。
-  // 実記事が取得できない場合は newsEmptyHTML で案内だけを表示します。
-  return [];
-}
 function isFallbackSearchNewsItem(item){
-  if(!item)return false;
-  if(item._fallbackSearch)return true;
-  const url=String(item.url||'');
-  const domain=String(item.domain||'');
-  return /Google News Search/i.test(domain)||/news\.google\.com\/search/i.test(url)||/ニュース検索$/.test(String(item.title||''));
+  return false;
 }
 function countDirectNewsItems(items){
-  return (Array.isArray(items)?items:[]).filter(item=>item&&item.url&&!isFallbackSearchNewsItem(item)).length;
+  return (Array.isArray(items)?items:[]).filter(item=>item&&item.url).length;
 }
 function stableNewsSelection(fresh,cached,target,limit=20){
   const freshPrepared=prepareNewsItems(Array.isArray(fresh)?fresh:[],target,limit);
@@ -3318,17 +3307,9 @@ function dedupeNews(items,limit=20){
     const clean=Object.assign({},item);
     clean.title=decodeHtml(stripMarkdownLinks(clean.title)).replace(/\s+-\s+[^-]{2,30}$/,'').trim()||clean.title;
     if(!hasJapaneseText(clean.title))continue;
-    const fallback=isFallbackSearchNewsItem(clean);
-    clean.url=fallback?String(clean.url||'').trim():normalizeNewsArticleUrl(clean.url);
-    if(!clean.url||(!fallback&&isListingNewsUrl(clean.url)))continue;
-    clean._fallbackSearch=fallback;
+    clean.url=normalizeNewsArticleUrl(clean.url);
+    if(!clean.url||isListingNewsUrl(clean.url))continue;
     clean.image=isHttpNewsImage(clean.image)?clean.image:'';
-    if(fallback){
-      if(out.some(x=>x.url===clean.url))continue;
-      out.push(clean);
-      if(out.length>=max)break;
-      continue;
-    }
     if(out.some(x=>isSimilarNews(clean,x)))continue;
     out.push(clean);
     if(out.length>=max)break;

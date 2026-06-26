@@ -372,12 +372,15 @@
     .ko-card-label{flex:0 0 auto;border:1px solid rgba(52,210,208,.36);border-radius:999px;padding:2px 6px;background:rgba(52,210,208,.12);color:#dffefd;font-size:10px;font-weight:900}
     .ko-card-label.third{border-color:rgba(240,201,107,.38);background:rgba(240,201,107,.12);color:#ffe79a}
     .ko-teams{display:flex;flex-direction:column;gap:6px}
-    .ko-team{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:10px;padding:5px 6px;color:#eef5ff;font-weight:900;font-size:12.5px;line-height:1.25}
-    .ko-team.winner{background:linear-gradient(90deg,rgba(129,216,208,.98),rgba(38,166,154,.92));color:#052523;box-shadow:0 0 0 1px rgba(129,216,208,.55)}
+    .ko-team{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:8px;border-radius:10px;padding:5px 6px;color:#eef5ff;font-weight:900;font-size:12.5px;line-height:1.25}
+    .ko-team.has-score{grid-template-columns:minmax(0,1fr) 46px}
+    .ko-team.jp:not(.winner){background:linear-gradient(180deg,rgba(35,135,139,.95),rgba(16,89,96,.95));border:1px solid rgba(93,243,240,.64);color:#eef5ff}
+    .ko-team.winner{background:linear-gradient(180deg,#f6d87f,#c89933);color:#15120a;box-shadow:0 0 0 1px rgba(255,231,151,.35),0 0 14px rgba(240,201,107,.20)}
+    .ko-team.jp.winner{border:1px solid rgba(93,243,240,.82)}
     .ko-team-main{display:flex;align-items:center;gap:5px;min-width:0}
     .ko-team-main span:last-child{white-space:normal;overflow:visible;text-overflow:clip}
-    .ko-score{flex:0 0 auto;min-width:22px;text-align:center;font-weight:900;color:#ffe79a}
-    .ko-team.winner .ko-score{color:#052523}
+    .ko-score{justify-self:end;width:46px;text-align:right;font-weight:900;color:#ffe79a;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .ko-team.winner .ko-score{color:#15120a}
     .ko-placeholder{color:#aebdd3;font-weight:900}
     .ko-note{margin-top:10px;font-size:11px;color:#8fa1bc;line-height:1.55}
     .ko-detail-score{border:1px solid rgba(205,220,245,.16);border-radius:14px;background:rgba(13,23,40,.95);padding:10px;margin-top:8px}
@@ -1506,8 +1509,13 @@ function isKoWinner(result,side){
   return false;
 }
 function koTeamHTML(side,score,winner){
-  const main=side.type==='team'?`${teamFlag(side.id)}<span>${esc(T[side.id]?.[0]||side.id)}</span>`:`<span class="ko-placeholder">${esc(side.label||'未定')}</span>`;
-  return `<div class="ko-team ${winner?'winner':''}"><span class="ko-team-main">${main}</span>${score?`<span class="ko-score">${esc(score)}</span>`:''}</div>`;
+  const teamId=side&&side.type==='team'?side.id:'';
+  const main=teamId?`${teamFlag(teamId)}<span>${esc(T[teamId]?.[0]||teamId)}</span>`:`<span class="ko-placeholder">${esc(side.label||'未定')}</span>`;
+  const cls=['ko-team'];
+  if(teamId==='jp')cls.push('jp');
+  if(winner)cls.push('winner');
+  if(score)cls.push('has-score');
+  return `<div class="${cls.join(' ')}"><span class="ko-team-main">${main}</span>${score?`<span class="ko-score">${esc(score)}</span>`:''}</div>`;
 }
 function resolveKoSide(token){
   const t=String(token||'');
@@ -1626,6 +1634,19 @@ async function updateKnockoutSchedule(){
   }
   save();render();
 }
+function pickPenaltyScore(competitor){
+  const c=competitor||{};
+  const candidates=[
+    c.penaltyScore,c.shootoutScore,c.penalties,c.penaltyKickScore,c.pkScore,
+    c.team&&c.team.penaltyScore,c.team&&c.team.shootoutScore
+  ];
+  for(const v of candidates){
+    if(v===undefined||v===null||v==='')continue;
+    const n=Number(v);
+    if(!Number.isNaN(n))return n;
+  }
+  return undefined;
+}
 async function fetchKnockoutResults(){
   const ids=new Set(KNOCKOUT_MATCHES.map(m=>String(m.id||''))); 
   const settled=await Promise.allSettled(KNOCKOUT_ESPN_DATES.map(d=>fetchJSONNoStore(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`)));
@@ -1645,9 +1666,9 @@ async function fetchKnockoutResults(){
     const rec={completed:!!st.completed,live:!!st.inProgress,home:hId,away:aId,hs:home.score,as:away.score};
     if(home.winner)rec.winner='home';
     if(away.winner)rec.winner='away';
-    const hp=home.curatedRank?.current||home.penaltyScore||home.shootoutScore;
-    const ap=away.curatedRank?.current||away.penaltyScore||away.shootoutScore;
-    if(hp!==undefined&&ap!==undefined){rec.homePens=hp;rec.awayPens=ap;}
+    const hp=pickPenaltyScore(home);
+    const ap=pickPenaltyScore(away);
+    if(hp!==undefined&&hp!==''&&ap!==undefined&&ap!==''){rec.homePens=hp;rec.awayPens=ap;}
     out[eid]=rec;
   });
   return out;
@@ -1890,11 +1911,10 @@ async function updateBracketTable(){
 
 async function updateGroupStandings(){
   state.groupStatus='更新中・・・';
-  if(currentGroup&&resetFailedScorerCachesForGroup(currentGroup)){
-    save();
-    renderGroupDetail(currentGroup);
-  }
-  save();render();
+  resetFailedScorerCachesForAllGroups();
+  save();
+  if(currentGroup)renderGroupDetail(currentGroup);
+  render();
   try{
     const result=await fetchLatestStandings();
     state.groups=result.groups;
@@ -1903,13 +1923,17 @@ async function updateGroupStandings(){
     console.warn('グループ順位更新失敗',e);
     if(!state.groups)state.groups=buildGroupRows(initialGroups);
   }
-  state.groupStatus='更新済';
-  save();render();
-  if(currentGroup){
-    renderGroupDetail(currentGroup);
-    // 更新ボタン経由の場合は、一度「得点者取得不可」になった試合だけ再取得します。
-    setTimeout(()=>loadGroupMatchDetails(currentGroup,{retryFailed:true}).catch(e=>console.warn('得点者取得失敗',e)),0);
+  save();
+  if(currentGroup)renderGroupDetail(currentGroup);
+  try{
+    const refreshed=await refreshAllGroupScorers({retryFailed:true});
+    state.groupStatus=refreshed>0?`更新済（得点者${refreshed}試合確認）`:'更新済';
+  }catch(e){
+    console.warn('全グループ得点者更新失敗',e);
+    state.groupStatus='更新済（一部得点者未取得）';
   }
+  save();render();
+  if(currentGroup)renderGroupDetail(currentGroup);
 }
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
 function confirmedIds(currentSlot){
@@ -2062,14 +2086,36 @@ function scoreStringTeam(label,m){
   for(const t of [m.home,m.away]){const n=T[t]?.[0];if(n&&txt.includes(n))return t}
   return '';
 }
+function scorerGoalTotal(m){return (Number(matchHomeScore(m))||0)+(Number(matchAwayScore(m))||0)}
 function isFailedScorerCache(cache,m){
   if(!cache||cache.scorerVersion!==SCORER_CACHE_VERSION)return false;
   if(cache.loading)return false;
   if(cache.fetched!==true)return false;
-  const homeGoals=Number(matchHomeScore(m))||0;
-  const awayGoals=Number(matchAwayScore(m))||0;
-  if(homeGoals+awayGoals<=0)return false;
+  if(scorerGoalTotal(m)<=0)return false;
   return hasNoScorers(cache);
+}
+function shouldFetchScorersForMatch(m,options={}){
+  if(!m||!isMatchCompleted(m))return false;
+  if(scorerGoalTotal(m)<=0)return false;
+  const cache=(state.matchCache||{})[m.id];
+  if(!cache||cache.scorerVersion!==SCORER_CACHE_VERSION)return true;
+  if(cache.loading)return true;
+  if(cache.fetched!==true)return true;
+  if(hasNoScorers(cache))return !!options.retryFailed;
+  return false;
+}
+function markScorerFetchPending(m){
+  state.matchCache=state.matchCache||{};
+  const cache=state.matchCache[m.id]||{};
+  state.matchCache[m.id]=Object.assign({},cache,{
+    loading:true,
+    fetched:false,
+    scorerVersion:SCORER_CACHE_VERSION,
+    completed:true,
+    hs:matchHomeScore(m),
+    as:matchAwayScore(m),
+    scorers:{home:[],away:[]}
+  });
 }
 function resetFailedScorerCachesForGroup(g){
   state.matchCache=state.matchCache||{};
@@ -2077,54 +2123,83 @@ function resetFailedScorerCachesForGroup(g){
   groupMatchesFor(g).filter(m=>isMatchCompleted(m)).forEach(m=>{
     const cache=state.matchCache[m.id];
     if(!isFailedScorerCache(cache,m))return;
-    state.matchCache[m.id]=Object.assign({},cache,{loading:true,fetched:false,scorerVersion:SCORER_CACHE_VERSION,scorers:{home:[],away:[]}});
+    markScorerFetchPending(m);
     changed=true;
   });
   return changed;
 }
-async function loadGroupMatchDetails(g,options={}){
-  state.matchCache=state.matchCache||{};
-  const retryFailed=!!(options&&options.retryFailed);
-  const matches=groupMatchesFor(g).filter(m=>isMatchCompleted(m));
+function resetFailedScorerCachesForAllGroups(){
   let changed=false;
-  matches.forEach(m=>{
-    const cache=state.matchCache[m.id];
-    const shouldRetryFailed=retryFailed&&isFailedScorerCache(cache,m);
-    if(!cache||cache.scorerVersion!==SCORER_CACHE_VERSION||shouldRetryFailed){
-      const freshCache={loading:true,fetched:false,scorerVersion:SCORER_CACHE_VERSION,scorers:{home:[],away:[]}};
-      if(cache&&cache.completed!==undefined)freshCache.completed=cache.completed;
-      if(cache&&cache.hs!==undefined)freshCache.hs=cache.hs;
-      if(cache&&cache.as!==undefined)freshCache.as=cache.as;
-      if(cache&&cache.yahooUrl)freshCache.yahooUrl=cache.yahooUrl;
-      state.matchCache[m.id]=freshCache;
-      changed=true;
+  GROUPS.forEach(g=>{if(resetFailedScorerCachesForGroup(g))changed=true;});
+  return changed;
+}
+async function fetchAndStoreMatchScorers(m){
+  let parsed={fetched:true,loading:false,scorerVersion:SCORER_CACHE_VERSION,completed:true,hs:matchHomeScore(m),as:matchAwayScore(m),scorers:{home:[],away:[]}};
+  const existing=(state.matchCache||{})[m.id]||{};
+  if(existing.yahooUrl)parsed.yahooUrl=existing.yahooUrl;
+  try{
+    const yahooScorers=await fetchMatchPageScorers(m);
+    if(yahooScorers&&(yahooScorers.home.length||yahooScorers.away.length)){
+      parsed.scorers=yahooScorers;
+      state.matchCache[m.id]=parsed;
+      return true;
+    }
+  }catch(e){console.warn('Yahoo得点者取得失敗',e)}
+  try{
+    const data=await fetchESPNEventSummary(m.id);
+    const esp=parseMatchSummary(data,m);
+    parsed.completed=esp.completed;
+    parsed.hs=esp.hs;
+    parsed.as=esp.as;
+    if(isScorerCountValid(esp.scorers,esp.hs,esp.as))parsed.scorers=esp.scorers;
+  }catch(e){console.warn('ESPN得点者取得失敗',e)}
+  state.matchCache[m.id]=parsed;
+  return !hasNoScorers(parsed);
+}
+async function runLimited(items,limit,worker){
+  const list=Array.isArray(items)?items:[];
+  let idx=0;
+  const workers=Array.from({length:Math.max(1,Math.min(Number(limit)||1,list.length||1))},async()=>{
+    while(idx<list.length){
+      const item=list[idx++];
+      await worker(item);
     }
   });
-  if(changed){save();if(currentGroup===g)renderGroupDetail(g)}
-  await Promise.all(matches.map(async m=>{
-    const cache=state.matchCache[m.id];
-    const shouldRetryFailed=retryFailed&&isFailedScorerCache(cache,m);
-    if(cache&&!cache.loading&&cache.fetched&&cache.scorerVersion===SCORER_CACHE_VERSION&&!shouldRetryFailed)return;
-    let parsed={fetched:true,scorerVersion:SCORER_CACHE_VERSION,completed:true,hs:matchHomeScore(m),as:matchAwayScore(m),scorers:{home:[],away:[]}};
-    try{
-      const yahooScorers=await fetchMatchPageScorers(m);
-      if(yahooScorers&&(yahooScorers.home.length||yahooScorers.away.length)){
-        parsed.scorers=yahooScorers;
-        state.matchCache[m.id]=parsed;
-        return;
-      }
-    }catch(e){console.warn('Yahoo得点者取得失敗',e)}
-    try{
-      const data=await fetchESPNEventSummary(m.id);
-      const esp=parseMatchSummary(data,m);
-      parsed.completed=esp.completed;
-      parsed.hs=esp.hs;
-      parsed.as=esp.as;
-      if(isScorerCountValid(esp.scorers,esp.hs,esp.as))parsed.scorers=esp.scorers;
-    }catch(e){console.warn('ESPN得点者取得失敗',e)}
-    state.matchCache[m.id]=parsed;
+  await Promise.all(workers);
+}
+function groupScorerRefreshMatches(groups,options={}){
+  const gs=Array.isArray(groups)?groups:GROUPS;
+  const seen=new Set();
+  const matches=[];
+  gs.forEach(g=>groupMatchesFor(g).forEach(m=>{
+    if(seen.has(m.id))return;
+    seen.add(m.id);
+    if(shouldFetchScorersForMatch(m,options))matches.push(m);
   }));
-  save();if(currentGroup===g)renderGroupDetail(g);
+  return matches;
+}
+async function refreshGroupScorers(groups,options={}){
+  state.matchCache=state.matchCache||{};
+  const matches=groupScorerRefreshMatches(groups,options);
+  if(!matches.length)return 0;
+  matches.forEach(markScorerFetchPending);
+  save();
+  if(currentGroup&&groups.includes(currentGroup))renderGroupDetail(currentGroup);
+  let touched=0;
+  await runLimited(matches,4,async m=>{
+    await fetchAndStoreMatchScorers(m);
+    touched++;
+  });
+  save();
+  if(currentGroup&&groups.includes(currentGroup))renderGroupDetail(currentGroup);
+  return touched;
+}
+async function refreshAllGroupScorers(options={}){
+  return refreshGroupScorers(GROUPS,options);
+}
+async function loadGroupMatchDetails(g,options={}){
+  await refreshGroupScorers([g],options);
+  if(currentGroup===g)renderGroupDetail(g);
 }
 async function fetchESPNEventSummary(eventId){
   const urls=[

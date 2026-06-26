@@ -484,18 +484,12 @@ const FIFA_PLAYER_STATS_URLS=[
   'https://www.fifa.com/ja/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics',
   'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics'
 ];
+const STAT_LIMITS={goals:15,assists:10};
 const STAT_SOURCES={
   goals:[
-    {name:'FIFA公式',url:FIFA_PLAYER_STATS_URLS[0],parser:'fifa'},
-    {name:'FOX Sports 得点ランキング',url:'https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026&sort=g&sortOrder=desc',parser:'fox'},
-    {name:'Soccer King 得点ランキング',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'},
-    {name:'ESPN Stats',url:'https://www.espn.com/soccer/stats/_/league/fifa.world'},
-    {name:'Google Search',url:'https://www.google.com/search?q=ワールドカップ+統計情報+得点ランキング'},
-    {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+scorers'}
+    {name:'Soccer King 得点ランキング',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'}
   ],
   assists:[
-    {name:'FIFA公式',url:FIFA_PLAYER_STATS_URLS[0],parser:'fifa'},
-    {name:'FOX Sports アシストランキング',url:'https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026&sort=a&sortOrder=desc',parser:'fox'},
     {name:'スポーツナビ アシストランキング',url:'https://soccer.yahoo.co.jp/wcup/category/2026/stats?gk=18&type=6',parser:'yahoo'}
   ]
 };
@@ -757,17 +751,16 @@ function statRowsDisplayable(rows){
   // 国旗・国名列を表示する表なので、国がほぼ空の解析結果は採用しません。
   return teamCount>=Math.min(10,list.length);
 }
+function statLimit(kind){return STAT_LIMITS[kind]||20}
 function fallbackStatRows(kind){
-  const key=kind==='assists'?'assists':'goals';
-  const rows=localizeStatRows((FOX_STATIC_FALLBACK_STATS[key]||[]).map(r=>Object.assign({},r)),key);
-  if(rows.length)return rows.slice(0,20);
-  if(kind==='assists')return localizeStatRows(yahooAssistFallbackRows(),kind);
+  const limit=statLimit(kind);
+  if(kind==='assists')return localizeStatRows(yahooAssistFallbackRows(),kind).slice(0,limit);
   return localizeStatRows(SOCCERKING_FALLBACK_STATS.rows
     .filter(r=>Number(r.goals)>0)
     .slice()
     .sort((a,b)=>Number(b.goals)-Number(a.goals)||Number(a.rank)-Number(b.rank))
-    .slice(0,20)
-    .map((r,i)=>({rank:i+1,value:r.goals,player:r.player,team:r.team})),kind);
+    .slice(0,limit)
+    .map((r,i)=>({rank:r.rank||i+1,value:r.goals,player:r.player,team:r.team})),kind);
 }
 function normalizeStatStatus(status){
   const s=String(status||'').trim();
@@ -1258,11 +1251,13 @@ function groupBoxHTML(g,rows){
     </table>
   </div>`
 }
-function topTwentyRows(list){
-  const out=(Array.isArray(list)?list:[]).slice(0,20).map((r,i)=>Object.assign({rank:i+1,value:'',player:'',team:''},r||{}));
-  while(out.length<20)out.push({rank:out.length+1,value:'',player:'',team:''});
+function topStatRows(list,kind){
+  const limit=statLimit(kind);
+  const out=(Array.isArray(list)?list:[]).slice(0,limit).map((r,i)=>Object.assign({rank:i+1,value:'',player:'',team:''},r||{}));
+  while(out.length<limit)out.push({rank:out.length+1,value:'',player:'',team:''});
   return out;
 }
+function topTwentyRows(list,kind){return topStatRows(list,kind)}
 function newsOptionsHTML(){
   const opts=[`<option value="all">W杯全体</option>`].concat(NEWS_COUNTRY_ORDER.map(id=>`<option value="${id}">${esc(T[id]?.[0]||id)}</option>`));
   return opts.join('');
@@ -1680,7 +1675,7 @@ function simpleTab(tab){
   if(tab==='flash')return `<div class="card"><h2>${title}</h2><p class="small">軽量化のため、ここは次工程で再調整します。</p><button class="btn primary">更新</button></div>`;
   if(tab==='news')return newsHTML();
   const sourceRows=((state[tab]||[]).some(r=>r.player||r.value)?state[tab]:fallbackStatRows(tab));
-  const rowsData=topTwentyRows(sourceRows);
+  const rowsData=topStatRows(sourceRows,tab);
   const label=tab==='goals'?'得点':'アシスト';
   const status=(state.statStatus&&state.statStatus[tab])||'';
   return `<div class="card"><div class="stat-head"><h2>${title}</h2><div class="stat-actions"><div class="stat-status">${esc(status)}</div><button class="btn primary" data-stat-update="${tab}">更新</button></div></div>
@@ -3890,12 +3885,13 @@ async function updatePlayerStats(kind){
   state.statStatus=state.statStatus||{};
   state.statStatus[kind]='更新中・・・';
   save();render();
+  const limit=statLimit(kind);
   const result=await fetchPlayerStats(kind).catch(e=>({rows:[],message:(e&&e.message)||'取得失敗'}));
   const rows=Array.isArray(result.rows)?result.rows:[];
   if(rows.length){
-    const normalized=localizeStatRows(rows.slice(0,20).map((r,i)=>({rank:r.rank||i+1,value:r.value,player:r.player,team:r.team||''})),kind);
+    const normalized=localizeStatRows(rows.slice(0,limit).map((r,i)=>({rank:r.rank||i+1,value:r.value,player:r.player,team:r.team||''})),kind);
     if(statRowsDisplayable(normalized)){
-      state[kind]=normalized;
+      state[kind]=normalized.slice(0,limit);
       state.statStatus[kind]='更新済';
     }else{
       const fb=fallbackStatRows(kind);
@@ -3916,40 +3912,18 @@ async function updatePlayerStats(kind){
 }
 async function fetchPlayerStats(kind){
   const sources=STAT_SOURCES[kind]||[];
+  const limit=statLimit(kind);
   let last='';
-  let bestSingle=null;
-  const rememberSingle=(source,rows,method,message='')=>{
-    const ranked=rankStatRows(rows).slice(0,20);
-    if(!ranked.length)return;
-    const candidate={source,rows:ranked,method,message};
-    if(!bestSingle||candidate.rows.length>bestSingle.rows.length)bestSingle=candidate;
-  };
-  const fifaSource=sources.find(src=>src.parser==='fifa');
-  if(fifaSource){
-    try{
-      const fifa=await fetchFifaPlayerStats(kind);
-      // 更新タイミング差による重複や順位ズレを避けるため、複数サイトの結果は混ぜません。
-      // FIFA公式で20件取れた場合はFIFA単独で確定。足りない場合も、他サイトとは合算せず「単独参照先として最も件数が多いもの」を採用します。
-      rememberSingle('FIFA公式',fifa.rows,fifa.method,fifa.rows.length>=20?'':`FIFA公式は${fifa.rows.length}件`);
-      if(bestSingle&&bestSingle.source==='FIFA公式'&&bestSingle.rows.length>=20)return bestSingle;
-      last='FIFA公式は20件未満、または表を完全には解析できませんでした。';
-    }catch(e){
-      last='FIFA公式 取得失敗';
-    }
-  }
-  for(const src of sources.filter(src=>src.parser!=='fifa')){
+  for(const src of sources){
     try{
       const fetched=await fetchRowsFromStatSource(src,kind);
-      const rows=Array.isArray(fetched.rows)?fetched.rows:[];
-      if(rows.length){
-        rememberSingle(src.name,rows,fetched.method,rows.length>=20?'':`${src.name}は${rows.length}件`);
-        if(bestSingle&&bestSingle.source===src.name&&bestSingle.rows.length>=20)return bestSingle;
-      }else{
-        last=src.name+' は取得できましたが、表を解析できませんでした。';
-      }
-    }catch(e){last=src.name+' 取得失敗: '+((e&&e.message)||'');}
+      const rows=rankStatRows(Array.isArray(fetched.rows)?fetched.rows:[]).slice(0,limit);
+      if(rows.length)return {source:src.name,rows,method:fetched.method||'',message:''};
+      last=src.name+' は取得できましたが、表を解析できませんでした。';
+    }catch(e){
+      last=src.name+' 取得失敗: '+((e&&e.message)||'');
+    }
   }
-  if(bestSingle)return bestSingle;
   return {rows:[],message:last};
 }
 
@@ -4235,9 +4209,10 @@ async function fetchRowsFromStatSource(src,kind){
         continue;
       }
       const rows=parseStatRowsBySource(src,text,kind);
-      const ranked=rankStatRows(rows).slice(0,20);
+      const limit=statLimit(kind);
+      const ranked=rankStatRows(rows).slice(0,limit);
       if(ranked.length>best.rows.length)best={rows:ranked,method:a.method,message:`${a.method} ${ranked.length}件`};
-      if(ranked.length>=20)return best;
+      if(ranked.length>=limit)return best;
       lastErr=new Error(a.method+' parsed '+ranked.length+' rows');
       // ここで止めない。取得できたテキストが検索ページ・空表・ブロック画面だった場合に、別ルートで再取得する。
     }catch(e){lastErr=e;}
@@ -4291,9 +4266,9 @@ function parseSoccerKingStats(text,kind){
       if(!seen.has(key)){seen.add(key);rows.push({player,team,value})}
       break;
     }
-    if(rows.length>=20)break;
+    if(rows.length>=statLimit(kind))break;
   }
-  return rows.sort((a,b)=>Number(b.value)-Number(a.value));
+  return rows.sort((a,b)=>Number(b.value)-Number(a.value)).slice(0,statLimit(kind));
 }
 function cleanPlayerName(name){
   return String(name||'')
@@ -4443,9 +4418,9 @@ function parseYahooStatsText(text,kind){
       seen.add(key);
       rows.push({rank,value,player,team});
     }
-    if(rows.length>=20)break;
+    if(rows.length>=statLimit(kind))break;
   }
-  return rows.sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
+  return rows.sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank)).slice(0,statLimit(kind));
 }
 
 function parseStatsText(text,kind){
@@ -4463,9 +4438,9 @@ function parseStatsText(text,kind){
       const key=parsed.player+'|'+parsed.value+'|'+parsed.team;
       if(!seen.has(key)){seen.add(key);rows.push(parsed)}
     }
-    if(rows.length>=20)break;
+    if(rows.length>=statLimit(kind))break;
   }
-  return rows.sort((a,b)=>Number(b.value)-Number(a.value));
+  return rows.sort((a,b)=>Number(b.value)-Number(a.value)).slice(0,statLimit(kind));
 }
 function parseStatsLine(line,kind){
   const cells=line.includes('|')?line.split('|').map(x=>x.trim()).filter(Boolean):null;

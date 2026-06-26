@@ -1751,7 +1751,8 @@ async function updateGroupStandings(){
   save();render();
   if(currentGroup){
     renderGroupDetail(currentGroup);
-    setTimeout(()=>loadGroupMatchDetails(currentGroup).catch(e=>console.warn('得点者取得失敗',e)),0);
+    // 更新ボタン経由の場合は、一度「得点者取得不可」になった試合だけ再取得します。
+    setTimeout(()=>loadGroupMatchDetails(currentGroup,{retryFailed:true}).catch(e=>console.warn('得点者取得失敗',e)),0);
   }
 }
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
@@ -1905,25 +1906,38 @@ function scoreStringTeam(label,m){
   for(const t of [m.home,m.away]){const n=T[t]?.[0];if(n&&txt.includes(n))return t}
   return '';
 }
-async function loadGroupMatchDetails(g){
+function isFailedScorerCache(cache,m){
+  if(!cache||cache.scorerVersion!==SCORER_CACHE_VERSION)return false;
+  if(cache.loading)return false;
+  if(cache.fetched!==true)return false;
+  const homeGoals=Number(matchHomeScore(m))||0;
+  const awayGoals=Number(matchAwayScore(m))||0;
+  if(homeGoals+awayGoals<=0)return false;
+  return hasNoScorers(cache);
+}
+async function loadGroupMatchDetails(g,options={}){
   state.matchCache=state.matchCache||{};
+  const retryFailed=!!(options&&options.retryFailed);
   const matches=groupMatchesFor(g).filter(m=>isMatchCompleted(m));
   let changed=false;
   matches.forEach(m=>{
     const cache=state.matchCache[m.id];
-    if(!cache||cache.scorerVersion!==SCORER_CACHE_VERSION){
+    const shouldRetryFailed=retryFailed&&isFailedScorerCache(cache,m);
+    if(!cache||cache.scorerVersion!==SCORER_CACHE_VERSION||shouldRetryFailed){
       const freshCache={loading:true,fetched:false,scorerVersion:SCORER_CACHE_VERSION,scorers:{home:[],away:[]}};
       if(cache&&cache.completed!==undefined)freshCache.completed=cache.completed;
       if(cache&&cache.hs!==undefined)freshCache.hs=cache.hs;
       if(cache&&cache.as!==undefined)freshCache.as=cache.as;
-      if(cache&&cache.scorerVersion===SCORER_CACHE_VERSION&&cache.yahooUrl)freshCache.yahooUrl=cache.yahooUrl;
+      if(cache&&cache.yahooUrl)freshCache.yahooUrl=cache.yahooUrl;
       state.matchCache[m.id]=freshCache;
       changed=true;
     }
   });
   if(changed){save();if(currentGroup===g)renderGroupDetail(g)}
   await Promise.all(matches.map(async m=>{
-    if(state.matchCache[m.id]&&!state.matchCache[m.id].loading&&state.matchCache[m.id].fetched&&state.matchCache[m.id].scorerVersion===SCORER_CACHE_VERSION)return;
+    const cache=state.matchCache[m.id];
+    const shouldRetryFailed=retryFailed&&isFailedScorerCache(cache,m);
+    if(cache&&!cache.loading&&cache.fetched&&cache.scorerVersion===SCORER_CACHE_VERSION&&!shouldRetryFailed)return;
     let parsed={fetched:true,scorerVersion:SCORER_CACHE_VERSION,completed:true,hs:matchHomeScore(m),as:matchAwayScore(m),scorers:{home:[],away:[]}};
     try{
       const yahooScorers=await fetchMatchPageScorers(m);
@@ -1952,7 +1966,7 @@ async function fetchESPNEventSummary(eventId){
   ];
   let lastErr;
   for(const url of urls){
-    try{const r=await fetch(url);if(r.ok)return await r.json();lastErr=new Error('HTTP '+r.status)}catch(e){lastErr=e}
+    try{const r=await fetch(cacheBustUrl(url),{cache:'no-store'});if(r.ok)return await r.json();lastErr=new Error('HTTP '+r.status)}catch(e){lastErr=e}
   }
   throw lastErr||new Error('summary取得失敗');
 }
@@ -1971,7 +1985,7 @@ function isScorerCountValid(scorers,hs,as){
 }
 function readerUrl(url){return 'https://r.jina.ai/'+url}
 async function fetchReaderText(url){
-  const r=await fetch(readerUrl(url));
+  const r=await fetch(cacheBustUrl(readerUrl(url)),{cache:'no-store'});
   if(!r.ok)throw new Error('Reader HTTP '+r.status);
   return await r.text();
 }

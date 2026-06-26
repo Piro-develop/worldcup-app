@@ -589,6 +589,53 @@ const YAHOO_MATCH_URLS={
 };
 
 
+const FOX_STATIC_FALLBACK_STATS={
+  updated:'FOX Sports確認データ 2026-06-26時点',
+  goals:[
+    {rank:1,value:5,player:'Lionel Messi',team:'ar'},
+    {rank:2,value:4,player:'Erling Haaland',team:'no'},
+    {rank:3,value:4,player:'Kylian Mbappe',team:'fr'},
+    {rank:4,value:4,player:'Vinicius Junior',team:'br'},
+    {rank:5,value:3,player:'Matheus Cunha',team:'br'},
+    {rank:6,value:3,player:'Johan Manzambi',team:'ch'},
+    {rank:7,value:3,player:'Jonathan David',team:'ca'},
+    {rank:8,value:3,player:'Ismael Saibari',team:'ma'},
+    {rank:9,value:3,player:'Brian Brobbey',team:'nl'},
+    {rank:10,value:3,player:'Deniz Undav',team:'de'},
+    {rank:11,value:2,player:'Daichi Kamada',team:'jp'},
+    {rank:12,value:2,player:'Ismaila Sarr',team:'sn'},
+    {rank:13,value:2,player:'Daniel Munoz',team:'co'},
+    {rank:14,value:2,player:'Anthony Elanga',team:'se'},
+    {rank:15,value:2,player:'Yasin Ayari',team:'se'},
+    {rank:16,value:2,player:'Crysencio Summerville',team:'nl'},
+    {rank:17,value:2,player:'Kai Havertz',team:'de'},
+    {rank:18,value:2,player:'Cody Gakpo',team:'nl'},
+    {rank:19,value:2,player:'Mikel Oyarzabal',team:'es'},
+    {rank:20,value:2,player:'Ruben Vargas',team:'ch'}
+  ],
+  assists:[
+    {rank:1,value:3,player:'Alexander Isak',team:'se'},
+    {rank:2,value:3,player:'Bruno Guimaraes',team:'br'},
+    {rank:3,value:3,player:'Michael Olise',team:'fr'},
+    {rank:4,value:2,player:'Hannibal Mejbri',team:'tn'},
+    {rank:5,value:2,player:'Chris Wood',team:'nz'},
+    {rank:6,value:2,player:'Julio Enciso',team:'py'},
+    {rank:7,value:2,player:'Martin Odegaard',team:'no'},
+    {rank:8,value:2,player:'Mohamed Salah',team:'eg'},
+    {rank:9,value:2,player:'Ryan Gravenberch',team:'nl'},
+    {rank:10,value:2,player:'Breel Embolo',team:'ch'},
+    {rank:11,value:2,player:'Denzel Dumfries',team:'nl'},
+    {rank:12,value:2,player:'Joshua Kimmich',team:'de'},
+    {rank:13,value:2,player:'Florian Wirtz',team:'de'},
+    {rank:14,value:2,player:'Nathan Saliba',team:'ca'},
+    {rank:15,value:2,player:'Brahim Diaz',team:'ma'},
+    {rank:16,value:2,player:'Roberto Alvarado',team:'mx'},
+    {rank:17,value:2,player:'Deniz Undav',team:'de'},
+    {rank:18,value:2,player:'Viktor Gyokeres',team:'se'},
+    {rank:19,value:1,player:'Chadi Riad',team:'ma'},
+    {rank:20,value:1,player:'Brandon Thomas-Asante',team:'gh'}
+  ]
+};
 const SOCCERKING_FALLBACK_STATS={
   updated:'Soccer King 6/25掲載データ',
   rows:[
@@ -625,20 +672,23 @@ function yahooAssistFallbackRows(){
   return YAHOO_ASSIST_FALLBACK_ROWS.map(r=>Object.assign({},r));
 }
 function fallbackStatRows(kind){
+  const key=kind==='assists'?'assists':'goals';
+  const rows=(FOX_STATIC_FALLBACK_STATS[key]||[]).map(r=>Object.assign({},r));
+  if(rows.length)return rows.slice(0,20);
   if(kind==='assists')return yahooAssistFallbackRows();
-  const key='goals';
   return SOCCERKING_FALLBACK_STATS.rows
-    .filter(r=>Number(r[key])>0)
+    .filter(r=>Number(r.goals)>0)
     .slice()
-    .sort((a,b)=>Number(b[key])-Number(a[key])||Number(a.rank)-Number(b.rank))
+    .sort((a,b)=>Number(b.goals)-Number(a.goals)||Number(a.rank)-Number(b.rank))
     .slice(0,20)
-    .map((r,i)=>({rank:i+1,value:r[key],player:r.player,team:r.team}));
+    .map((r,i)=>({rank:i+1,value:r.goals,player:r.player,team:r.team}));
 }
 function normalizeStatStatus(status){
   const s=String(status||'').trim();
   if(!s)return '';
   if(s==='更新中・・・'||s==='更新済')return s;
   if(/^更新済（/.test(s))return s;
+  if(/^外部取得不可/.test(s))return s;
   if(/^取得失敗/.test(s))return s;
   if(/^解析失敗/.test(s))return s;
   if(/^予備データ/.test(s))return s;
@@ -953,9 +1003,11 @@ function load(){
   const base={active:'bracket',bracket:clone(initial),groups:buildGroupRows(initialGroups),groupStatus:'',bracketStatus:'',goals:fallbackStatRows('goals'),assists:fallbackStatRows('assists'),statStatus:{goals:'',assists:''},matchCache:{},news:{target:'all',status:'',items:[],cache:{},requestId:0,version:NEWS_PIPELINE_VERSION},ko:{status:'',results:{},viewCol:0}};
   const saved=readSaved(STORE);
   const merged=Object.assign(base,saved||{});
-  if(!String(merged.statStatus?.assists||'').includes('スポーツナビ')&&!String(merged.statStatus?.assists||'').includes('Yahoo')){
+  if(!Array.isArray(merged.assists)||merged.assists.length<20){
     merged.assists=fallbackStatRows('assists');
-    merged.statStatus=Object.assign({},merged.statStatus,{assists:'スポーツナビフォールバック表示中'});
+  }
+  if(!Array.isArray(merged.goals)||merged.goals.length<20){
+    merged.goals=fallbackStatRows('goals');
   }
   const preserved=migrateSavedBracket();
   if(preserved)merged.bracket=preserved;
@@ -3582,9 +3634,13 @@ async function updatePlayerStats(kind){
     state.statStatus[kind]=`更新済（${result.source||'参照先'} ${normalized.length}件）`;
   }else{
     const fb=fallbackStatRows(kind);
-    if(fb.length)state[kind]=fb;
-    state.statStatus[kind]='取得失敗・予備データ表示中';
-    console.warn('ランキング取得失敗',kind,result.message||'');
+    if(fb.length){
+      state[kind]=fb;
+      state.statStatus[kind]=`外部取得不可・内蔵FOXデータ${fb.length}件表示中`;
+    }else{
+      state.statStatus[kind]='取得失敗・表示データなし';
+    }
+    console.warn('ランキング外部取得不可',kind,result.message||'');
   }
   save();render();
 }

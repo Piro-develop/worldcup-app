@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>北米中W杯 2026 観戦アプリ</title>
+  <title>2026北中米W杯観戦アプリ</title>
   <link rel="icon" type="image/png" href="./worldcup-icon.png">
   <link rel="apple-touch-icon" href="./worldcup-icon.png">
   <link rel="shortcut icon" href="./worldcup-icon.png">
   <meta name="theme-color" content="#050913">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="北米中W杯">
+  <meta name="apple-mobile-web-app-title" content="26北中米観戦アプリ">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="北米中W杯">
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E5%8C%97%E7%B1%B3%E4%B8%ADW%E6%9D%AF%20%E8%A6%B3%E6%88%A6%E3%82%A2%E3%83%97%E3%83%AA%22%2C%22short_name%22%3A%22%E5%8C%97%E7%B1%B3%E4%B8%ADW%E6%9D%AF%22%2C%22start_url%22%3A%22.%2Findex.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23050913%22%2C%22theme_color%22%3A%22%23050913%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22.%2Fworldcup-icon.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22.%2Fworldcup-icon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+  <meta name="application-name" content="26北中米観戦アプリ">
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%2226%E5%8C%97%E4%B8%AD%E7%B1%B3%E8%A6%B3%E6%88%A6%E3%82%A2%E3%83%97%E3%83%AA%22%2C%22short_name%22%3A%2226%E5%8C%97%E4%B8%AD%E7%B1%B3%E8%A6%B3%E6%88%A6%E3%82%A2%E3%83%97%E3%83%AA%22%2C%22start_url%22%3A%22.%2Findex.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23050913%22%2C%22theme_color%22%3A%22%23050913%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22.%2Fworldcup-icon.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22.%2Fworldcup-icon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
   <style>
     :root{
       --bg:#050913;--panel:#0c1424;--panel2:#111c30;--slot:#101b2f;
@@ -399,7 +399,7 @@
   <div class="wrap">
     <header class="hero">
       <div class="eyebrow">FIFA WORLD CUP 2026</div>
-      <h1 class="title">北米中W杯 観戦アプリ</h1>
+      <h1 class="title">26北中米観戦アプリ</h1>
       <p class="lead">決勝トーナメントを中心に、ランキング・速報・ニュースを確認するための軽量版です。</p>
     </header>
     <nav class="tabs" id="tabs"></nav>
@@ -460,7 +460,7 @@ const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=18000;
 const NEWS_BG_IMAGE_LIMIT=0;
 const NEWS_MIN_STABLE_RESULTS=8;
-const NEWS_PIPELINE_VERSION='jp-news-real-articles-only-v20';
+const NEWS_PIPELINE_VERSION='jp-news-direct-publisher-only-v21';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -1093,7 +1093,8 @@ function newsItemHTML(item){
   const emergency=newsPlaceholderImage(label);
   const img=newsInitialImage(item,target);
   const title=cleanNewsTitle(item.title||'タイトルなし');
-  const url=normalizeNewsArticleUrl(item.url||'')||'#';
+  const url=normalizeDirectNewsArticleUrl(item.url||'');
+  if(!url)return '';
   return `<a class="news-item" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><img class="news-thumb" src="${esc(img)}" alt="" loading="lazy" referrerpolicy="no-referrer" data-fallback="${esc(fallback)}" data-emergency="${esc(emergency)}" onerror="if(!this.dataset.usedFallback){this.dataset.usedFallback='1';this.src=this.dataset.fallback;}else{this.onerror=null;this.src=this.dataset.emergency;}"><span class="news-title">${esc(title)}</span></a>`;
 }
 
@@ -2304,6 +2305,50 @@ function isGoogleNewsArticleUrl(url){
     return u.hostname.replace(/^www\./,'').toLowerCase()==='news.google.com'&&/(?:^|\/)articles\//i.test(u.pathname);
   }catch(e){return false}
 }
+function isNewsIntermediaryUrl(url){
+  try{
+    const u=new URL(String(url||''));
+    const host=u.hostname.replace(/^www\./,'').toLowerCase();
+    if(host==='news.google.com')return true;
+    if(host==='google.com'||host.endsWith('.google.com'))return true;
+    if(host==='r.jina.ai'||host.endsWith('.jina.ai'))return true;
+    if(host==='api.allorigins.win'||host.endsWith('.allorigins.win'))return true;
+    if(host==='api.codetabs.com'||host.endsWith('.codetabs.com'))return true;
+    if(host==='api.rss2json.com'||host.endsWith('.rss2json.com'))return true;
+    if(host==='gdeltproject.org'||host.endsWith('.gdeltproject.org'))return true;
+    return false;
+  }catch(e){return true}
+}
+function isDirectNewsArticleUrl(url){
+  const u=String(url||'').trim();
+  if(!/^https?:\/\//i.test(u))return false;
+  if(isNewsIntermediaryUrl(u))return false;
+  if(isListingNewsUrl(u))return false;
+  return true;
+}
+function normalizeDirectNewsArticleUrl(url){
+  const u=normalizeGoogleNewsLink(url);
+  return isDirectNewsArticleUrl(u)?u:'';
+}
+async function resolveDirectNewsArticleUrl(url){
+  let u=normalizeGoogleNewsMaybeRelativeUrl(url||'');
+  u=normalizeGoogleNewsLink(u);
+  if(isDirectNewsArticleUrl(u))return u;
+  if(isGoogleNewsArticleUrl(u)){
+    const resolved=await promiseWithSoftTimeout(resolveGoogleNewsArticleUrl(u),2600);
+    return normalizeDirectNewsArticleUrl(resolved);
+  }
+  return '';
+}
+async function resolveNewsCandidatesToDirectArticles(items){
+  const list=(Array.isArray(items)?items:[]).slice(0,240);
+  const resolved=await Promise.all(list.map(async item=>{
+    const direct=await resolveDirectNewsArticleUrl(item&&item.url).catch(()=>'');
+    if(!direct)return null;
+    return Object.assign({},item,{url:direct});
+  }));
+  return resolved.filter(Boolean);
+}
 async function resolveGoogleNewsArticleUrl(url){
   if(!isGoogleNewsArticleUrl(url))return '';
   const txt=await promiseWithSoftTimeout(fetchReaderText(url),2600);
@@ -2345,7 +2390,7 @@ function sanitizeNewsCacheItems(items,target,limit=20){
     .filter(item=>!isFallbackSearchNewsItem(item))
     .map(item=>({
       title:cleanNewsTitle(item&&item.title||''),
-      url:normalizeNewsArticleUrl(item&&item.url||''),
+      url:normalizeDirectNewsArticleUrl(item&&item.url||''),
       image:newsProviderLogo(item,target),
       seen:item&&item.seen||'',
       domain:item&&item.domain||''
@@ -2414,8 +2459,9 @@ async function enhanceNewsLinksAndImagesInBackground(target){
   for(const r of results){
     const item=state.news.items[r.idx];
     if(!item)continue;
-    if(r.url&&r.url!==item.url&&!isListingNewsUrl(r.url)){
-      item.url=r.url;
+    const directUrl=normalizeDirectNewsArticleUrl(r.url);
+    if(directUrl&&directUrl!==item.url){
+      item.url=directUrl;
       changed=true;
     }
     if(isHttpNewsImage(r.img)){
@@ -2430,7 +2476,7 @@ function isFallbackSearchNewsItem(item){
   return false;
 }
 function countDirectNewsItems(items){
-  return (Array.isArray(items)?items:[]).filter(item=>item&&item.url).length;
+  return (Array.isArray(items)?items:[]).filter(item=>item&&isDirectNewsArticleUrl(item.url)).length;
 }
 function stableNewsSelection(fresh,cached,target,limit=20){
   const freshPrepared=prepareNewsItems(Array.isArray(fresh)?fresh:[],target,limit);
@@ -2757,12 +2803,13 @@ function sortNewsLatestFirst(items){
 function prepareNewsItems(items,target,limit=20){
   const all=(Array.isArray(items)?items:[]).map((item,idx)=>{
     const x=Object.assign({},item);
+    x.url=normalizeDirectNewsArticleUrl(x.url);
     const s=scoreNewsItemForTarget(x,target,x.domain);
     x._newsScore=s.score;
     x._newsCategory=s.category;
     x._order=Number.isFinite(+x._order)?+x._order:idx;
     return x;
-  }).filter(x=>x._newsScore>-500);
+  }).filter(x=>x.url&&isDirectNewsArticleUrl(x.url)&&x._newsScore>-500);
 
   let selected=[];
   if(!target||target==='all'){
@@ -2809,7 +2856,7 @@ function isLikelyArticlePath(url){
     if(host.includes('nikkansports.com'))return !isListingNewsUrl(url)&&(/\/news\//.test(path)||/\/soccer\//.test(path));
     if(host.includes('soccer.yahoo.co.jp'))return /\/wcup\/category\/2026\//.test(path)&&!/\/(schedule|standings|stats|cups|about)\/?$/i.test(path);
     if(host.includes('news.yahoo.co.jp'))return /\/articles\//.test(path)||/\/pickup\//.test(path);
-    if(host==='news.google.com')return isGoogleNewsArticleUrl(url);
+    if(host==='news.google.com')return false;
     return !isListingNewsUrl(url);
   }catch(e){return false}
 }
@@ -2938,13 +2985,14 @@ async function fetchNewsItems(target){
         _query:x._query||queryTextForTarget,
         _order:(r.loaderIndex||0)*10000+i
       };
-      if(!url||isListingNewsUrl(url))return;
+      if(!url)return;
       if(!isUsableNewsTitle(title))return;
       if(newsHardRejectsText(title+' '+url+' '+item._query,title))return;
       combined.push(item);
     });
   });
-  return prepareNewsItems(combined,target,20);
+  const directCombined=await resolveNewsCandidatesToDirectArticles(combined);
+  return prepareNewsItems(directCombined,target,20);
 }
 function toNewsArticleFromGdelt(a){
   const url=normalizeNewsArticleUrl(a.url||a.url_mobile||'');
@@ -3307,8 +3355,8 @@ function dedupeNews(items,limit=20){
     const clean=Object.assign({},item);
     clean.title=decodeHtml(stripMarkdownLinks(clean.title)).replace(/\s+-\s+[^-]{2,30}$/,'').trim()||clean.title;
     if(!hasJapaneseText(clean.title))continue;
-    clean.url=normalizeNewsArticleUrl(clean.url);
-    if(!clean.url||isListingNewsUrl(clean.url))continue;
+    clean.url=normalizeDirectNewsArticleUrl(clean.url);
+    if(!clean.url||!isDirectNewsArticleUrl(clean.url))continue;
     clean.image=isHttpNewsImage(clean.image)?clean.image:'';
     if(out.some(x=>isSimilarNews(clean,x)))continue;
     out.push(clean);

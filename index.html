@@ -477,14 +477,20 @@ const CURATED_NEWS_SOURCES=[
 ];
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
+const FIFA_PLAYER_STATS_URLS=[
+  'https://www.fifa.com/ja/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics',
+  'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics'
+];
 const STAT_SOURCES={
   goals:[
+    {name:'FIFA公式',url:FIFA_PLAYER_STATS_URLS[0],parser:'fifa'},
     {name:'Soccer King 得点ランキング',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'},
     {name:'ESPN Stats',url:'https://www.espn.com/soccer/stats/_/league/fifa.world'},
     {name:'Google Search',url:'https://www.google.com/search?q=ワールドカップ+統計情報+得点ランキング'},
     {name:'Google Search EN',url:'https://www.google.com/search?q=World+Cup+2026+top+scorers'}
   ],
   assists:[
+    {name:'FIFA公式',url:FIFA_PLAYER_STATS_URLS[0],parser:'fifa'},
     {name:'スポーツナビ アシストランキング',url:'https://soccer.yahoo.co.jp/wcup/category/2026/stats?gk=18&type=6',parser:'yahoo'}
   ]
 };
@@ -3559,16 +3565,281 @@ async function updatePlayerStats(kind){
 async function fetchPlayerStats(kind){
   const sources=STAT_SOURCES[kind]||[];
   let last='';
-  for(const src of sources){
+  let bestSingle=null;
+  const rememberSingle=(source,rows,method,message='')=>{
+    const ranked=rankStatRows(rows).slice(0,20);
+    if(!ranked.length)return;
+    const candidate={source,rows:ranked,method,message};
+    if(!bestSingle||candidate.rows.length>bestSingle.rows.length)bestSingle=candidate;
+  };
+  const fifaSource=sources.find(src=>src.parser==='fifa');
+  if(fifaSource){
+    try{
+      const fifa=await fetchFifaPlayerStats(kind);
+      // 更新タイミング差による重複や順位ズレを避けるため、複数サイトの結果は混ぜません。
+      // FIFA公式で20件取れた場合はFIFA単独で確定。足りない場合も、他サイトとは合算せず「単独参照先として最も件数が多いもの」を採用します。
+      rememberSingle('FIFA公式',fifa.rows,fifa.method,fifa.rows.length>=20?'':`FIFA公式は${fifa.rows.length}件`);
+      if(bestSingle&&bestSingle.source==='FIFA公式'&&bestSingle.rows.length>=20)return bestSingle;
+      last='FIFA公式は20件未満、または表を完全には解析できませんでした。';
+    }catch(e){
+      last='FIFA公式 取得失敗';
+    }
+  }
+  for(const src of sources.filter(src=>src.parser!=='fifa')){
     try{
       const fetched=await fetchStatSourceText(src.url);
       const rows=src.parser==='soccerking'?parseSoccerKingStatsText(fetched.text,kind):src.parser==='yahoo'?parseYahooStatsText(fetched.text,kind):parseStatsText(fetched.text,kind);
-      if(rows.length)return {source:src.name,rows,method:fetched.method};
-      last=src.name+' は取得できましたが、表を解析できませんでした。';
+      if(rows.length){
+        rememberSingle(src.name,rows,fetched.method,rows.length>=20?'':`${src.name}は${rows.length}件`);
+        if(bestSingle&&bestSingle.source===src.name&&bestSingle.rows.length>=20)return bestSingle;
+      }else{
+        last=src.name+' は取得できましたが、表を解析できませんでした。';
+      }
     }catch(e){last=src.name+' 取得失敗';}
   }
+  if(bestSingle)return bestSingle;
   return {rows:[],message:last};
 }
+
+async function fetchFifaPlayerStats(kind){
+  const attempts=[];
+  FIFA_PLAYER_STATS_URLS.forEach(url=>{
+    const freshUrl=cacheBustUrl(url);
+    attempts.push({method:'FIFA公式 Jina Reader',url,loader:()=>fetchReaderTextNoStore(url)});
+    attempts.push({method:'FIFA公式 AllOrigins raw',url,loader:()=>fetchAllOriginsText(freshUrl)});
+    attempts.push({method:'FIFA公式 AllOrigins get',url,loader:()=>fetchAllOriginsGetText(freshUrl)});
+    attempts.push({method:'FIFA公式 Codetabs',url,loader:()=>fetchTextViaCoddProxy(freshUrl)});
+  });
+  let best={rows:[],method:'',url:''};
+  let lastErr=null;
+  for(const a of attempts){
+    try{
+      const text=await promiseWithSoftTimeout(a.loader(),6200);
+      if(!text||!String(text).trim())continue;
+      const rows=parseFifaStatsText(text,kind);
+      if(rows.length>best.rows.length)best={rows,method:a.method,url:a.url};
+      if(rows.length>=20)return best;
+    }catch(e){lastErr=e;}
+  }
+  if(best.rows.length)return best;
+  throw lastErr||new Error('FIFA公式ランキング取得失敗');
+}
+function statRankValue(r){
+  const n=Number(r&&r.value);
+  return Number.isFinite(n)?n:0;
+}
+function statPlayerKey(player,team){
+  const name=String(player||'')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[・･\s\-_.、，,.'’`´]/g,'')
+    .toLowerCase();
+  return `${name}|${team||''}`;
+}
+function dedupeStatRows(rows){
+  const out=[];
+  const seen=new Set();
+  for(const r of Array.isArray(rows)?rows:[]){
+    const player=cleanPlayerName(r.player||'');
+    const team=r.team||'';
+    const value=Number(r.value);
+    if(!player||!Number.isFinite(value)||value<=0)continue;
+    const key=statPlayerKey(player,team);
+    if(seen.has(key))continue;
+    seen.add(key);
+    out.push(Object.assign({},r,{player,team,value}));
+  }
+  return out;
+}
+function rankStatRows(rows){
+  const sorted=dedupeStatRows(rows).sort((a,b)=>statRankValue(b)-statRankValue(a)||Number(a.rank||999)-Number(b.rank||999)||String(a.player).localeCompare(String(b.player),'ja'));
+  let prev=null,rank=0;
+  sorted.forEach((r,i)=>{
+    const v=statRankValue(r);
+    if(prev===null||v!==prev)rank=i+1;
+    r.rank=Number(r.rank)||rank;
+    prev=v;
+  });
+  return sorted;
+}
+function parseFifaStatsText(text,kind){
+  const rows=[];
+  rows.push(...parseFifaStatsFromJsonText(text,kind));
+  rows.push(...parseFifaStatsFromPlainText(text,kind));
+  return rankStatRows(rows).slice(0,60);
+}
+function parseFifaStatsFromJsonText(text,kind){
+  const raw=String(text||'');
+  const jsonTexts=[];
+  try{
+    if(/<\s*(html|head|body|script)\b/i.test(raw)&&typeof DOMParser!=='undefined'){
+      const doc=new DOMParser().parseFromString(raw,'text/html');
+      doc.querySelectorAll('script').forEach(script=>{
+        const body=(script.textContent||'').trim();
+        if(body&&(/[\{\[]/.test(body[0])||body.includes('player-statistics')||body.includes('playerStatistics')))jsonTexts.push(body);
+      });
+    }
+  }catch(e){}
+  const nextData=(raw.match(/<script[^>]+id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i)||[])[1];
+  if(nextData)jsonTexts.push(decodeHtml(nextData));
+  const nuxtData=(raw.match(/<script[^>]+id=["']__NUXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i)||[])[1];
+  if(nuxtData)jsonTexts.push(decodeHtml(nuxtData));
+  const candidates=[];
+  jsonTexts.forEach(t=>{
+    const clean=decodeHtml(String(t||'').trim());
+    if(!clean)return;
+    candidates.push(clean);
+    const assign=clean.match(/(?:__NEXT_DATA__|__NUXT__|self\.__next_f\.push)\s*=\s*([\s\S]+)$/);
+    if(assign)candidates.push(assign[1]);
+  });
+  const out=[];
+  const seenObjects=new Set();
+  candidates.forEach(t=>{
+    try{
+      const json=JSON.parse(t);
+      collectFifaStatRows(json,kind,out,seenObjects,0);
+    }catch(e){
+      extractLikelyJsonObjects(t).forEach(chunk=>{
+        try{collectFifaStatRows(JSON.parse(chunk),kind,out,seenObjects,0)}catch(_e){}
+      });
+    }
+  });
+  return out;
+}
+function extractLikelyJsonObjects(text){
+  const s=String(text||'');
+  const out=[];
+  const re=/(\{[^{}]{0,1200}(?:goals|assists|player|team|country|statistics)[^{}]{0,1200}\})/gi;
+  let m;
+  while((m=re.exec(s))&&out.length<120)out.push(m[1]);
+  return out;
+}
+function collectFifaStatRows(obj,kind,out,seen,depth){
+  if(!obj||typeof obj!=='object'||depth>8||seen.has(obj))return;
+  seen.add(obj);
+  const row=fifaRowFromObject(obj,kind);
+  if(row)out.push(row);
+  if(Array.isArray(obj)){
+    obj.forEach(v=>collectFifaStatRows(v,kind,out,seen,depth+1));
+  }else{
+    Object.keys(obj).forEach(k=>collectFifaStatRows(obj[k],kind,out,seen,depth+1));
+  }
+}
+function fifaRowFromObject(obj,kind){
+  if(!obj||Array.isArray(obj)||typeof obj!=='object')return null;
+  const value=fifaStatValue(obj,kind);
+  if(!Number.isFinite(value)||value<=0)return null;
+  const player=fifaPlayerName(obj);
+  const team=fifaTeamId(obj);
+  if(!player||!team)return null;
+  if(/team|country|ranking|statistics|goals|assists|player statistics/i.test(player))return null;
+  return {rank:fifaRankValue(obj),value,player,team};
+}
+function fifaRankValue(obj){
+  const keys=['rank','ranking','position','pos'];
+  for(const k of keys){
+    const n=Number(obj[k]);
+    if(Number.isFinite(n)&&n>0&&n<200)return n;
+  }
+  return 0;
+}
+function fifaPlayerName(obj){
+  const direct=['playerName','player_name','displayName','fullName','shortName','knownName','name','title'];
+  for(const k of direct){
+    const v=obj[k];
+    if(typeof v==='string'&&isLikelyPlayerName(v))return v;
+  }
+  const nested=['player','competitor','athlete','person'];
+  for(const k of nested){
+    const p=obj[k];
+    if(p&&typeof p==='object'){
+      const name=fifaPlayerName(p);
+      if(name)return name;
+    }
+  }
+  return '';
+}
+function isLikelyPlayerName(v){
+  const s=String(v||'').trim();
+  if(s.length<2||s.length>80)return false;
+  if(/^\d+$/.test(s))return false;
+  if(/^(goals?|assists?|team|country|player|rank|statistics|all|total|match|matches|得点|アシスト|順位|選手|国)$/i.test(s))return false;
+  if(teamIdFromText(s))return false;
+  return /[A-Za-zÀ-ÿぁ-んァ-ヶ一-龯]/.test(s);
+}
+function fifaTeamId(obj){
+  const direct=['teamName','team_name','countryName','country_name','associationName','association_name','memberAssociationName','member_association_name','nationality','teamCode','countryCode','code','abbreviation','teamAbbreviation'];
+  for(const k of direct){
+    const v=obj[k];
+    if(typeof v==='string'){
+      const id=teamIdFromText(v)||ESPN_MAP[v.toUpperCase()]||NAME_MAP[v.toLowerCase()];
+      if(id)return id;
+    }
+  }
+  const nested=['team','country','association','memberAssociation','nationalTeam'];
+  for(const k of nested){
+    const p=obj[k];
+    if(typeof p==='string'){
+      const id=teamIdFromText(p)||ESPN_MAP[p.toUpperCase()]||NAME_MAP[p.toLowerCase()];
+      if(id)return id;
+    }
+    if(p&&typeof p==='object'){
+      const id=fifaTeamId(p);
+      if(id)return id;
+    }
+  }
+  return '';
+}
+function fifaStatValue(obj,kind){
+  const goalKeys=['goals','goal','goalsScored','goals_scored','totalGoals','total_goals','G'];
+  const assistKeys=['assists','assist','goalAssists','goal_assists','totalAssists','total_assists','A'];
+  const keys=kind==='goals'?goalKeys:assistKeys;
+  for(const k of keys){
+    const n=Number(obj[k]);
+    if(Number.isFinite(n)&&n>=0&&n<100)return n;
+  }
+  const statArrays=['statistics','stats','playerStatistics','player_stats','values','metrics'];
+  for(const key of statArrays){
+    const arr=obj[key];
+    if(!Array.isArray(arr))continue;
+    for(const item of arr){
+      if(!item||typeof item!=='object')continue;
+      const label=String(item.name||item.label||item.title||item.key||item.type||item.statType||'').toLowerCase();
+      const wants=kind==='goals'?/(^|\b)(goals?|得点)(\b|$)/:/(^|\b)(assists?|アシスト)(\b|$)/;
+      if(!wants.test(label))continue;
+      const n=Number(item.value??item.total??item.count??item.statValue);
+      if(Number.isFinite(n)&&n>=0&&n<100)return n;
+    }
+  }
+  return NaN;
+}
+function parseFifaStatsFromPlainText(text,kind){
+  const raw=statPlainText(text);
+  const lines=String(raw||'').replace(/\r/g,'').split(/\n+/).map(normalizeArticleLine).filter(Boolean);
+  const targetWords=kind==='goals'?/(得点|Goals?)/i:/(アシスト|Assists?)/i;
+  const startIdx=lines.findIndex(l=>targetWords.test(l)&&/(順位|Rank|選手|Player|統計|Statistics)/i.test(l));
+  const start=startIdx>=0?startIdx:Math.max(0,lines.findIndex(l=>targetWords.test(l))-10);
+  const scope=lines.slice(start,start+260);
+  const teamNames=Object.values(T).map(v=>v[0]).concat(Object.keys(NAME_MAP)).sort((a,b)=>b.length-a.length).map(escapeRegExp).join('|');
+  const out=[];
+  const joined=scope.join(' ').replace(/\s+/g,' ');
+  const re=new RegExp('(\d{1,2})\s+(.{2,70}?)\s+('+teamNames+')\s+(\d{1,2})(?:\s|$)','gi');
+  let m;
+  while((m=re.exec(joined))&&out.length<60){
+    const rank=Number(m[1]);
+    const player=cleanPlayerName(m[2]);
+    const team=fifaTeamId({teamName:m[3]})||teamIdFromText(m[3]);
+    const value=Number(m[4]);
+    if(player&&team&&Number.isFinite(value)&&value>0)out.push({rank,value,player,team});
+  }
+  if(out.length)return out;
+  for(const line of scope){
+    const parsed=parseStatsLine(line,kind);
+    if(parsed)out.push(parsed);
+  }
+  return out;
+}
+
 async function fetchReaderTextNoStore(url){
   const target=cacheBustUrl(url);
   const r=await fetch(readerUrl(target),{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});

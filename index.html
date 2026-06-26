@@ -484,6 +484,7 @@ const FIFA_PLAYER_STATS_URLS=[
 const STAT_SOURCES={
   goals:[
     {name:'FIFA公式',url:FIFA_PLAYER_STATS_URLS[0],parser:'fifa'},
+    {name:'FOX Sports 得点ランキング',url:'https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026&sort=g&sortOrder=desc',parser:'fox'},
     {name:'Soccer King 得点ランキング',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'},
     {name:'ESPN Stats',url:'https://www.espn.com/soccer/stats/_/league/fifa.world'},
     {name:'Google Search',url:'https://www.google.com/search?q=ワールドカップ+統計情報+得点ランキング'},
@@ -491,6 +492,7 @@ const STAT_SOURCES={
   ],
   assists:[
     {name:'FIFA公式',url:FIFA_PLAYER_STATS_URLS[0],parser:'fifa'},
+    {name:'FOX Sports アシストランキング',url:'https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026&sort=a&sortOrder=desc',parser:'fox'},
     {name:'スポーツナビ アシストランキング',url:'https://soccer.yahoo.co.jp/wcup/category/2026/stats?gk=18&type=6',parser:'yahoo'}
   ]
 };
@@ -498,15 +500,20 @@ const YAHOO_SCHEDULE_URL='https://soccer.yahoo.co.jp/wcup/category/2026/schedule
 const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule/31457/11/?gk=18',
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule/31457/21/?gk=18',
+  'https://soccer.yahoo.co.jp/wcup/category/2026/schedule/31457/31/?gk=18',
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=5;
+const SCORER_CACHE_VERSION=6;
 const MATCH_SCORER_FALLBACKS={
   '66456912':{home:[],away:["マテオ チャベス 後 10'","フリアン キニョーネス 後 16'","アルバロ フィダルゴ 後 49'"]},
   '66456938':{home:["アクラフ ハキミ 前 39'","イスマエル サイバリ 前 46'","ソフィアン ラヒミ 後 33'","ジェシム ヤシン 後 44'"],away:["オウンゴール 前 10'","ウィルソン イシドール 前 43'"]},
   '66456972':{home:["ブライアン ブロビー 前 5'","ブライアン ブロビー 前 17'","コーディ ガクポ 後 2'","コーディ ガクポ 後 9'","クリセンシオ サマーフィル 後 44'"],away:["アンソニー エランガ 後 14'"]},
-  '66456974':{home:[],away:["鎌田 大地 前 4'","上田 綺世 前 31'","伊東 純也 後 24'","上田 綺世 後 38'"]}
+  '66456974':{home:[],away:["鎌田 大地 前 4'","上田 綺世 前 31'","伊東 純也 後 24'","上田 綺世 後 38'"]},
+  '66457078':{home:["ニルソン アングロ 前 9'","ゴンサロ プラタ 後 32'"],away:["レロイ サネ 前 2'"]},
+  '66457080':{home:[],away:["ニコラ ペペ 前 7'","ニコラ ペペ 後 19'"]},
+  '66456976':{home:["ハゼム マストゥーリ 後 9'"],away:["オウンゴール 前 3'","ブライアン ブロビー 前 7'","ヤン ポール ファンヘッケ 後 17'"]},
+  '66456978':{home:["前田 大然 後 11'"],away:["アンソニー エランガ 後 17'"]}
 };
 const YAHOO_MATCH_URLS={
   // Group A
@@ -540,11 +547,15 @@ const YAHOO_MATCH_URLS={
   '66457072':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061402/summary?gk=18',
   '66457074':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062002/summary?gk=18',
   '66457076':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062003/summary?gk=18',
+  '66457078':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062502/summary?gk=18',
+  '66457080':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062501/summary?gk=18',
   // Group F
   '66456968':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061404/summary?gk=18',
   '66456970':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061405/summary?gk=18',
   '66456972':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062004/summary?gk=18',
   '66456974':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062005/summary?gk=18',
+  '66456976':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062504/summary?gk=18',
+  '66456978':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062503/summary?gk=18',
   // Group G
   '66456982':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061504/summary?gk=18',
   '66456984':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061503/summary?gk=18',
@@ -1744,6 +1755,10 @@ async function updateBracketTable(){
 
 async function updateGroupStandings(){
   state.groupStatus='更新中・・・';
+  if(currentGroup&&resetFailedScorerCachesForGroup(currentGroup)){
+    save();
+    renderGroupDetail(currentGroup);
+  }
   save();render();
   try{
     const result=await fetchLatestStandings();
@@ -1920,6 +1935,17 @@ function isFailedScorerCache(cache,m){
   const awayGoals=Number(matchAwayScore(m))||0;
   if(homeGoals+awayGoals<=0)return false;
   return hasNoScorers(cache);
+}
+function resetFailedScorerCachesForGroup(g){
+  state.matchCache=state.matchCache||{};
+  let changed=false;
+  groupMatchesFor(g).filter(m=>isMatchCompleted(m)).forEach(m=>{
+    const cache=state.matchCache[m.id];
+    if(!isFailedScorerCache(cache,m))return;
+    state.matchCache[m.id]=Object.assign({},cache,{loading:true,fetched:false,scorerVersion:SCORER_CACHE_VERSION,scorers:{home:[],away:[]}});
+    changed=true;
+  });
+  return changed;
 }
 async function loadGroupMatchDetails(g,options={}){
   state.matchCache=state.matchCache||{};
@@ -3588,7 +3614,7 @@ async function fetchPlayerStats(kind){
   for(const src of sources.filter(src=>src.parser!=='fifa')){
     try{
       const fetched=await fetchStatSourceText(src.url);
-      const rows=src.parser==='soccerking'?parseSoccerKingStatsText(fetched.text,kind):src.parser==='yahoo'?parseYahooStatsText(fetched.text,kind):parseStatsText(fetched.text,kind);
+      const rows=src.parser==='soccerking'?parseSoccerKingStatsText(fetched.text,kind):src.parser==='yahoo'?parseYahooStatsText(fetched.text,kind):src.parser==='fox'?parseFoxStatsText(fetched.text,kind):parseStatsText(fetched.text,kind);
       if(rows.length){
         rememberSingle(src.name,rows,fetched.method,rows.length>=20?'':`${src.name}は${rows.length}件`);
         if(bestSingle&&bestSingle.source===src.name&&bestSingle.rows.length>=20)return bestSingle;
@@ -3823,7 +3849,7 @@ function parseFifaStatsFromPlainText(text,kind){
   const teamNames=Object.values(T).map(v=>v[0]).concat(Object.keys(NAME_MAP)).sort((a,b)=>b.length-a.length).map(escapeRegExp).join('|');
   const out=[];
   const joined=scope.join(' ').replace(/\s+/g,' ');
-  const re=new RegExp('(\d{1,2})\s+(.{2,70}?)\s+('+teamNames+')\s+(\d{1,2})(?:\s|$)','gi');
+  const re=new RegExp('(\\d{1,2})\\s+(.{2,70}?)\\s+('+teamNames+')\\s+(\\d{1,2})(?:\\s|$)','gi');
   let m;
   while((m=re.exec(joined))&&out.length<60){
     const rank=Number(m[1]);
@@ -3979,7 +4005,44 @@ function parseSoccerKingStatsText(text,kind){
     }
   }
 
-  return rows.sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
+  return out.sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
+}
+
+
+function parseFoxStatsText(text,kind){
+  const lines=String(text||'').replace(/\r/g,'').split(/\n+/).map(normalizeArticleLine).filter(Boolean);
+  const startIdx=lines.findIndex(l=>/FIFA Men's World Cup|STANDARD STATS|PLAYERS/i.test(l));
+  const scope=lines.slice(startIdx>=0?startIdx:0);
+  const rows=[];
+  const seen=new Set();
+  const statIndex=kind==='goals'?5:9; // FOX standard columns: GP, GS, MP, RTG, POTM, G, xG, HG, PKG, A, ...
+  for(let i=0;i<scope.length-12;i++){
+    if(!/^\d{1,3}$/.test(scope[i]))continue;
+    const rank=Number(scope[i]);
+    const nameLine=scope[i+1]||'';
+    const m=nameLine.match(/^(.+?)\s+([A-Z]{2,3})$/);
+    if(!m)continue;
+    const player=cleanPlayerName(m[1]);
+    const team=ESPN_MAP[m[2]]||NAME_MAP[String(m[2]||'').toLowerCase()]||'';
+    if(!player||!team)continue;
+    const vals=[];
+    let j=i+2;
+    while(j<scope.length&&vals.length<18){
+      const v=scope[j];
+      if(/^\d{1,3}$/.test(v)&&scope[j+1]&&/^.+?\s+[A-Z]{2,3}$/.test(scope[j+1]))break;
+      if(/^(?:-|\d+(?:\.\d+)?)$/.test(v))vals.push(v);
+      j++;
+    }
+    const raw=vals[statIndex];
+    const value=Number(raw);
+    if(!Number.isFinite(value)||value<=0)continue;
+    const key=statPlayerKey(player,team);
+    if(seen.has(key))continue;
+    seen.add(key);
+    rows.push({rank,value,player,team});
+    if(rows.length>=40)break;
+  }
+  return rankStatRows(rows).slice(0,40);
 }
 
 function parseYahooStatsText(text,kind){

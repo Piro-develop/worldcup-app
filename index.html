@@ -4005,41 +4005,53 @@ function parseSoccerKingStatsText(text,kind){
     }
   }
 
-  return out.sort((a,b)=>Number(b.value)-Number(a.value)||Number(a.rank)-Number(b.rank));
+  return rankStatRows(rows).slice(0,40);
 }
 
 
 function parseFoxStatsText(text,kind){
-  const lines=String(text||'').replace(/\r/g,'').split(/\n+/).map(normalizeArticleLine).filter(Boolean);
-  const startIdx=lines.findIndex(l=>/FIFA Men's World Cup|STANDARD STATS|PLAYERS/i.test(l));
+  const lines=String(text||'')
+    .replace(/\r/g,'')
+    .split(/\n+/)
+    .map(normalizeArticleLine)
+    .map(l=>l.replace(/^[-*•\s]+/,'').trim())
+    .filter(Boolean);
+  const startIdx=lines.findIndex(l=>/FIFA Men's World Cup|STANDARD STATS|PLAYERS|GP\s+GS\s+MP|\bPOTM\b/i.test(l));
   const scope=lines.slice(startIdx>=0?startIdx:0);
   const rows=[];
   const seen=new Set();
   const statIndex=kind==='goals'?5:9; // FOX standard columns: GP, GS, MP, RTG, POTM, G, xG, HG, PKG, A, ...
-  for(let i=0;i<scope.length-12;i++){
-    if(!/^\d{1,3}$/.test(scope[i]))continue;
+  const playerRe=/^(.+?)\s+([A-Z]{2,3})$/;
+  const isNumericCell=v=>/^(?:-|\d+(?:\.\d+)?)$/.test(String(v||'').trim());
+  const isRankLine=(v,next)=>/^\d{1,3}$/.test(String(v||'').trim())&&playerRe.test(String(next||'').trim());
+
+  for(let i=0;i<scope.length-8;i++){
+    if(!isRankLine(scope[i],scope[i+1]))continue;
     const rank=Number(scope[i]);
-    const nameLine=scope[i+1]||'';
-    const m=nameLine.match(/^(.+?)\s+([A-Z]{2,3})$/);
+    const nameLine=scope[i+1].trim();
+    const m=nameLine.match(playerRe);
     if(!m)continue;
     const player=cleanPlayerName(m[1]);
-    const team=ESPN_MAP[m[2]]||NAME_MAP[String(m[2]||'').toLowerCase()]||'';
+    const abbr=String(m[2]||'').toUpperCase();
+    const team=ESPN_MAP[abbr]||NAME_MAP[abbr.toLowerCase()]||'';
     if(!player||!team)continue;
+
     const vals=[];
     let j=i+2;
     while(j<scope.length&&vals.length<18){
-      const v=scope[j];
-      if(/^\d{1,3}$/.test(v)&&scope[j+1]&&/^.+?\s+[A-Z]{2,3}$/.test(scope[j+1]))break;
-      if(/^(?:-|\d+(?:\.\d+)?)$/.test(v))vals.push(v);
+      if(isRankLine(scope[j],scope[j+1]))break;
+      const v=scope[j].trim();
+      if(isNumericCell(v))vals.push(v==='-'?'0':v);
       j++;
     }
-    const raw=vals[statIndex];
-    const value=Number(raw);
-    if(!Number.isFinite(value)||value<=0)continue;
+    const value=Number(vals[statIndex]);
+    if(!Number.isFinite(value)||value<=0){i=Math.max(i,j-1);continue;}
     const key=statPlayerKey(player,team);
-    if(seen.has(key))continue;
-    seen.add(key);
-    rows.push({rank,value,player,team});
+    if(!seen.has(key)){
+      seen.add(key);
+      rows.push({rank,value,player,team});
+    }
+    i=Math.max(i,j-1);
     if(rows.length>=40)break;
   }
   return rankStatRows(rows).slice(0,40);

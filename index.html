@@ -800,14 +800,16 @@ function fallbackStatRows(kind){
   if(kind==='assists')return localizeStatRows(FOX_STATIC_FALLBACK_STATS[kind]||[],kind).slice(0,statLimit(kind));
   return [];
 }
-function normalizeStatStatus(status){
+function normalizeVisibleStatus(status){
   const s=String(status||'').trim();
   if(!s)return '';
-  if(s==='更新中・・・'||s==='更新済')return s;
-  if(/^更新済/.test(s))return s;
-  if(/^外部取得不可|^外部取得データ不完全|^予備データ/.test(s))return '';
-  if(/^取得失敗|^解析失敗|^FIFA公式取得失敗/.test(s))return '取得失敗';
+  if(/更新中|取得中/.test(s))return '更新中・・・';
+  if(/失敗|不可|解析失敗|エラー/.test(s))return '取得失敗';
+  if(/更新済|取得済|前回表示|前回取得|保存データ|保持/.test(s))return '更新済';
   return '';
+}
+function normalizeStatStatus(status){
+  return normalizeVisibleStatus(status);
 }
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
 const GROUP_DATA_VERSION='group-data-v108-20260627-64done-full-scorer-seed';
@@ -1212,8 +1214,8 @@ function load(){
     merged.matchCache={};
     merged.groupDataVersion=GROUP_DATA_VERSION;
   }
-  if(!['','更新中・・・','更新済'].includes(merged.groupStatus||''))merged.groupStatus=String(merged.groupStatus||'').startsWith('更新済')?'更新済':'';
-  if(!['','更新中・・・','更新済'].includes(merged.bracketStatus||''))merged.bracketStatus='';
+  merged.groupStatus=normalizeVisibleStatus(merged.groupStatus||'');
+  merged.bracketStatus=normalizeVisibleStatus(merged.bracketStatus||'');
   merged.statStatus=Object.assign({goals:'',assists:''},merged.statStatus||{});
   ['goals','assists'].forEach(k=>{merged.statStatus[k]=normalizeStatStatus(merged.statStatus[k]||'');});
   if(!merged.news||typeof merged.news!=='object')merged.news={target:'all',status:'',items:[],version:NEWS_PIPELINE_VERSION};
@@ -1227,11 +1229,11 @@ function load(){
   merged.news.items=merged.news.items
     .map(item=>item&&Object.assign({},item,{title:cleanNewsTitle(item.title||''),url:normalizeNewsArticleUrl(item.url||'')}))
     .filter(item=>item&&isUsableNewsTitle(item.title)&&item.url);
-  if(!merged.news.items.length&&/^取得済/.test(merged.news.status||''))merged.news.status='';
-  if(!['','取得中・・・','取得済','取得失敗','ニュース取得失敗'].includes(merged.news.status||'')&&!/^取得済/.test(merged.news.status||''))merged.news.status='';
+  if(!merged.news.items.length&&/^更新済/.test(merged.news.status||''))merged.news.status='';
+  merged.news.status=normalizeVisibleStatus(merged.news.status||'');
   if(!merged.ko||typeof merged.ko!=='object')merged.ko={status:'',results:{}};
   if(!merged.ko.results||typeof merged.ko.results!=='object')merged.ko.results={};
-  if(!['','更新中・・・','更新済','更新失敗'].includes(merged.ko.status||''))merged.ko.status='';
+  merged.ko.status=normalizeVisibleStatus(merged.ko.status||'');
   merged.ko.viewCol=Number.isFinite(Number(merged.ko.viewCol))?Math.max(0,Math.min(3,Number(merged.ko.viewCol))):0;
   return merged;
 }
@@ -1774,7 +1776,7 @@ async function updateKnockoutSchedule(){
   }catch(e){
     console.warn('決勝T日程更新失敗',e);
     applyConfirmedBracketSlots();
-    state.ko.status='更新失敗';
+    state.ko.status='取得失敗';
   }
   save();render();
 }
@@ -1865,7 +1867,7 @@ function bind(){
   const newsTarget=document.getElementById('newsTarget');
   if(newsTarget){
     newsTarget.value=(state.news&&state.news.target)||'all';
-    newsTarget.onchange=()=>{state.news=state.news||{target:'all',status:'',items:[],cache:{},requestId:0,version:NEWS_PIPELINE_VERSION};state.news.target=newsTarget.value;const cached=getNewsCacheForTarget(state.news.target);state.news.items=cached;state.news.status=cached.length?`前回取得 ${cached.length}件`:'';save();render()};
+    newsTarget.onchange=()=>{state.news=state.news||{target:'all',status:'',items:[],cache:{},requestId:0,version:NEWS_PIPELINE_VERSION};state.news.target=newsTarget.value;const cached=getNewsCacheForTarget(state.news.target);state.news.items=cached;state.news.status=cached.length?'更新済':'';save();render()};
   }
   const fetchNewsBtn=document.getElementById('fetchNews');if(fetchNewsBtn)fetchNewsBtn.onclick=fetchNews;
   document.querySelectorAll('[data-group]').forEach(b=>{b.onclick=()=>openGroupDetail(b.dataset.group);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openGroupDetail(b.dataset.group)}}})
@@ -3299,7 +3301,7 @@ async function fetchNews(){
   state.news.version=NEWS_PIPELINE_VERSION;
   const cached=getNewsCacheForTarget(target);
   state.news.items=cached.map(item=>Object.assign({},item,{image:newsInitialImage(item,target)}));
-  state.news.status=cached.length?`取得中・・・（前回${cached.length}件を保持）`:'取得中・・・';
+  state.news.status='更新中・・・';
   save();render();
   try{
     const freshRaw=await promiseWithSoftTimeout(fetchNewsItems(target),NEWS_FAST_LIMIT_MS);
@@ -3318,7 +3320,7 @@ async function fetchNews(){
       state.news.status=newsStatusForItems(cachedNow);
     }else{
       state.news.items=[];
-      state.news.status='ニュース取得失敗';
+      state.news.status='取得失敗';
     }
   }
   save();render();
@@ -3378,10 +3380,7 @@ function stableNewsSelection(fresh,cached,target,limit=20){
 }
 function newsStatusForItems(items){
   const total=(Array.isArray(items)?items:[]).length;
-  const direct=countDirectNewsItems(items);
-  if(!total)return 'ニュース取得失敗';
-  if(direct===total)return `取得済 ${total}件`;
-  return `取得済 ${direct}件`;
+  return total?'更新済':'取得失敗';
 }
 
 
@@ -4315,7 +4314,7 @@ async function updatePlayerStats(kind){
     try{await refreshAllGroupScorers({retryFailed:true});}catch(e){console.warn('得点R用得点者更新失敗',e)}
     const rows=currentGoalRankingRows().slice(0,limit);
     state.goals=rows;
-    state.statStatus.goals=rows.length?'更新済':'得点R取得失敗';
+    state.statStatus.goals=rows.length?'更新済':'取得失敗';
     save();render();
     return;
   }
@@ -4326,23 +4325,18 @@ async function updatePlayerStats(kind){
     const normalized=localizeStatRows(rows.slice(0,limit).map((r,i)=>({rank:r.rank||i+1,value:r.value,player:r.player,team:r.team||''})),kind);
     if(statRowsDisplayable(normalized)){
       state[kind]=normalized.slice(0,limit);
-      const sourceName=result.source||'参照先';
-      if(sourceName.includes('FOX'))state.statStatus[kind]='更新済（FOX）';
-      else if(sourceName.includes('ESPN'))state.statStatus[kind]='更新済（ESPN）';
-      else if(sourceName.includes('サッカーキング'))state.statStatus[kind]='更新済（サッカーキング）';
-      else if(sourceName.includes('スポーツナビ')||sourceName.includes('Yahoo'))state.statStatus[kind]='更新済（スポーツナビ）';
-      else state.statStatus[kind]='更新済（補助参照）';
+      state.statStatus[kind]='更新済';
     }else{
       const fallback=fallbackStatRows(kind);
       if(previous.length){
         state[kind]=previous.slice(0,limit);
-        state.statStatus[kind]='前回表示を維持';
+        state.statStatus[kind]='更新済';
       }else if(fallback.length){
         state[kind]=fallback.slice(0,limit);
-        state.statStatus[kind]=`更新済（${STAT_SNAPSHOT_UPDATED}）`; 
+        state.statStatus[kind]='更新済'; 
       }else{
         state[kind]=[];
-        state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'アシストR取得失敗';
+        state.statStatus[kind]='取得失敗';
       }
       console.warn('ランキング解析不可',kind,result.message||'');
     }
@@ -4350,13 +4344,13 @@ async function updatePlayerStats(kind){
     const fallback=fallbackStatRows(kind);
     if(previous.length){
       state[kind]=previous.slice(0,limit);
-      state.statStatus[kind]='前回表示を維持';
+      state.statStatus[kind]='更新済';
     }else if(fallback.length){
       state[kind]=fallback.slice(0,limit);
-      state.statStatus[kind]=`更新済（${STAT_SNAPSHOT_UPDATED}）`; 
+      state.statStatus[kind]='更新済'; 
     }else{
       state[kind]=[];
-      state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'アシストR取得失敗';
+      state.statStatus[kind]='取得失敗';
     }
     console.warn('ランキング取得不可',kind,result.message||'');
   }

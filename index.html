@@ -484,23 +484,23 @@ const CURATED_NEWS_SOURCES=[
 ];
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
-const FIFA_PLAYER_STATS_URLS=[
-  'https://www.fifa.com/ja/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics',
-  'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics'
-];
 const STAT_LIMITS={goals:15,assists:10};
-const STAT_DATA_VERSION='stat-goals-soccerking-primary-with-fifa-try-v104';
+const STAT_DATA_VERSION='stat-english-fox-espn-v105';
+const FOX_STANDARD_STATS_BASE='https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026';
+const ESPN_SCORING_STATS_URL='https://www.espn.com/soccer/stats/_/league/FIFA.WORLD/view/scoring';
 const STAT_SOURCES={
   goals:[
-    // 実表示を優先し、得点Rはサッカーキングを主参照に戻します。
-    // FIFA公式はページ構造上、HTML単体アプリから安定取得できないため補助試行に留めます。
-    {name:'サッカーキング 得点ランキング',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'},
-    {name:'FIFA公式 得点ランキング',url:'https://www.fifa.com/ja/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics',parser:'fifa'}
+    // FIFA公式はHTML単体アプリから安定取得できないため、ランキング取得ルートから外します。
+    // 得点R・アシストRは英語統計（FOX主参照、ESPN補助参照）を取得し、日本語名へ変換します。
+    {name:'FOX Sports 得点ランキング',url:FOX_STANDARD_STATS_BASE+'&sort=g&sortOrder=desc',parser:'fox'},
+    {name:'ESPN 得点ランキング',url:ESPN_SCORING_STATS_URL,parser:'espn'}
   ],
   assists:[
-    {name:'FIFA公式 アシストランキング',url:'https://www.fifa.com/ja/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics',parser:'fifa'}
+    {name:'FOX Sports アシストランキング',url:FOX_STANDARD_STATS_BASE+'&sort=a&sortOrder=desc',parser:'fox'},
+    {name:'ESPN アシストランキング',url:ESPN_SCORING_STATS_URL,parser:'espn'}
   ]
 };
+const STAT_SNAPSHOT_UPDATED='FOX/ESPN 2026-06-27時点';
 const SOCCERKING_GOALS_SNAPSHOT_UPDATED='サッカーキング 2026-06-26時点';
 const SOCCERKING_STATIC_GOALS=[
   {rank:1,value:5,player:'リオネル・メッシ',team:'ar'},
@@ -631,7 +631,37 @@ const YAHOO_MATCH_URLS={
 };
 
 
-const FOX_STATIC_FALLBACK_STATS={goals:[],assists:[]};
+const FOX_STATIC_FALLBACK_STATS={
+  goals:[
+    {rank:1,value:5,player:'Lionel Messi',team:'ar'},
+    {rank:2,value:4,player:'Vinicius Junior',team:'br'},
+    {rank:3,value:4,player:'Erling Haaland',team:'no'},
+    {rank:4,value:4,player:'Kylian Mbappe',team:'fr'},
+    {rank:5,value:3,player:'Ismael Saibari',team:'ma'},
+    {rank:6,value:3,player:'Jonathan David',team:'ca'},
+    {rank:7,value:3,player:'Matheus Cunha',team:'br'},
+    {rank:8,value:3,player:'Brian Brobbey',team:'nl'},
+    {rank:9,value:3,player:'Johan Manzambi',team:'ch'},
+    {rank:10,value:3,player:'Deniz Undav',team:'de'},
+    {rank:11,value:2,player:'Yasin Ayari',team:'se'},
+    {rank:12,value:2,player:'Cody Gakpo',team:'nl'},
+    {rank:13,value:2,player:'Julian Quinones',team:'mx'},
+    {rank:14,value:2,player:'Daichi Kamada',team:'jp'},
+    {rank:15,value:2,player:'Kai Havertz',team:'de'}
+  ],
+  assists:[
+    {rank:1,value:3,player:'Alexander Isak',team:'se'},
+    {rank:2,value:3,player:'Bruno Guimaraes',team:'br'},
+    {rank:3,value:3,player:'Michael Olise',team:'fr'},
+    {rank:4,value:2,player:'Hannibal Mejbri',team:'tn'},
+    {rank:5,value:2,player:'Viktor Gyokeres',team:'se'},
+    {rank:6,value:2,player:'Denzel Dumfries',team:'nl'},
+    {rank:7,value:2,player:'Julio Enciso',team:'py'},
+    {rank:8,value:2,player:'Breel Embolo',team:'ch'},
+    {rank:9,value:2,player:'Ryan Gravenberch',team:'nl'},
+    {rank:10,value:2,player:'Roberto Alvarado',team:'mx'}
+  ]
+};
 const STAT_PLAYER_JA={
   'lionel messi':'リオネル・メッシ','messi':'リオネル・メッシ',
   'erling haaland':'アーリング・ハーランド','haaland':'アーリング・ハーランド',
@@ -646,7 +676,10 @@ const STAT_PLAYER_JA={
   'mohamed salah':'モハメド・サラー','ryan gravenberch':'ライアン・フラーフェンベルフ','breel embolo':'ブリール・エンボロ','denzel dumfries':'デンゼル・ダンフリース',
   'joshua kimmich':'ヨシュア・キミッヒ','florian wirtz':'フロリアン・ヴィルツ','nathan saliba':'ネイサン・サリバ','brahim diaz':'ブラヒム・ディアス','brahim díaz':'ブラヒム・ディアス',
   'roberto alvarado':'ロベルト・アルバラード','viktor gyokeres':'ヴィクトル・ギェケレシュ','viktor gyökeres':'ヴィクトル・ギェケレシュ','chadi riad':'シャディ・リアド','brandon thomas-asante':'ブランドン・トーマス＝アサンテ',
-  'ueda ayase':'上田綺世','ayase ueda':'上田綺世','takumi minamino':'南野拓実','daizen maeda':'前田大然'
+  'ueda ayase':'上田綺世','ayase ueda':'上田綺世','takumi minamino':'南野拓実','daizen maeda':'前田大然',
+  'julian quinones':'フリアン・キニョーネス','julián quiñones':'フリアン・キニョーネス','ousmane dembele':'ウスマン・デンベレ','ousmane dembélé':'ウスマン・デンベレ',
+  'arda guler':'アルダ・ギュレル','arda güler':'アルダ・ギュレル','keito nakamura':'中村敬斗','ritsu doan':'堂安律','hwang in-beom':'ファン・インボム',
+  'iliman ndiaye':'イリマン・エンディアイエ','ismael saibari':'イスマエル・サイバリ','ismaïla sarr':'イスマイラ・サール','isak':'アレクサンダー・イサク'
 };
 function normalizePlayerAlias(name){
   return String(name||'')
@@ -712,9 +745,8 @@ function statRowsDisplayable(rows){
 }
 function statLimit(kind){return STAT_LIMITS[kind]||20}
 function fallbackStatRows(kind){
-  // 得点Rは、外部取得が全滅した場合でも空欄にしないため、出典と日付を明示した内蔵スナップショットを表示します。
-  // アシストRはFIFA公式のみのまま。取得できない場合は空欄にします。
-  if(kind==='goals')return localizeStatRows(SOCCERKING_STATIC_GOALS,'goals').slice(0,statLimit('goals'));
+  // 外部取得が全滅した場合でも空欄にしないため、英語統計の確認済みスナップショットを表示します。
+  if(kind==='goals'||kind==='assists')return localizeStatRows(FOX_STATIC_FALLBACK_STATS[kind]||[],kind).slice(0,statLimit(kind));
   return [];
 }
 function normalizeStatStatus(status){
@@ -723,7 +755,7 @@ function normalizeStatStatus(status){
   if(s==='更新中・・・'||s==='更新済')return s;
   if(/^更新済/.test(s))return s;
   if(/^外部取得不可|^外部取得データ不完全|^予備データ/.test(s))return '';
-  if(/^取得失敗|^解析失敗|^FIFA公式取得失敗/.test(s))return 'FIFA公式取得失敗';
+  if(/^取得失敗|^解析失敗|^FIFA公式取得失敗/.test(s))return '取得失敗';
   return '';
 }
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
@@ -4050,7 +4082,8 @@ async function updatePlayerStats(kind){
     if(statRowsDisplayable(normalized)){
       state[kind]=normalized.slice(0,limit);
       const sourceName=result.source||'参照先';
-      if(sourceName.includes('FIFA公式'))state.statStatus[kind]='更新済（FIFA公式）';
+      if(sourceName.includes('FOX'))state.statStatus[kind]='更新済（FOX）';
+      else if(sourceName.includes('ESPN'))state.statStatus[kind]='更新済（ESPN）';
       else if(sourceName.includes('サッカーキング'))state.statStatus[kind]='更新済（サッカーキング）';
       else state.statStatus[kind]='更新済（補助参照）';
     }else{
@@ -4060,10 +4093,10 @@ async function updatePlayerStats(kind){
         state.statStatus[kind]='取得失敗（前回表示を維持）';
       }else if(fallback.length){
         state[kind]=fallback.slice(0,limit);
-        state.statStatus[kind]=`取得失敗（${SOCCERKING_GOALS_SNAPSHOT_UPDATED}）`;
+        state.statStatus[kind]=`取得失敗（${STAT_SNAPSHOT_UPDATED}）`;
       }else{
         state[kind]=[];
-        state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'FIFA公式取得失敗';
+        state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'アシストR取得失敗';
       }
       console.warn('ランキング解析不可',kind,result.message||'');
     }
@@ -4074,10 +4107,10 @@ async function updatePlayerStats(kind){
       state.statStatus[kind]='取得失敗（前回表示を維持）';
     }else if(fallback.length){
       state[kind]=fallback.slice(0,limit);
-      state.statStatus[kind]=`取得失敗（${SOCCERKING_GOALS_SNAPSHOT_UPDATED}）`;
+      state.statStatus[kind]=`取得失敗（${STAT_SNAPSHOT_UPDATED}）`;
     }else{
       state[kind]=[];
-      state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'FIFA公式取得失敗';
+      state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'アシストR取得失敗';
     }
     console.warn('ランキング取得不可',kind,result.message||'');
   }
@@ -4100,29 +4133,6 @@ async function fetchPlayerStats(kind){
   return {rows:[],message:last};
 }
 
-async function fetchFifaPlayerStats(kind){
-  const attempts=[];
-  FIFA_PLAYER_STATS_URLS.forEach(url=>{
-    const freshUrl=cacheBustUrl(url);
-    attempts.push({method:'FIFA公式 Jina Reader',url,loader:()=>fetchReaderTextNoStore(url)});
-    attempts.push({method:'FIFA公式 AllOrigins raw',url,loader:()=>fetchAllOriginsText(freshUrl)});
-    attempts.push({method:'FIFA公式 AllOrigins get',url,loader:()=>fetchAllOriginsGetText(freshUrl)});
-    attempts.push({method:'FIFA公式 Codetabs',url,loader:()=>fetchTextViaCoddProxy(freshUrl)});
-  });
-  let best={rows:[],method:'',url:''};
-  let lastErr=null;
-  for(const a of attempts){
-    try{
-      const text=await promiseWithSoftTimeout(a.loader(),6200);
-      if(!text||!String(text).trim())continue;
-      const rows=parseFifaStatsText(text,kind);
-      if(rows.length>best.rows.length)best={rows,method:a.method,url:a.url};
-      if(rows.length>=20)return best;
-    }catch(e){lastErr=e;}
-  }
-  if(best.rows.length)return best;
-  throw lastErr||new Error('FIFA公式ランキング取得失敗');
-}
 function statRankValue(r){
   const n=Number(r&&r.value);
   return Number.isFinite(n)?n:0;
@@ -4365,10 +4375,10 @@ function statSourceAttempts(url){
 }
 function parseStatRowsBySource(src,text,kind){
   if(!src)return [];
-  if(src.parser==='fifa')return parseFifaStatsText(text,kind);
   if(src.parser==='soccerking')return parseSoccerKingStatsText(text,kind);
   if(src.parser==='yahoo')return parseYahooStatsText(text,kind);
   if(src.parser==='fox')return parseFoxStatsText(text,kind);
+  if(src.parser==='espn')return parseEspnStatsText(text,kind);
   return parseStatsText(text,kind);
 }
 async function fetchRowsFromStatSource(src,kind){
@@ -4521,12 +4531,29 @@ function parseSoccerKingStatsText(text,kind){
 }
 
 
+function statEnglishTeamAliasPattern(){
+  const extra=['Bosnia-Herzegovina','Bosnia and Herzegovina','United States','South Korea','New Zealand','Cape Verde','Saudi Arabia','Ivory Coast','DR Congo','Curaçao','Curacao','Czechia','Turkiye','Turkey'];
+  const aliases=uniq(Object.keys(NAME_MAP).concat(extra));
+  return aliases.sort((a,b)=>b.length-a.length).map(escapeRegExp).join('|');
+}
+function cleanStatLineForParsing(line){
+  return normalizeArticleLine(line)
+    .replace(/\s+/g,' ')
+    .replace(/^[-*•\s]+/,'')
+    .trim();
+}
+function teamIdFromStatAlias(name){
+  const raw=String(name||'').trim();
+  if(!raw)return '';
+  const lower=raw.toLowerCase().replace(/[’']/g,'').trim();
+  if(NAME_MAP[lower])return NAME_MAP[lower];
+  return teamIdFromText(raw);
+}
 function parseFoxStatsText(text,kind){
   const lines=String(text||'')
     .replace(/\r/g,'')
     .split(/\n+/)
-    .map(normalizeArticleLine)
-    .map(l=>l.replace(/^[-*•\s]+/,'').trim())
+    .map(cleanStatLineForParsing)
     .filter(Boolean);
   const startIdx=lines.findIndex(l=>/FIFA Men's World Cup|STANDARD STATS|PLAYERS|GP\s+GS\s+MP|\bPOTM\b/i.test(l));
   const scope=lines.slice(startIdx>=0?startIdx:0);
@@ -4536,18 +4563,35 @@ function parseFoxStatsText(text,kind){
   const playerRe=/^(.+?)\s+([A-Z]{2,3})$/;
   const isNumericCell=v=>/^(?:-|\d+(?:\.\d+)?)$/.test(String(v||'').trim());
   const isRankLine=(v,next)=>/^\d{1,3}$/.test(String(v||'').trim())&&playerRe.test(String(next||'').trim());
+  const addRow=(rank,player,abbr,value)=>{
+    const team=ESPN_MAP[String(abbr||'').toUpperCase()]||'';
+    player=cleanPlayerName(player);
+    value=Number(value);
+    if(!player||!team||!Number.isFinite(value)||value<=0)return;
+    const key=statPlayerKey(player,team);
+    if(seen.has(key))return;
+    seen.add(key);
+    rows.push({rank:Number(rank)||rows.length+1,value,player,team});
+  };
 
+  // r.jina.ai等が表を1行のパイプ区切りで返す場合に対応。
+  for(const raw of scope){
+    if(!raw.includes('|'))continue;
+    const cells=raw.split('|').map(c=>cleanStatLineForParsing(c)).filter(Boolean);
+    if(cells.length<8)continue;
+    const rank=Number(cells[0]);
+    const m=String(cells[1]||'').match(playerRe);
+    if(!Number.isFinite(rank)||!m)continue;
+    const nums=cells.slice(2).filter(isNumericCell).map(v=>v==='-'?'0':v);
+    addRow(rank,m[1],m[2],nums[statIndex]);
+  }
+
+  // 通常のFOXページ取得結果：順位行 → 選手名+国略称行 → 数値列の順で並ぶ。
   for(let i=0;i<scope.length-8;i++){
     if(!isRankLine(scope[i],scope[i+1]))continue;
     const rank=Number(scope[i]);
-    const nameLine=scope[i+1].trim();
-    const m=nameLine.match(playerRe);
+    const m=scope[i+1].trim().match(playerRe);
     if(!m)continue;
-    const player=cleanPlayerName(m[1]);
-    const abbr=String(m[2]||'').toUpperCase();
-    const team=ESPN_MAP[abbr]||NAME_MAP[abbr.toLowerCase()]||'';
-    if(!player||!team)continue;
-
     const vals=[];
     let j=i+2;
     while(j<scope.length&&vals.length<18){
@@ -4556,14 +4600,49 @@ function parseFoxStatsText(text,kind){
       if(isNumericCell(v))vals.push(v==='-'?'0':v);
       j++;
     }
-    const value=Number(vals[statIndex]);
-    if(!Number.isFinite(value)||value<=0){i=Math.max(i,j-1);continue;}
-    const key=statPlayerKey(player,team);
-    if(!seen.has(key)){
-      seen.add(key);
-      rows.push({rank,value,player,team});
-    }
+    addRow(rank,m[1],m[2],vals[statIndex]);
     i=Math.max(i,j-1);
+    if(rows.length>=40)break;
+  }
+  return rankStatRows(rows).slice(0,40);
+}
+
+function parseEspnStatsText(text,kind){
+  const lines=String(text||'')
+    .replace(/\r/g,'')
+    .split(/\n+/)
+    .map(cleanStatLineForParsing)
+    .filter(Boolean);
+  const sectionTitle=kind==='goals'?/Top\s+Scorers/i:/Top\s+Assists/i;
+  const nextTitle=kind==='goals'?/Top\s+Assists/i:/(Statistics\s+are\s+updated|Glossary|FIFA\s+World\s+Cup\s+News)/i;
+  let start=lines.findIndex(l=>sectionTitle.test(l));
+  if(start<0)start=0;
+  let end=lines.findIndex((l,i)=>i>start&&nextTitle.test(l));
+  if(end<0)end=Math.min(lines.length,start+90);
+  const scope=lines.slice(start+1,end);
+  const teamPattern=statEnglishTeamAliasPattern();
+  const rankedRe=new RegExp('^(\\d{1,3})\\s*(.+?)\\s+('+teamPattern+')\\s+(\\d{1,2})\\s+(\\d{1,2})$','i');
+  const noRankRe=new RegExp('^(.+?)\\s+('+teamPattern+')\\s+(\\d{1,2})\\s+(\\d{1,2})$','i');
+  const rows=[];
+  const seen=new Set();
+  const add=(rank,player,teamName,value)=>{
+    const team=teamIdFromStatAlias(teamName);
+    player=cleanPlayerName(player);
+    value=Number(value);
+    if(!player||!team||!Number.isFinite(value)||value<=0)return;
+    const key=statPlayerKey(player,team);
+    if(seen.has(key))return;
+    seen.add(key);
+    rows.push({rank:Number(rank)||rows.length+1,value,player,team});
+  };
+  for(const line of scope){
+    if(/^(RK|Name|Team|P|G|A|Scoring|Discipline|Performance|Select|hidden)$/i.test(line))continue;
+    let m=line.match(rankedRe);
+    if(m){add(m[1],m[2],m[3],m[5]);}
+    else{
+      m=line.match(noRankRe);
+      if(m)add(rows.length+1,m[1],m[2],m[4]);
+    }
     if(rows.length>=40)break;
   }
   return rankStatRows(rows).slice(0,40);

@@ -442,7 +442,7 @@ const ELIMINATED=['tr','ht','tn','pa','jo'];
 const uniq=a=>[...new Set(a)];
 const gts=gs=>uniq(gs.flatMap(g=>G[g]||[]));
 const TH={t1:gts(['A','B','C','D','F']),t2:gts(['C','D','F','G','H']),t3:gts(['C','E','F','H','I']),t4:gts(['E','H','I','J','K']),t5:gts(['B','E','F','I','J']),t6:gts(['A','E','H','I','J']),t7:gts(['E','F','G','I','J']),t8:gts(['D','E','I','J','L'])};
-const tabs=[['bracket','決勝T表'],['knockout','決勝T日程'],['groups','グループS'],['goals','得点Ｒ'],['assists','アシストＲ'],['news','ニュース']];
+const tabs=[['bracket','決勝トーナメント表'],['knockout','日程・結果'],['groups','グループステージ'],['goals','得点ランキング'],['assists','アシストランキング'],['news','ニュース']];
 const NEWS_EN={de:'Germany',jp:'Japan',fr:'France',kr:'South Korea',za:'South Africa',ch:'Switzerland',ca:'Canada',br:'Brazil',ma:'Morocco',co:'Colombia',pt:'Portugal',hr:'Croatia',es:'Spain',at:'Austria',us:'United States',be:'Belgium',ci:'Ivory Coast',no:'Norway',mx:'Mexico',eng:'England',ar:'Argentina',uy:'Uruguay',au:'Australia',py:'Paraguay',eg:'Egypt',nl:'Netherlands',se:'Sweden',tn:'Tunisia',cz:'Czechia',qa:'Qatar',ba:'Bosnia and Herzegovina',ht:'Haiti',sct:'Scotland',tr:'Turkey',ec:'Ecuador',cw:'Curaçao',ir:'Iran',nz:'New Zealand',sa:'Saudi Arabia',cv:'Cape Verde',sn:'Senegal',iq:'Iraq',dz:'Algeria',jo:'Jordan',uz:'Uzbekistan',cd:'DR Congo',gh:'Ghana',pa:'Panama'};
 const NEWS_COUNTRY_ORDER=(()=>{
   const order=Object.keys(T).filter(id=>id!=='jp').sort((a,b)=>String(T[a]?.[0]||a).localeCompare(String(T[b]?.[0]||b),'ja'));
@@ -486,7 +486,7 @@ const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const ESPN_FULL_SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=950';
 const STAT_LIMITS={goals:20,assists:10};
-const STAT_DATA_VERSION='stat-own-goals-v109-top20';
+const STAT_DATA_VERSION='stat-own-goals-v110-top20';
 const FOX_STANDARD_STATS_BASE='https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026';
 const ESPN_SCORING_STATS_URL='https://www.espn.com/soccer/stats/_/league/FIFA.WORLD/view/scoring';
 const STAT_SOURCES={
@@ -1357,8 +1357,8 @@ function groupBoxHTML(g,rows){
   return `<div class="group-box" data-group="${g}" role="button" tabindex="0" aria-label="Group ${g} 詳細">
     <div class="group-title"><span>Group ${g}</span></div>
     <table class="group-table">
-      <thead><tr><th class="rank-col">順</th><th class="flag-col">国</th><th class="team-col">国名</th><th class="rec-col">勝敗</th><th class="num-col">得</th><th class="num-col">失</th><th class="num-col">差</th><th class="pts-col">点</th></tr></thead>
-      <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="team-cell">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.d}-${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
+      <thead><tr><th class="rank-col">順</th><th class="flag-col">国</th><th class="team-col">国名</th><th class="rec-col">勝-敗-分</th><th class="num-col">得</th><th class="num-col">失</th><th class="num-col">差</th><th class="pts-col">点</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="team-cell">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.l}-${r.d}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
     </table>
   </div>`
 }
@@ -1567,6 +1567,7 @@ function knockoutScheduleHTML(){
   }
   return `<section class="panel"><div class="card"><div class="ko-head"><h2>決勝トーナメント日程・結果</h2><div class="group-toolbar-actions"><div class="group-status">${esc(ko.status||'')}</div><button class="btn primary" id="updateKnockout">更新</button></div></div>
     <div class="group-toolbar-helper">試合結果は各カードをタップ</div>
+    <div class="group-toolbar-helper">グループステージの結果詳細は各グループを参照</div>
     <div class="ko-viewbar"><button class="ko-nav-btn" data-ko-nav="-1" ${prevDisabled} aria-label="左へ">‹</button><div class="ko-view-spacer" aria-hidden="true"></div><button class="ko-nav-btn" data-ko-nav="1" ${nextDisabled} aria-label="右へ">›</button></div>
     <div class="ko-board-wrap">${boardHtml}</div>
   </div></section>`;
@@ -2351,8 +2352,8 @@ function teamNameLine(id,winner=false){
 function groupDetailTable(g){
   const rows=state.groups?.[g]||buildGroupRows(initialGroups)[g]||[];
   return `<table class="detail-table">
-    <thead><tr><th>順位</th><th>国</th><th>国名</th><th>勝敗</th><th>得点</th><th>失点</th><th>差</th><th>勝点</th></tr></thead>
-    <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="detail-team">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.d}-${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
+    <thead><tr><th>順位</th><th>国</th><th>国名</th><th>勝-敗-分</th><th>得点</th><th>失点</th><th>差</th><th>勝点</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="detail-team">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.l}-${r.d}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
   </table>`
 }
 function openGroupDetail(g){

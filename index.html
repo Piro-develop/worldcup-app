@@ -289,14 +289,14 @@
     .match-team-name.winner .flag-img{border-color:rgba(5,37,35,.35);box-shadow:0 0 0 1px rgba(255,255,255,.38)}
     .match-team-name{display:flex;align-items:center;gap:4px;min-width:0;font-weight:900;border-radius:10px;padding:4px 6px}
     .match-team.away .match-team-name{justify-content:flex-end}
-    .team-scorers{font-size:9.2px;line-height:1.25;color:#d7e2f2;font-weight:700;width:100%;max-width:100%;display:flex;flex-direction:column;gap:1px;align-items:stretch;text-align:left;overflow:hidden}
-    .match-team.home .team-scorers{align-self:stretch}
-    .match-team.away .team-scorers{align-self:stretch;text-align:left}
-    .scorer-line{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;column-gap:0;align-items:baseline;width:100%;min-width:0;white-space:nowrap;text-align:left;overflow:hidden;letter-spacing:-.055em}
+    .team-scorers{font-size:9.2px;line-height:1.25;color:#d7e2f2;font-weight:700;width:max-content;max-width:100%;display:flex;flex-direction:column;gap:1px;text-align:left;overflow:hidden}
+    .match-team.home .team-scorers{align-self:flex-start}
+    .match-team.away .team-scorers{align-self:flex-end;text-align:left}
+    .scorer-line{display:grid;grid-template-columns:1em 2.15em minmax(0,1fr);column-gap:1px;align-items:baseline;width:100%;min-width:0;white-space:nowrap;text-align:left;overflow:hidden;letter-spacing:-.055em}
     .scorer-line span{min-width:0;white-space:nowrap}
-    .scorer-name{font-weight:800;word-break:keep-all;overflow:visible;overflow-wrap:normal;padding-right:12px}
-    .scorer-period{color:#b9c8dc;font-weight:800;white-space:nowrap;padding-left:0;padding-right:2px}
-    .scorer-minute{color:#b9c8dc;font-weight:800;white-space:nowrap;padding-left:0}
+    .scorer-period{color:#b9c8dc;font-weight:800;white-space:nowrap;text-align:left}
+    .scorer-minute{color:#b9c8dc;font-weight:800;white-space:nowrap;text-align:right}
+    .scorer-name{font-weight:800;word-break:keep-all;overflow:visible;overflow-wrap:normal;text-align:left;padding-left:4px}
     .match-score{
       align-self:flex-start;
       margin-top:4px;
@@ -313,6 +313,8 @@
       box-sizing:border-box;
     }
     .match-score.done{background:#f6d87f;color:#15120a}
+    .match-score.live{background:#155c66;color:#dffefd;border:1px solid rgba(129,216,208,.55)}
+    .match-status-live{display:inline-flex;align-items:center;margin-left:6px;padding:1px 6px;border-radius:999px;background:rgba(52,210,208,.14);color:#81d8d0;font-size:10px;font-weight:900;vertical-align:1px}
     .scorers{
       margin-top:7px;
       padding-top:7px;
@@ -392,10 +394,12 @@
     .ko-detail-team-name.winner{background:linear-gradient(90deg,rgba(129,216,208,.98),rgba(38,166,154,.92));color:#052523}
     .ko-detail-score-pill{min-width:54px;text-align:center;border-radius:999px;padding:5px 8px;background:#17243a;color:#fff;font-weight:900}
     .ko-detail-scorers{font-size:11px;line-height:1.45;color:#d7e2f2;font-weight:700}
+    .ko-detail-team.home .ko-detail-scorers{align-self:flex-start}
+    .ko-detail-team.away .ko-detail-scorers{align-self:flex-end}
     .ko-detail-empty{color:#8fa1bc;font-size:11px;font-weight:700}
     @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-head h2{font-size:18px}.ko-card{min-height:90px;padding:7px}.ko-team{font-size:11px;padding:5px 4px}.ko-round-title{font-size:11px;padding:7px 3px}.ko-meta{font-size:10px}.ko-card-label{font-size:9px;padding:2px 5px}}
     @media (max-width:430px){.group-toolbar{gap:6px}.group-toolbar-left{font-size:11px;letter-spacing:-.03em}.panel-head-title{font-size:17px;letter-spacing:-.04em}.group-toolbar-helper{font-size:10.5px;margin-top:-6px}.group-toolbar-actions .group-status{font-size:10px;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-spacer{min-width:8px}}
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:1px}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:0}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
   </style>
 </head>
 <body>
@@ -920,15 +924,26 @@ function isMatchCompleted(m){
   if(cached.completed===false)return false;
   return false;
 }
+function isMatchLive(m){
+  const cached=matchCacheFor(m.id);
+  if(isMatchCompleted(m))return false;
+  if(m.status==='live')return true;
+  return !!(cached.live||cached.inProgress);
+}
+function hasMatchScore(m){
+  const hs=matchHomeScore(m);
+  const as=matchAwayScore(m);
+  return hs!==undefined&&hs!==null&&hs!==''&&as!==undefined&&as!==null&&as!=='';
+}
 function matchHomeScore(m){
   const cached=matchCacheFor(m.id);
-  if(cached.completed===true&&cached.hs!==undefined)return cached.hs;
+  if((cached.completed===true||cached.live||cached.inProgress)&&cached.hs!==undefined)return cached.hs;
   if(m.status==='done'&&m.hs!==undefined)return m.hs;
   return cached.hs ?? m.hs;
 }
 function matchAwayScore(m){
   const cached=matchCacheFor(m.id);
-  if(cached.completed===true&&cached.as!==undefined)return cached.as;
+  if((cached.completed===true||cached.live||cached.inProgress)&&cached.as!==undefined)return cached.as;
   if(m.status==='done'&&m.as!==undefined)return m.as;
   return cached.as ?? m.as;
 }
@@ -939,13 +954,31 @@ function applyScoreboardMatchUpdates(updates){
   updates.forEach(u=>{
     if(!u||!u.id||!GROUP_MATCH_BY_ID[u.id])return;
     const base=GROUP_MATCH_BY_ID[u.id];
-    const baseCompleted=base.status==='done';
-    const completed=!!u.completed||baseCompleted;
-    // 参照先/CDNが古い「予定」を返しても、基礎データ側で終了済みの試合を予定へ戻さない。
-    const hs=completed?(u.completed&&u.hs!==undefined?u.hs:base.hs):u.hs;
-    const as=completed?(u.completed&&u.as!==undefined?u.as:base.as):u.as;
     const prev=state.matchCache[u.id]||{};
-    const next=Object.assign({},prev,{completed,hs,as,statusText:u.statusText||'',scoreUpdatedAt:Date.now()});
+    const baseCompleted=base.status==='done';
+    const incomingCompleted=!!u.completed||baseCompleted;
+    const incomingLive=!incomingCompleted&&!!(u.live||u.inProgress);
+
+    // 既に終了済みとして保存されている試合は、参照先/CDNが古い試合中・予定データを返しても戻さない。
+    if(prev.completed===true&&!incomingCompleted)return;
+
+    const completed=incomingCompleted;
+    const live=!completed&&incomingLive;
+    const hs=(completed||live)?(u.hs!==undefined?u.hs:base.hs):u.hs;
+    const as=(completed||live)?(u.as!==undefined?u.as:base.as):u.as;
+    const next=Object.assign({},prev,{
+      completed,
+      live,
+      inProgress:live,
+      hs,
+      as,
+      statusText:u.statusText||'',
+      scoreUpdatedAt:Date.now()
+    });
+    if(completed){
+      delete next.live;
+      delete next.inProgress;
+    }
     if(completed&&prev.completed!==true){
       delete next.loading;
       delete next.fetched;
@@ -976,7 +1009,15 @@ function scoreboardMatchUpdatesFromEvents(events){
       if(tid&&!Number.isNaN(score))scores[tid]=score;
     });
     if(scores[base.home]===undefined||scores[base.away]===undefined)return;
-    updates.push({id,completed:!!st.completed,hs:scores[base.home],as:scores[base.away],statusText:st.detail||st.shortDetail||st.description||''});
+    updates.push({
+      id,
+      completed:!!st.completed,
+      live:!!st.inProgress,
+      inProgress:!!st.inProgress,
+      hs:scores[base.home],
+      as:scores[base.away],
+      statusText:st.detail||st.shortDetail||st.description||''
+    });
   });
   return updates;
 }
@@ -984,11 +1025,16 @@ function scoreboardMatchUpdatesFromPayloads(payloads){
   return scoreboardMatchUpdatesFromEvents(uniqueESPNEvents(payloads));
 }
 function groupMatchesFor(g){
-  return (GROUP_MATCHES[g]||[]).map(m=>Object.assign({},m,{
-    status:isMatchCompleted(m)?'done':m.status,
-    hs:matchHomeScore(m),
-    as:matchAwayScore(m)
-  }));
+  return (GROUP_MATCHES[g]||[]).map(m=>{
+    const completed=isMatchCompleted(m);
+    const live=isMatchLive(m);
+    return Object.assign({},m,{
+      status:completed?'done':(live?'live':m.status),
+      live,
+      hs:matchHomeScore(m),
+      as:matchAwayScore(m)
+    });
+  });
 }
 function buildGroupRows(src){
   const out={};
@@ -1577,7 +1623,7 @@ function koDetailTeamHTML(side,sideName,winner,done,scorers,goals){
   return `<div class="ko-detail-team ${sideName}"><div class="ko-detail-team-name ${winner?'winner':''}">${name}</div>${scorerHtml}</div>`;
 }
 function koDetailScorersHTML(items,goals){
-  if(items&&items.length)return `<div class="ko-detail-scorers">${items.map(x=>`<div>${esc(x)}</div>`).join('')}</div>`;
+  if(items&&items.length)return `<div class="team-scorers ko-detail-scorers">${scorerLines(items)}</div>`;
   if(Number(goals)>0)return '<div class="ko-detail-empty">得点者取得待ち</div>';
   return '<div class="ko-detail-empty">得点者なし</div>';
 }
@@ -1888,17 +1934,33 @@ function matchByTeams(home,away){
 function updateFromYahooTeams(home,away,hs,as,statusText){
   const found=matchByTeams(home,away);
   if(!found)return null;
+  const status=String(statusText||'').trim();
+  const completed=/試合終了|終了|FT|Full\s*Time/i.test(status);
+  const live=!completed&&/(前半|後半|延前|延後|試合中|ハーフタイム|HT|Half\s*Time|\d+分)/i.test(status);
   return {
     id:found.match.id,
-    completed:true,
+    completed,
+    live,
+    inProgress:live,
     hs:found.swapped?as:hs,
     as:found.swapped?hs:as,
-    statusText:statusText||'試合終了',
+    statusText:status|| (completed?'試合終了':(live?'試合中':'')),
     source:'yahoo-schedule'
   };
 }
 function knownTeamNamePattern(){
   return Object.values(T).map(v=>escapeRegExp(v[0])).sort((a,b)=>b.length-a.length).join('|');
+}
+function isLiveYahooStatus(text){
+  return /(前半|後半|延前|延後|試合中|ハーフタイム|HT|Half\s*Time|\d+分)/i.test(String(text||''));
+}
+function isCompletedYahooStatus(text){
+  return /試合終了|終了|FT|Full\s*Time/i.test(String(text||''));
+}
+function parseYahooStatusText(text){
+  const t=String(text||'').replace(/\s+/g,' ').trim();
+  const m=t.match(/(試合終了|終了|前半\s*\d+分|後半\s*\d+分|延前\s*\d+分|延後\s*\d+分|前半|後半|ハーフタイム|試合中|HT|FT)/i);
+  return m?m[1].replace(/\s+/g,''):'';
 }
 function parseYahooScheduleMatchUpdates(text){
   const lines=readerPlainLines(text).filter(Boolean);
@@ -1910,14 +1972,16 @@ function parseYahooScheduleMatchUpdates(text){
     updates.push(u);
   };
   const teamPattern=knownTeamNamePattern();
-  const sameLineRe=new RegExp(`(${teamPattern}).{0,40}?(\\d+)\\s*-\\s*(\\d+).{0,40}?試合終了.{0,40}?(${teamPattern})`);
+  const statusPattern='(?:試合終了|終了|前半\\s*\\d+分|後半\\s*\\d+分|延前\\s*\\d+分|延後\\s*\\d+分|前半|後半|ハーフタイム|試合中|HT|FT)';
+  const sameLineRe=new RegExp(`(${teamPattern}).{0,60}?(\\d+)\\s*-\\s*(\\d+).{0,80}?(${statusPattern}).{0,80}?(${teamPattern})`,'i');
   lines.forEach(line=>{
     const m=line.match(sameLineRe);
     if(!m)return;
     const home=teamIdFromDisplayName(m[1]);
-    const away=teamIdFromDisplayName(m[4]);
+    const away=teamIdFromDisplayName(m[5]);
     const hs=Number(m[2]),as=Number(m[3]);
-    if(home&&away&&!Number.isNaN(hs)&&!Number.isNaN(as))add(updateFromYahooTeams(home,away,hs,as,'試合終了'));
+    const status=parseYahooStatusText(m[4]||line);
+    if(home&&away&&!Number.isNaN(hs)&&!Number.isNaN(as))add(updateFromYahooTeams(home,away,hs,as,status));
   });
   for(let i=0;i<lines.length;i++){
     const home=teamIdFromDisplayName(lines[i]);
@@ -1928,12 +1992,13 @@ function parseYahooScheduleMatchUpdates(text){
       if(sm){scoreIdx=j;hs=Number(sm[1]);as=Number(sm[2]);break;}
     }
     if(scoreIdx<0)continue;
-    const statusWindow=lines.slice(i,Math.min(lines.length,scoreIdx+5)).join(' ');
-    if(!/試合終了|終了/.test(statusWindow))continue;
+    const statusWindow=lines.slice(i,Math.min(lines.length,scoreIdx+7)).join(' ');
+    if(!isCompletedYahooStatus(statusWindow)&&!isLiveYahooStatus(statusWindow))continue;
+    const status=parseYahooStatusText(statusWindow)||(isCompletedYahooStatus(statusWindow)?'試合終了':'試合中');
     for(let k=scoreIdx+1;k<Math.min(lines.length,scoreIdx+8);k++){
       const away=teamIdFromDisplayName(lines[k]);
       if(!away||away===home)continue;
-      add(updateFromYahooTeams(home,away,hs,as,'試合終了'));
+      add(updateFromYahooTeams(home,away,hs,as,status));
       break;
     }
   }
@@ -1951,8 +2016,8 @@ function mergeMatchUpdates(updates){
     if(!u||!u.id)return;
     const prev=map.get(u.id);
     if(!prev){map.set(u.id,u);return;}
-    const prevScore=(prev.completed?2:0)+(prev.source==='yahoo-schedule'?1:0);
-    const nextScore=(u.completed?2:0)+(u.source==='yahoo-schedule'?1:0);
+    const prevScore=(prev.completed?4:0)+(prev.live||prev.inProgress?2:0)+(prev.source==='yahoo-schedule'?1:0);
+    const nextScore=(u.completed?4:0)+(u.live||u.inProgress?2:0)+(u.source==='yahoo-schedule'?1:0);
     if(nextScore>=prevScore)map.set(u.id,Object.assign({},prev,u));
   });
   return [...map.values()];
@@ -2079,7 +2144,7 @@ function openGroupDetail(g){
 }
 function renderGroupDetail(g){
   const sh=document.getElementById('sheet');
-  sh.innerHTML=`<div class="sheet-head"><div><div class="group-detail-title">Group ${g}</div><div class="small">国名を省略せず表示し、下に試合結果・予定を日付順で表示します。</div></div><button class="sheet-close" id="closeSheetBtn" type="button" aria-label="閉じる">×</button></div>
+  sh.innerHTML=`<div class="sheet-head"><div><div class="group-detail-title">Group ${g}</div></div><button class="sheet-close" id="closeSheetBtn" type="button" aria-label="閉じる">×</button></div>
     <div class="detail-section">
       <h3>順位表</h3>
       ${groupDetailTable(g)}
@@ -2092,10 +2157,12 @@ function renderGroupDetail(g){
 }
 function matchCardHTML(m){
   const cached=(state.matchCache||{})[m.id]||{};
-  const done=cached.completed ?? (m.status==='done');
-  const hs=cached.hs ?? m.hs;
-  const as=cached.as ?? m.as;
-  const score=done?`${hs ?? '-'} - ${as ?? '-'}`:'予定';
+  const done=isMatchCompleted(m);
+  const live=!done&&isMatchLive(m);
+  const hs=matchHomeScore(m);
+  const as=matchAwayScore(m);
+  const hasScore=hs!==undefined&&hs!==null&&hs!==''&&as!==undefined&&as!==null&&as!=='';
+  const score=(done||live)&&hasScore?`${hs ?? '-'} - ${as ?? '-'}`:'予定';
   const homeWin=done&&Number(hs)>Number(as);
   const awayWin=done&&Number(as)>Number(hs);
   const freshScorerCache=cached.scorerVersion===SCORER_CACHE_VERSION;
@@ -2103,11 +2170,12 @@ function matchCardHTML(m){
   const scorers=normalizeScorers(rawScorers,m);
   const loading=freshScorerCache?!!cached.loading:false;
   const fetched=freshScorerCache?!!cached.fetched:false;
+  const liveLabel=live?'<span class="match-status-live">試合中</span>':'';
   return `<div class="match-card">
-    <div class="match-date">${dateText(m.date)}</div>
+    <div class="match-date">${dateText(m.date)}${liveLabel}</div>
     <div class="match-main">
       <div class="match-team home">${teamNameLine(m.home,homeWin)}${scorerBlock(scorers.home,done,hs,loading,fetched)}</div>
-      <div class="match-score ${done?'done':''}">${score}</div>
+      <div class="match-score ${done?'done':(live?'live':'')}">${score}</div>
       <div class="match-team away">${teamNameLine(m.away,awayWin)}${scorerBlock(scorers.away,done,as,loading,fetched)}</div>
     </div>
   </div>`
@@ -2146,8 +2214,23 @@ function normalizeScorers(scorers,m){
 }
 function scorerLines(items){return (items||[]).map(x=>{
   const p=parseScorerLabel(x);
-  return `<div class="scorer-line"><span class="scorer-name">${esc(p.name)}</span><span class="scorer-period">${esc(p.period)}</span><span class="scorer-minute">${esc(p.minute)}</span></div>`;
+  return `<div class="scorer-line"><span class="scorer-period">${esc(normalizeScorerPeriod(p.period))}</span><span class="scorer-minute">${esc(normalizeScorerMinute(p.minute))}</span><span class="scorer-name">${esc(p.name)}</span></div>`;
 }).join('')}
+function normalizeScorerPeriod(v){
+  const s=String(v||'').trim();
+  if(!s)return '';
+  if(/^延前/.test(s))return '延前';
+  if(/^延後/.test(s))return '延後';
+  if(/^前半|^前/.test(s))return '前';
+  if(/^後半|^後/.test(s))return '後';
+  return s;
+}
+function normalizeScorerMinute(v){
+  let s=String(v||'').trim();
+  if(!s)return '';
+  s=s.replace(/[’′]/g,"'").replace(/分/g,'').replace(/'/g,'').trim();
+  return s?`'${s}`:'';
+}
 function fitScorerRows(){
   try{
     document.querySelectorAll('.scorer-line').forEach(row=>{

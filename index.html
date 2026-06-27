@@ -489,18 +489,36 @@ const FIFA_PLAYER_STATS_URLS=[
   'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics'
 ];
 const STAT_LIMITS={goals:15,assists:10};
-const STAT_DATA_VERSION='stat-fifa-primary-soccerking-backup-v103';
+const STAT_DATA_VERSION='stat-goals-soccerking-primary-with-fifa-try-v104';
 const STAT_SOURCES={
   goals:[
-    {name:'FIFA公式 得点ランキング',url:'https://www.fifa.com/ja/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics',parser:'fifa'},
-    // FIFA公式ページはブラウザ直取得・中継取得で空HTML／JS生成のみになる場合があります。
-    // 得点Rだけは表示不能を避けるため、FIFA公式が解析できない場合に限りサッカーキングを補助参照します。
-    {name:'サッカーキング 得点ランキング',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'}
+    // 実表示を優先し、得点Rはサッカーキングを主参照に戻します。
+    // FIFA公式はページ構造上、HTML単体アプリから安定取得できないため補助試行に留めます。
+    {name:'サッカーキング 得点ランキング',url:'https://www.soccer-king.jp/news/world/wc/fixed/2170290.html',parser:'soccerking'},
+    {name:'FIFA公式 得点ランキング',url:'https://www.fifa.com/ja/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics',parser:'fifa'}
   ],
   assists:[
     {name:'FIFA公式 アシストランキング',url:'https://www.fifa.com/ja/tournaments/mens/worldcup/canadamexicousa2026/statistics/player-statistics',parser:'fifa'}
   ]
 };
+const SOCCERKING_GOALS_SNAPSHOT_UPDATED='サッカーキング 2026-06-26時点';
+const SOCCERKING_STATIC_GOALS=[
+  {rank:1,value:5,player:'リオネル・メッシ',team:'ar'},
+  {rank:2,value:4,player:'ヴィニシウス・ジュニオール',team:'br'},
+  {rank:3,value:4,player:'キリアン・エンバペ',team:'fr'},
+  {rank:4,value:4,player:'アーリング・ハーランド',team:'no'},
+  {rank:5,value:3,player:'デニズ・ウンダヴ',team:'de'},
+  {rank:6,value:3,player:'ヨハン・マンザンビ',team:'ch'},
+  {rank:7,value:3,player:'ブライアン・ブロビー',team:'nl'},
+  {rank:8,value:3,player:'マテウス・クーニャ',team:'br'},
+  {rank:9,value:3,player:'ジョナサン・デイヴィッド',team:'ca'},
+  {rank:10,value:3,player:'イスマエル・サイバリ',team:'ma'},
+  {rank:11,value:2,player:'クリセンシオ・サマーフィル',team:'nl'},
+  {rank:12,value:2,player:'ミケル・オヤルサバル',team:'es'},
+  {rank:13,value:2,player:'マクシミリアーノ・アラウホ',team:'uy'},
+  {rank:14,value:2,player:'ルベン・バルガス',team:'ch'},
+  {rank:15,value:2,player:'上田綺世',team:'jp'}
+];
 const YAHOO_SCHEDULE_URL='https://soccer.yahoo.co.jp/wcup/category/2026/schedule';
 const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule/31457/11/?gk=18',
@@ -509,7 +527,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=7;
+const SCORER_CACHE_VERSION=8;
 const MATCH_SCORER_FALLBACKS={
   '66456912':{home:[],away:["マテオ チャベス 後 10'","フリアン キニョーネス 後 16'","アルバロ フィダルゴ 後 49'"]},
   '66456938':{home:["アクラフ ハキミ 前 39'","イスマエル サイバリ 前 46'","ソフィアン ラヒミ 後 33'","ジェシム ヤシン 後 44'"],away:["オウンゴール 前 10'","ウィルソン イシドール 前 43'"]},
@@ -694,8 +712,9 @@ function statRowsDisplayable(rows){
 }
 function statLimit(kind){return STAT_LIMITS[kind]||20}
 function fallbackStatRows(kind){
-  // 得点R・アシストRはFIFA公式だけを参照します。
-  // 旧参照先（サッカーキング／スポーツナビ）の内蔵予備データは、表示の混在を避けるため使いません。
+  // 得点Rは、外部取得が全滅した場合でも空欄にしないため、出典と日付を明示した内蔵スナップショットを表示します。
+  // アシストRはFIFA公式のみのまま。取得できない場合は空欄にします。
+  if(kind==='goals')return localizeStatRows(SOCCERKING_STATIC_GOALS,'goals').slice(0,statLimit('goals'));
   return [];
 }
 function normalizeStatStatus(status){
@@ -708,7 +727,7 @@ function normalizeStatStatus(status){
   return '';
 }
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
-const GROUP_DATA_VERSION='group-data-v103-20260627-group-h-live-stat-fallback';
+const GROUP_DATA_VERSION='group-data-v104-20260627-live-auto-scorers-stat-fix';
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
 const ESPN_MAP={
@@ -1522,6 +1541,7 @@ function openKoDetail(no){
   if(!m)return;
   editing=null;
   currentGroup=null;
+  currentKoMatchNo=Number(no);
   const result=getKoResult(m);
   const done=!!result.completed;
   const live=!!result.live;
@@ -1540,24 +1560,50 @@ function openKoDetail(no){
       <h3>試合詳細</h3>
       <div class="ko-detail-score">
         <div class="ko-detail-main">
-          ${koDetailTeamHTML(aSide,'home',aWin,done,scorers.home,hs)}
+          ${koDetailTeamHTML(aSide,'home',aWin,done,live,scorers.home,hs)}
           <div class="ko-detail-score-pill">${esc(score)}</div>
-          ${koDetailTeamHTML(bSide,'away',bWin,done,scorers.away,as)}
+          ${koDetailTeamHTML(bSide,'away',bWin,done,live,scorers.away,as)}
         </div>
       </div>
       <div class="group-detail-note">${done?'得点者情報は取得できた場合に表示します。':'このカードはまだ予定です。結果確定後、更新でスコアを反映します。'}</div>
     </div>`;
   const closeBtn=document.getElementById('closeSheetBtn');if(closeBtn)closeBtn.onclick=closeSheet;
+  if((done||live)&&((Number(hs)||0)+(Number(as)||0)>0)&&(!scorers.home.length&&!scorers.away.length)){
+    setTimeout(()=>loadKoMatchDetails(m).catch(e=>console.warn('決勝T得点者取得失敗',e)),0);
+  }
 }
-function koDetailTeamHTML(side,sideName,winner,done,scorers,goals){
+function koDetailTeamHTML(side,sideName,winner,done,live,scorers,goals){
   const name=side.type==='team'?`${teamFlag(side.id)}<span>${esc(T[side.id]?.[0]||side.id)}</span>`:`<span>${esc(side.label||'未定')}</span>`;
-  const scorerHtml=done?koDetailScorersHTML(scorers,goals):'<div class="ko-detail-empty">試合前</div>';
+  const active=done||live;
+  const scorerHtml=active?koDetailScorersHTML(scorers,goals):'<div class="ko-detail-empty">試合前</div>';
   return `<div class="ko-detail-team ${sideName}"><div class="ko-detail-team-name ${winner?'winner':''}">${name}</div>${scorerHtml}</div>`;
 }
 function koDetailScorersHTML(items,goals){
   if(items&&items.length)return `<div class="team-scorers ko-detail-scorers">${scorerLines(items)}</div>`;
   if(Number(goals)>0)return '<div class="ko-detail-empty">得点者取得待ち</div>';
   return '<div class="ko-detail-empty">得点者なし</div>';
+}
+
+async function loadKoMatchDetails(m){
+  if(!m)return;
+  const key=String(m.id||m.no);
+  const result=getKoResult(m);
+  if(!result||(!result.completed&&!result.live))return;
+  const home=result.home||resolveKoSide(m.a).id||'';
+  const away=result.away||resolveKoSide(m.b).id||'';
+  if(!home||!away)return;
+  const temp={id:m.id,home,away,status:result.completed?'done':(result.live?'live':'scheduled'),hs:result.hs,as:result.as};
+  let scorers={home:[],away:[]};
+  try{
+    const data=await fetchESPNEventSummary(m.id);
+    const parsed=parseMatchSummary(data,temp);
+    scorers=normalizeScorers(parsed.scorers,temp);
+  }catch(e){console.warn('決勝T ESPN得点者取得失敗',e)}
+  state.ko=state.ko||{results:{}};
+  state.ko.results=state.ko.results||{};
+  state.ko.results[key]=Object.assign({},result,{home,away,scorers});
+  save();
+  if(currentKoMatchNo===Number(m.no))openKoDetail(m.no);
 }
 function confirmedTeamByGroupRank(g,rank){
   const byTag=BRACKET_CONFIRMED_BY_TAG[`${g}${rank}`];
@@ -2138,6 +2184,7 @@ function availableOptions(s){
 }
 
 let currentGroup=null;
+let currentKoMatchNo=null;
 function dateText(iso){
   return new Date(iso).toLocaleString('ja-JP',{month:'numeric',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit'});
 }
@@ -2192,14 +2239,14 @@ function matchCardHTML(m){
   return `<div class="match-card">
     <div class="match-date">${dateText(m.date)}${liveLabel}</div>
     <div class="match-main">
-      <div class="match-team home">${teamNameLine(m.home,homeWin)}${scorerBlock(scorers.home,done,hs,loading,fetched)}</div>
+      <div class="match-team home">${teamNameLine(m.home,homeWin)}${scorerBlock(scorers.home,done,live,hs,loading,fetched)}</div>
       <div class="match-score ${done?'done':(live?'live':'')}">${score}</div>
-      <div class="match-team away">${teamNameLine(m.away,awayWin)}${scorerBlock(scorers.away,done,as,loading,fetched)}</div>
+      <div class="match-team away">${teamNameLine(m.away,awayWin)}${scorerBlock(scorers.away,done,live,as,loading,fetched)}</div>
     </div>
   </div>`
 }
-function scorerBlock(items,done,goals,loading,fetched){
-  if(!done)return '';
+function scorerBlock(items,done,live,goals,loading,fetched){
+  if(!done&&!live)return '';
   const goalCount=Number(goals)||0;
   if(items&&items.length)return `<div class="team-scorers">${scorerLines(items)}</div>`;
   if(goalCount>0&&loading)return `<div class="team-scorers"><div class="scorer-empty">得点者取得中…</div></div>`;
@@ -2297,7 +2344,7 @@ function isFailedScorerCache(cache,m){
   return hasNoScorers(cache);
 }
 function shouldFetchScorersForMatch(m,options={}){
-  if(!m||!isMatchCompleted(m))return false;
+  if(!m||(!isMatchCompleted(m)&&!isMatchLive(m)))return false;
   if(scorerGoalTotal(m)<=0)return false;
   const cache=(state.matchCache||{})[m.id];
   if(!cache||cache.scorerVersion!==SCORER_CACHE_VERSION)return true;
@@ -2309,11 +2356,15 @@ function shouldFetchScorersForMatch(m,options={}){
 function markScorerFetchPending(m){
   state.matchCache=state.matchCache||{};
   const cache=state.matchCache[m.id]||{};
+  const completed=isMatchCompleted(m);
+  const live=!completed&&isMatchLive(m);
   state.matchCache[m.id]=Object.assign({},cache,{
     loading:true,
     fetched:false,
     scorerVersion:SCORER_CACHE_VERSION,
-    completed:true,
+    completed,
+    live,
+    inProgress:live,
     hs:matchHomeScore(m),
     as:matchAwayScore(m),
     scorers:{home:[],away:[]}
@@ -2322,7 +2373,7 @@ function markScorerFetchPending(m){
 function resetFailedScorerCachesForGroup(g){
   state.matchCache=state.matchCache||{};
   let changed=false;
-  groupMatchesFor(g).filter(m=>isMatchCompleted(m)).forEach(m=>{
+  groupMatchesFor(g).filter(m=>isMatchCompleted(m)||isMatchLive(m)).forEach(m=>{
     const cache=state.matchCache[m.id];
     if(!isFailedScorerCache(cache,m))return;
     markScorerFetchPending(m);
@@ -2336,7 +2387,9 @@ function resetFailedScorerCachesForAllGroups(){
   return changed;
 }
 async function fetchAndStoreMatchScorers(m){
-  let parsed={fetched:true,loading:false,scorerVersion:SCORER_CACHE_VERSION,completed:true,hs:matchHomeScore(m),as:matchAwayScore(m),scorers:{home:[],away:[]}};
+  const completed=isMatchCompleted(m);
+  const live=!completed&&isMatchLive(m);
+  let parsed={fetched:true,loading:false,scorerVersion:SCORER_CACHE_VERSION,completed,live,inProgress:live,hs:matchHomeScore(m),as:matchAwayScore(m),scorers:{home:[],away:[]}};
   const existing=(state.matchCache||{})[m.id]||{};
   if(existing.yahooUrl)parsed.yahooUrl=existing.yahooUrl;
   try{
@@ -2350,7 +2403,9 @@ async function fetchAndStoreMatchScorers(m){
   try{
     const data=await fetchESPNEventSummary(m.id);
     const esp=parseMatchSummary(data,m);
-    parsed.completed=esp.completed;
+    parsed.completed=!!esp.completed;
+    parsed.live=!parsed.completed&&live;
+    parsed.inProgress=parsed.live;
     parsed.hs=esp.hs;
     parsed.as=esp.as;
     if(isScorerCountValid(esp.scorers,esp.hs,esp.as))parsed.scorers=esp.scorers;
@@ -3987,6 +4042,7 @@ async function updatePlayerStats(kind){
   state.statStatus[kind]='更新中・・・';
   save();render();
   const limit=statLimit(kind);
+  const previous=Array.isArray(state[kind])?state[kind].filter(r=>r&&r.player):[];
   const result=await fetchPlayerStats(kind).catch(e=>({rows:[],message:(e&&e.message)||'取得失敗'}));
   const rows=Array.isArray(result.rows)?result.rows:[];
   if(rows.length){
@@ -3994,16 +4050,36 @@ async function updatePlayerStats(kind){
     if(statRowsDisplayable(normalized)){
       state[kind]=normalized.slice(0,limit);
       const sourceName=result.source||'参照先';
-      state.statStatus[kind]=sourceName.includes('FIFA公式')?'更新済（FIFA公式）':'更新済（補助参照）';
+      if(sourceName.includes('FIFA公式'))state.statStatus[kind]='更新済（FIFA公式）';
+      else if(sourceName.includes('サッカーキング'))state.statStatus[kind]='更新済（サッカーキング）';
+      else state.statStatus[kind]='更新済（補助参照）';
     }else{
-      state[kind]=[];
-      state.statStatus[kind]='FIFA公式取得失敗';
-      console.warn('FIFA公式ランキング解析不可',kind,result.message||'');
+      const fallback=fallbackStatRows(kind);
+      if(previous.length){
+        state[kind]=previous.slice(0,limit);
+        state.statStatus[kind]='取得失敗（前回表示を維持）';
+      }else if(fallback.length){
+        state[kind]=fallback.slice(0,limit);
+        state.statStatus[kind]=`取得失敗（${SOCCERKING_GOALS_SNAPSHOT_UPDATED}）`;
+      }else{
+        state[kind]=[];
+        state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'FIFA公式取得失敗';
+      }
+      console.warn('ランキング解析不可',kind,result.message||'');
     }
   }else{
-    state[kind]=[];
-    state.statStatus[kind]='FIFA公式取得失敗';
-    console.warn('FIFA公式ランキング取得不可',kind,result.message||'');
+    const fallback=fallbackStatRows(kind);
+    if(previous.length){
+      state[kind]=previous.slice(0,limit);
+      state.statStatus[kind]='取得失敗（前回表示を維持）';
+    }else if(fallback.length){
+      state[kind]=fallback.slice(0,limit);
+      state.statStatus[kind]=`取得失敗（${SOCCERKING_GOALS_SNAPSHOT_UPDATED}）`;
+    }else{
+      state[kind]=[];
+      state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'FIFA公式取得失敗';
+    }
+    console.warn('ランキング取得不可',kind,result.message||'');
   }
   save();render();
 }
@@ -4396,45 +4472,49 @@ function cleanPlayerName(name){
 }
 function parseSoccerKingStatsText(text,kind){
   const lines=String(text||'').replace(/\r/g,'').split(/\n+/).map(normalizeArticleLine).filter(Boolean);
-  const start=Math.max(0,lines.findIndex(l=>/FIFAワールドカップ\s*2026\s*得点ランキング|順位\s*選手／国\s*得点|得点ランキング/.test(l)));
+  let start=lines.findIndex(l=>/FIFAワールドカップ\s*2026\s*得点ランキング|順位\s*選手／国\s*得点|得点ランキング/.test(l));
+  if(start<0)start=0;
   let end=lines.findIndex((l,i)=>i>start&&/ワールドカップ2026得点王争い|得点ランキングの順位決定方法|日本代表（SAMURAI BLUE）の得点記録/.test(l));
-  if(end<0)end=start+140;
+  if(end<0)end=Math.min(lines.length,start+180);
   const scopeLines=lines.slice(start,end);
   const rows=[];
   const seen=new Set();
-  const teamNames=Object.values(T).map(v=>v[0]).sort((a,b)=>b.length-a.length).map(escapeRegExp).join('|');
+  const add=(rank,player,teamName,goals,assists)=>{
+    const team=teamIdFromText(teamName);
+    const value=kind==='goals'?Number(goals):Number(assists);
+    player=cleanPlayerName(player);
+    if(!player||/順位|選手|得点|アシスト|時間|INDEX|ランキング|FIFA|ワールドカップ/.test(player))return;
+    if(!team||!Number.isFinite(value)||value<=0)return;
+    const key=rank+'|'+player+'|'+team+'|'+value;
+    if(seen.has(key))return;
+    seen.add(key);
+    rows.push({rank:Number(rank)||rows.length+1,value,player,team});
+  };
 
+  const teamNames=Object.values(T).map(v=>v[0]).sort((a,b)=>b.length-a.length).map(escapeRegExp).join('|');
   const section=scopeLines.join(' ').replace(/\s+/g,' ');
   const re=new RegExp("(\\d{1,2})\\s+(.+?)\\s+("+teamNames+")\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+\\d{1,4}\\s*[′'’]","g");
   let m;
-  while((m=re.exec(section))&&rows.length<20){
-    const rank=Number(m[1]);
-    const player=cleanPlayerName(m[2]);
-    const teamName=m[3];
-    const goals=Number(m[4]);
-    const assists=Number(m[5]);
-    const value=kind==='goals'?goals:assists;
-    const team=teamIdFromText(teamName);
-    if(!player||/順位|選手|得点|アシスト|時間|INDEX|ランキング|FIFA|ワールドカップ/.test(player))continue;
-    if(!Number.isFinite(value)||value<=0)continue;
-    const key=rank+'|'+player+'|'+teamName+'|'+value;
-    if(!seen.has(key)){seen.add(key);rows.push({rank,value,player,team})}
-  }
+  while((m=re.exec(section))&&rows.length<40)add(m[1],m[2],m[3],m[4],m[5]);
 
   if(!rows.length){
     for(let i=0;i<scopeLines.length-1;i++){
-      const a=scopeLines[i], b=scopeLines[i+1];
-      const m1=a.match(/^(\d{1,2})\s+(.+?)$/);
-      const m2=b.match(/^(.+?)\s+(\d{1,2})\s+(\d{1,2})\s+\d{1,4}\s*[′'’]?\s*$/);
-      if(!m1||!m2)continue;
-      const rank=Number(m1[1]);
-      const player=cleanPlayerName(m1[2]);
-      const team=teamIdFromText(m2[1]);
-      const goals=Number(m2[2]);
-      const assists=Number(m2[3]);
-      const value=kind==='goals'?goals:assists;
-      if(player&&team&&value>0)rows.push({rank,value,player,team});
+      const rankLine=scopeLines[i].match(/^(\d{1,2})\s+(.+?)$/);
+      if(!rankLine)continue;
+      for(let j=i+1;j<Math.min(scopeLines.length,i+4);j++){
+        const statLine=scopeLines[j].match(/^(.+?)\s+(\d{1,2})\s+(\d{1,2})\s+\d{1,4}\s*[′'’]?\s*$/);
+        if(!statLine)continue;
+        add(rankLine[1],rankLine[2],statLine[1],statLine[2],statLine[3]);
+        break;
+      }
     }
+  }
+
+  if(!rows.length){
+    // Web取得結果の行番号やリンク表記が混ざった場合の最終保険。
+    const compact=section.replace(/L\d+:\s*/g,' ');
+    const loose=new RegExp("(\\d{1,2})\\s+(?:[^0-9]{0,20})?([^0-9]{2,50}?)\\s+("+teamNames+")\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+\\d{1,4}","g");
+    while((m=loose.exec(compact))&&rows.length<40)add(m[1],m[2],m[3],m[4],m[5]);
   }
 
   return rankStatRows(rows).slice(0,40);
@@ -4565,6 +4645,45 @@ function parseStatsLine(line,kind){
   return null;
 }
 
+
+const LIVE_REFRESH_INTERVAL_MS=90000;
+let liveRefreshTimer=null;
+let liveRefreshBusy=false;
+async function refreshLiveDataSilently(){
+  if(liveRefreshBusy)return;
+  if(document.hidden)return;
+  if(!['bracket','knockout','groups'].includes(state.active)&&!currentGroup&&!currentKoMatchNo)return;
+  liveRefreshBusy=true;
+  try{
+    const [standingsResult, knockoutResults]=await Promise.all([
+      fetchLatestStandings().catch(e=>{console.warn('ライブ順位更新失敗',e);return null}),
+      fetchKnockoutResults().catch(e=>{console.warn('ライブ決勝T更新失敗',e);return null})
+    ]);
+    if(standingsResult&&standingsResult.groups){
+      state.groups=standingsResult.groups;
+      applyScoreboardMatchUpdates(standingsResult.matchUpdates||[]);
+      applyConfirmedBracketSlots();
+    }
+    if(knockoutResults){
+      state.ko=state.ko||{status:'',results:{},viewCol:0};
+      state.ko.results=Object.assign({},state.ko.results||{},knockoutResults);
+    }
+    if(currentGroup){
+      await refreshGroupScorers([currentGroup],{retryFailed:true}).catch(e=>console.warn('ライブ得点者更新失敗',e));
+    }
+    save();
+    render();
+    if(currentGroup)renderGroupDetail(currentGroup);
+    if(currentKoMatchNo)openKoDetail(currentKoMatchNo);
+  }finally{
+    liveRefreshBusy=false;
+  }
+}
+function startLiveAutoRefresh(){
+  if(liveRefreshTimer)return;
+  liveRefreshTimer=setInterval(()=>{refreshLiveDataSilently().catch(e=>console.warn('ライブ自動更新失敗',e));},LIVE_REFRESH_INTERVAL_MS);
+}
+
 function openSheet(id){
   const s=findSlot(id);if(!s||s.fixed)return;
   const options=availableOptions(s);
@@ -4577,13 +4696,14 @@ function openSheet(id){
   document.getElementById('clearSel').onclick=()=>{document.querySelectorAll('#sheet input').forEach(x=>x.checked=false)};
   document.getElementById('closeSheetBtn').onclick=closeSheet;
 }
-function closeSheet(){document.getElementById('backdrop').classList.remove('show');const sh=document.getElementById('sheet');sh.classList.remove('show','group-detail');editing=null;currentGroup=null}
+function closeSheet(){document.getElementById('backdrop').classList.remove('show');const sh=document.getElementById('sheet');sh.classList.remove('show','group-detail');editing=null;currentGroup=null;currentKoMatchNo=null}
 function applySheet(){const s=findSlot(editing);if(s){s.sel=[...document.querySelectorAll('#sheet input:checked')].map(x=>x.value);s.confirmed=false;save();closeSheet();render()}}
 const backdropEl=document.getElementById('backdrop');
 if(backdropEl)backdropEl.onclick=closeSheet;
 function boot(){
   try{
     render();
+    startLiveAutoRefresh();
     document.body.setAttribute('data-app-ready','true');
   }catch(e){
     console.error('初期表示エラー',e);

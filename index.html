@@ -465,7 +465,7 @@ const ALLORIGINS_GET='https://api.allorigins.win/get?url=';
 const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=18000;
 const NEWS_BG_IMAGE_LIMIT=0;
-const NEWS_MIN_STABLE_RESULTS=8;
+const NEWS_MIN_STABLE_RESULTS=3;
 const NEWS_PIPELINE_VERSION='jp-news-direct-publisher-only-v21';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
@@ -485,18 +485,19 @@ const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const ESPN_FULL_SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=950';
 const STAT_LIMITS={goals:20,assists:10};
-const STAT_DATA_VERSION='stat-own-goals-v110-top20';
+const STAT_DATA_VERSION='stat-own-goals-v114-yahoo-assists';
 const FOX_STANDARD_STATS_BASE='https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026';
 const ESPN_SCORING_STATS_URL='https://www.espn.com/soccer/stats/_/league/FIFA.WORLD/view/scoring';
+const YAHOO_ASSIST_STATS_URL='https://soccer.yahoo.co.jp/wcup/category/2026/stats?gk=18&type=6';
 const STAT_SOURCES={
   // 得点Rは外部ランキングを使わず、試合別得点者データだけで独自集計します。
   goals:[],
+  // アシストRは以前安定していたスポーツナビの個人成績ページを主参照に戻します。
   assists:[
-    {name:'FOX Sports アシストランキング',url:FOX_STANDARD_STATS_BASE+'&sort=a&sortOrder=desc',parser:'fox'},
-    {name:'ESPN アシストランキング',url:ESPN_SCORING_STATS_URL,parser:'espn'}
+    {name:'スポーツナビ アシストランキング',url:YAHOO_ASSIST_STATS_URL,parser:'yahoo'}
   ]
 };
-const STAT_SNAPSHOT_UPDATED='FOX/ESPN 2026-06-27時点';
+const STAT_SNAPSHOT_UPDATED='保存データ 2026-06-27時点';
 const SOCCERKING_GOALS_SNAPSHOT_UPDATED='サッカーキング 2026-06-26時点';
 const SOCCERKING_STATIC_GOALS=[
   {rank:1,value:5,player:'リオネル・メッシ',team:'ar'},
@@ -4158,20 +4159,44 @@ function parseMarkdownNewsLinks(text,domain){
   const out=[];
   const seen=new Set();
   const raw=String(text||'').replace(/\r/g,'');
-  const linkRe=/\[([^\]]{8,240})\]\(((?:https?:\/\/|\/)[^)]+)\)/g;
-  let m;
-  while((m=linkRe.exec(raw))){
-    let title=cleanNewsTitle(stripMarkdownLinks(m[1]).trim());
-    let url=normalizeNewsArticleUrl(m[2].trim());
-    if(!url)url=normalizeNewsArticleUrl(normalizeGoogleNewsMaybeRelativeUrl(m[2].trim()));
-    if(!title||!url||seen.has(url))continue;
-    if(!isUsableNewsTitle(title))continue;
-    if(/^(画像|動画|写真|一覧|もっと見る|続きを読む|Google|ニュース|詳細|その他|ログイン)$/.test(title))continue;
+  const add=(title,url,extra={})=>{
+    title=cleanNewsTitle(stripMarkdownLinks(title||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim());
+    url=normalizeNewsArticleUrl(normalizeGoogleNewsMaybeRelativeUrl(url||''));
+    if(!title||!url||seen.has(url))return;
+    if(!isUsableNewsTitle(title))return;
+    if(/^(画像|動画|写真|一覧|もっと見る|続きを読む|Google|ニュース|詳細|その他|ログイン)$/.test(title))return;
     seen.add(url);
-    out.push({title,url,image:'',seen:'',domain:domain||''});
-    if(out.length>=30)break;
+    out.push({title,url,image:extra.image||'',seen:extra.seen||'',domain:extra.domain||domain||''});
+  };
+  let m;
+  // r.jina.ai / Google News / Yahoo検索は、Markdownリンクで返る場合があります。
+  const linkRe=/\[([^\]]{8,260})\]\(((?:https?:\/\/|\/)[^)\s]+)\)/g;
+  while((m=linkRe.exec(raw))){
+    add(m[1],m[2]);
+    if(out.length>=60)break;
   }
-  return out;
+  // Jina Search系は「Title:」「URL Source:」の行で返ることがあります。
+  const blockRe=/(?:^|\n)(?:#+\s*)?(?:Title:\s*)?([^\n]{8,260})\n+(?:URL Source|URL|Source|Link):\s*((?:https?:\/\/|\/)[^\s\n)]+)/gi;
+  while((m=blockRe.exec(raw))){
+    add(m[1],m[2]);
+    if(out.length>=80)break;
+  }
+  // HTMLリンクのまま返る場合の保険。
+  const htmlLinkRe=/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  while((m=htmlLinkRe.exec(raw))){
+    add(m[2],m[1]);
+    if(out.length>=100)break;
+  }
+  // 行の前後にURLが分かれて出る場合の保険。
+  const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean);
+  for(let i=0;i<lines.length&&out.length<120;i++){
+    const urlMatch=lines[i].match(/(?:https?:\/\/|\/)[^\s)]+/);
+    if(!urlMatch)continue;
+    const prev=(lines[i-1]||'').replace(/^[-*#\d.\s]+/,'').trim();
+    const next=(lines[i+1]||'').replace(/^[-*#\d.\s]+/,'').trim();
+    add(prev||next,urlMatch[0]);
+  }
+  return dedupeNews(out,120);
 }
 async function fetchGoogleNewsSearchReaderItems(target){
   const queries=buildGoogleNewsQueries(target).slice(0,newsQueryLimit(target,8));
@@ -4290,7 +4315,7 @@ async function updatePlayerStats(kind){
     try{await refreshAllGroupScorers({retryFailed:true});}catch(e){console.warn('得点R用得点者更新失敗',e)}
     const rows=currentGoalRankingRows().slice(0,limit);
     state.goals=rows;
-    state.statStatus.goals=rows.length?'更新済（試合別得点者から独自集計）':'得点R取得失敗';
+    state.statStatus.goals=rows.length?'更新済':'得点R取得失敗';
     save();render();
     return;
   }
@@ -4305,15 +4330,16 @@ async function updatePlayerStats(kind){
       if(sourceName.includes('FOX'))state.statStatus[kind]='更新済（FOX）';
       else if(sourceName.includes('ESPN'))state.statStatus[kind]='更新済（ESPN）';
       else if(sourceName.includes('サッカーキング'))state.statStatus[kind]='更新済（サッカーキング）';
+      else if(sourceName.includes('スポーツナビ')||sourceName.includes('Yahoo'))state.statStatus[kind]='更新済（スポーツナビ）';
       else state.statStatus[kind]='更新済（補助参照）';
     }else{
       const fallback=fallbackStatRows(kind);
       if(previous.length){
         state[kind]=previous.slice(0,limit);
-        state.statStatus[kind]='取得失敗（前回表示を維持）';
+        state.statStatus[kind]='前回表示を維持';
       }else if(fallback.length){
         state[kind]=fallback.slice(0,limit);
-        state.statStatus[kind]=`取得失敗（${STAT_SNAPSHOT_UPDATED}）`;
+        state.statStatus[kind]=`更新済（${STAT_SNAPSHOT_UPDATED}）`; 
       }else{
         state[kind]=[];
         state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'アシストR取得失敗';
@@ -4324,10 +4350,10 @@ async function updatePlayerStats(kind){
     const fallback=fallbackStatRows(kind);
     if(previous.length){
       state[kind]=previous.slice(0,limit);
-      state.statStatus[kind]='取得失敗（前回表示を維持）';
+      state.statStatus[kind]='前回表示を維持';
     }else if(fallback.length){
       state[kind]=fallback.slice(0,limit);
-      state.statStatus[kind]=`取得失敗（${STAT_SNAPSHOT_UPDATED}）`;
+      state.statStatus[kind]=`更新済（${STAT_SNAPSHOT_UPDATED}）`; 
     }else{
       state[kind]=[];
       state.statStatus[kind]=kind==='goals'?'得点R取得失敗':'アシストR取得失敗';

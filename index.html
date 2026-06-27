@@ -151,7 +151,7 @@
       vertical-align:-1px;
       background:#fff;
     }
-    .group-table .flag-img{width:18px;height:12px;margin:0}
+    .group-table .flag-img{width:16px;height:11px;margin-right:3px}
     .opt .flag-img{width:22px;height:15px;margin-right:0}
 
     .toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 8px}
@@ -203,12 +203,11 @@
     }
     .group-table th{color:#aebdd3;font-weight:800;background:rgba(7,17,31,.72)}
     .group-table td.team-cell{text-align:left;font-weight:900}
-    .group-table .rank-col{width:16px}
-    .group-table .flag-col{width:22px}
+    .group-table .rank-col{width:14px}
     .group-table .team-col{width:auto}
-    .group-table .rec-col{width:34px}
-    .group-table .num-col{width:20px}
-    .group-table .pts-col{width:22px;font-weight:900;color:#ffe79a}
+    .group-table .rec-col{width:48px;letter-spacing:-.10em;font-size:8px}
+    .group-table .num-col{width:18px}
+    .group-table .pts-col{width:18px;font-weight:900;color:#ffe79a}
     .group-table tr.qualified-row{
       background:linear-gradient(90deg,rgba(246,216,127,.94),rgba(200,153,51,.92));
       color:#15120a;
@@ -399,7 +398,7 @@
     .ko-detail-empty{color:#8fa1bc;font-size:11px;font-weight:700}
     @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-head h2{font-size:18px}.ko-card{min-height:90px;padding:7px}.ko-team{font-size:11px;padding:5px 4px}.ko-round-title{font-size:11px;padding:7px 3px}.ko-meta{font-size:10px}.ko-card-label{font-size:9px;padding:2px 5px}}
     @media (max-width:430px){.group-toolbar{gap:6px}.group-toolbar-left{font-size:11px;letter-spacing:-.03em}.panel-head-title{font-size:17px;letter-spacing:-.04em}.group-toolbar-helper{font-size:10.5px;margin-top:-6px}.group-toolbar-actions .group-status{font-size:10px;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-spacer{min-width:8px}}
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:0}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px;margin-right:3px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:0}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
   </style>
 </head>
 <body>
@@ -1357,8 +1356,8 @@ function groupBoxHTML(g,rows){
   return `<div class="group-box" data-group="${g}" role="button" tabindex="0" aria-label="Group ${g} 詳細">
     <div class="group-title"><span>Group ${g}</span></div>
     <table class="group-table">
-      <thead><tr><th class="rank-col">順</th><th class="flag-col">国</th><th class="team-col">国名</th><th class="rec-col">勝-敗-分</th><th class="num-col">得</th><th class="num-col">失</th><th class="num-col">差</th><th class="pts-col">点</th></tr></thead>
-      <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="team-cell">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.l}-${r.d}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
+      <thead><tr><th class="rank-col">順</th><th class="team-col">国</th><th class="rec-col">勝-敗-分</th><th class="num-col">得</th><th class="num-col">失</th><th class="num-col">差</th><th class="pts-col">点</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td class="team-cell">${teamFlag(r.team)}${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.l}-${r.d}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
     </table>
   </div>`
 }
@@ -2352,8 +2351,8 @@ function teamNameLine(id,winner=false){
 function groupDetailTable(g){
   const rows=state.groups?.[g]||buildGroupRows(initialGroups)[g]||[];
   return `<table class="detail-table">
-    <thead><tr><th>順位</th><th>国</th><th>国名</th><th>勝-敗-分</th><th>得点</th><th>失点</th><th>差</th><th>勝点</th></tr></thead>
-    <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td>${teamFlag(r.team)}</td><td class="detail-team">${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.l}-${r.d}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
+    <thead><tr><th>順位</th><th>国</th><th>勝-敗-分</th><th>得点</th><th>失点</th><th>差</th><th>勝点</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr class="${isQualifiedTeam(r.team)?'qualified-row':''}"><td>${r.rank}</td><td class="detail-team">${teamFlag(r.team)}${esc(T[r.team]?.[0]||r.team)}</td><td>${r.w}-${r.l}-${r.d}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf-r.ga>0?'+':''}${r.gf-r.ga}</td><td class="pts-col">${r.pts}</td></tr>`).join('')}</tbody>
   </table>`
 }
 function openGroupDetail(g){

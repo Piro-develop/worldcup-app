@@ -516,7 +516,9 @@ const MATCH_SCORER_FALLBACKS={
   '66456976':{home:["ハゼム マストゥーリ 後 9'"],away:["オウンゴール 前 3'","ブライアン ブロビー 前 7'","ヤン ポール ファンヘッケ 後 17'"]},
   '66456978':{home:["前田 大然 後 11'"],away:["アンソニー エランガ 後 17'"]},
   '66456948':{home:["アルダ・ギュレル","オルクン・コクチュ","カーン・アイハン"],away:["オースティン・トラスティ","セバスチャン・バーホルター"]},
-  '66456950':{home:[],away:[]}
+  '66456950':{home:[],away:[]},
+  '66457014':{home:["テーロ オースゴール 前 21'"],away:["ウスマン デンベレ 前 7'","ウスマン デンベレ 前 20'","ウスマン デンベレ 前 32'","デジレ ドゥエ 後 49'"]},
+  '66457016':{home:["アビブ ディアラ 前 4'","イスマイラ サール 後 11'","パペ ゲイェ 後 14'","パペ ゲイェ 後 26'","イリマン エンディアイエ 後 37'"],away:[]}
 };
 const YAHOO_MATCH_URLS={
   // Group A
@@ -576,6 +578,8 @@ const YAHOO_MATCH_URLS={
   '66457008':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061602/summary?gk=18',
   '66457010':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062202/summary?gk=18',
   '66457012':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062201/summary?gk=18',
+  '66457014':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062601/summary?gk=18',
+  '66457016':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026062602/summary?gk=18',
   // Group J
   '66457018':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061603/summary?gk=18',
   '66457020':'https://soccer.yahoo.co.jp/wcup/category/2026/game/2026061604/summary?gk=18',
@@ -776,7 +780,7 @@ function normalizeStatStatus(status){
   return '';
 }
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
-const GROUP_DATA_VERSION='group-data-v93-20260626-group-d-yahoo-schedule';
+const GROUP_DATA_VERSION='group-data-v100-20260627-group-i-final';
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
 const ESPN_MAP={
@@ -808,7 +812,7 @@ const initialGroups={
  F:[['nl',2,1,0,10,4,7],['jp',1,2,0,7,3,5],['se',1,1,1,7,7,4],['tn',0,0,3,2,12,0]],
  G:[['eg',1,1,0,4,2,4],['ir',0,2,0,2,2,2],['be',0,2,0,1,1,2],['nz',0,1,1,3,5,1]],
  H:[['es',1,1,0,4,0,4],['uy',0,2,0,3,3,2],['cv',0,2,0,2,2,2],['sa',0,1,1,1,5,1]],
- I:[['fr',2,0,0,6,1,6],['no',2,0,0,7,3,6],['sn',0,0,2,3,6,0],['iq',0,0,2,1,7,0]],
+ I:[['fr',3,0,0,10,2,9],['no',2,0,1,8,7,6],['sn',1,0,2,8,6,3],['iq',0,0,3,1,12,0]],
  J:[['ar',2,0,0,5,0,6],['at',1,0,1,3,3,3],['dz',1,0,1,2,4,3],['jo',0,0,2,2,5,0]],
  K:[['co',2,0,0,4,1,6],['pt',1,1,0,6,1,4],['cd',0,1,1,1,2,1],['uz',0,0,2,1,8,0]],
  L:[['eng',1,1,0,4,2,4],['gh',1,1,0,1,0,4],['hr',1,0,1,3,4,3],['pa',0,0,2,0,2,0]]
@@ -884,8 +888,8 @@ const GROUP_MATCHES={
   {id:'66457008',date:'2026-06-16T18:00:00-04:00',home:'iq',away:'no',status:'done',hs:1,as:4},
   {id:'66457010',date:'2026-06-22T17:00:00-04:00',home:'fr',away:'iq',status:'done',hs:3,as:0},
   {id:'66457012',date:'2026-06-22T20:00:00-04:00',home:'no',away:'sn',status:'done',hs:3,as:2},
-  {id:'66457014',date:'2026-06-26T15:00:00-04:00',home:'no',away:'fr',status:'scheduled'},
-  {id:'66457016',date:'2026-06-26T15:00:00-04:00',home:'sn',away:'iq',status:'scheduled'}
+  {id:'66457014',date:'2026-06-26T15:00:00-04:00',home:'no',away:'fr',status:'done',hs:1,as:4},
+  {id:'66457016',date:'2026-06-26T15:00:00-04:00',home:'sn',away:'iq',status:'done',hs:5,as:0}
  ],
  J:[
   {id:'66457018',date:'2026-06-16T21:00:00-04:00',home:'ar',away:'dz',status:'done',hs:3,as:0},

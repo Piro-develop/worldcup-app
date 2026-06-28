@@ -1721,7 +1721,7 @@ async function loadKoMatchDetails(m){
   const temp={id:m.id,home,away,status:result.completed?'done':(result.live?'live':'scheduled'),hs:result.hs,as:result.as};
   let scorers={home:[],away:[]};
   try{
-    const data=await fetchESPNEventSummary(existing.espnEventId||m.id);
+    const data=await fetchESPNEventSummary(result.espnEventId||m.id);
     const parsed=parseMatchSummary(data,temp);
     scorers=normalizeScorers(parsed.scorers,temp);
   }catch(e){console.warn('決勝T ESPN得点者取得失敗',e)}
@@ -1791,52 +1791,112 @@ function pickPenaltyScore(competitor){
   }
   return undefined;
 }
+function koMatchScoreCandidate(m,teamIds,eventMs){
+  if(!m||!teamIds||teamIds.length<2)return -1;
+  const a=resolveKoSide(m.a).id||m.a;
+  const b=resolveKoSide(m.b).id||m.b;
+  if(!a||!b||!T[a]||!T[b])return -1;
+  if(!sameTeamSet([a,b],teamIds))return -1;
+  const baseMs=Date.parse(m.date||'')||0;
+  const diff=baseMs&&eventMs?Math.abs(baseMs-eventMs):0;
+  const day=24*60*60*1000;
+  // 日付が近い同一カードを優先。W杯では同一カードが再戦する可能性もあるため、距離で絞ります。
+  return 1000-Math.min(999,Math.floor(diff/(60*1000))) + (diff<=day?500:0);
+}
+function findKnockoutMatchForESPNEvent(ev){
+  const eid=String(ev&&ev.id||'');
+  const byId=KNOCKOUT_MATCHES.find(m=>String(m.id||'')===eid);
+  if(byId)return byId;
+  const teamIds=espnEventTeamIds(ev);
+  if(teamIds.length<2)return null;
+  const eventMs=espnEventDateMs(ev);
+  const candidates=KNOCKOUT_MATCHES
+    .map(m=>({m,score:koMatchScoreCandidate(m,teamIds,eventMs)}))
+    .filter(x=>x.score>=0)
+    .sort((a,b)=>b.score-a.score);
+  return candidates.length?candidates[0].m:null;
+}
+function koResultKeyForMatch(m){return String(m&&m.id||m&&m.no||'')}
+function koEventStatusType(ev,comp){return ((ev&&ev.status)||{}).type||((comp&&comp.status)||{}).type||{};}
+function koEventToResultRecord(ev,match){
+  const comp=(ev.competitions||[])[0]||{};
+  const cs=comp.competitors||[];
+  if(cs.length<2||!match)return null;
+  const expectedA=resolveKoSide(match.a).id||match.a;
+  const expectedB=resolveKoSide(match.b).id||match.b;
+  const cWithId=cs.map(c=>Object.assign({},c,{_teamId:resolveTeamFromESPN(c.team||c)}));
+  let home=cWithId.find(c=>c._teamId===expectedA)||cWithId.find(c=>c.homeAway==='home')||cWithId[0];
+  let away=cWithId.find(c=>c._teamId===expectedB)||cWithId.find(c=>c.homeAway==='away')||cWithId[1];
+  if(home&&away&&home._teamId===away._teamId){
+    home=cWithId[0];away=cWithId[1];
+  }
+  const hId=home&&home._teamId||resolveTeamFromESPN(home&&home.team||home)||expectedA;
+  const aId=away&&away._teamId||resolveTeamFromESPN(away&&away.team||away)||expectedB;
+  const st=koEventStatusType(ev,comp);
+  const rec={
+    completed:!!st.completed,
+    live:!!st.inProgress,
+    inProgress:!!st.inProgress,
+    home:hId,
+    away:aId,
+    hs:home&&home.score!==undefined?home.score:'',
+    as:away&&away.score!==undefined?away.score:'',
+    espnEventId:String(ev.id||''),
+    statusText:st.detail||st.shortDetail||st.description||''
+  };
+  if(home&&home.winner)rec.winner='home';
+  if(away&&away.winner)rec.winner='away';
+  const hp=pickPenaltyScore(home);
+  const ap=pickPenaltyScore(away);
+  if(hp!==undefined&&hp!==''&&ap!==undefined&&ap!==''){rec.homePens=hp;rec.awayPens=ap;}
+  return rec;
+}
 async function fetchKnockoutResults(){
-  const ids=new Set(KNOCKOUT_MATCHES.map(m=>String(m.id||'')));
-  const settled=await Promise.allSettled(KNOCKOUT_ESPN_DATES.map(d=>fetchJSONNoStore(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`)));
+  const dateRange=`${KNOCKOUT_ESPN_DATES[0]}-${KNOCKOUT_ESPN_DATES[KNOCKOUT_ESPN_DATES.length-1]}`;
+  const urls=[
+    `${ESPN_SCOREBOARD}?dates=${dateRange}&limit=300`
+  ].concat(KNOCKOUT_ESPN_DATES.map(d=>`${ESPN_SCOREBOARD}?dates=${d}&limit=100`));
+  const settled=await Promise.allSettled(urls.map(u=>fetchJSONNoStore(u)));
   const payloads=settled.filter(x=>x.status==='fulfilled').map(x=>x.value);
+  if(!payloads.length)throw new Error('決勝T速報取得失敗');
   const out={};
   uniqueESPNEvents(payloads).forEach(ev=>{
-    const eid=String(ev.id||'');
-    if(!ids.has(eid))return;
-    const comp=(ev.competitions||[])[0]||{};
-    const cs=comp.competitors||[];
-    if(cs.length<2)return;
-    const home=cs.find(c=>c.homeAway==='home')||cs[0];
-    const away=cs.find(c=>c.homeAway==='away')||cs[1];
-    const hId=resolveTeamFromESPN(home.team||home);
-    const aId=resolveTeamFromESPN(away.team||away);
-    const st=(ev.status||{}).type||{};
-    const rec={completed:!!st.completed,live:!!st.inProgress,home:hId,away:aId,hs:home.score,as:away.score};
-    if(home.winner)rec.winner='home';
-    if(away.winner)rec.winner='away';
-    const hp=pickPenaltyScore(home);
-    const ap=pickPenaltyScore(away);
-    if(hp!==undefined&&hp!==''&&ap!==undefined&&ap!==''){rec.homePens=hp;rec.awayPens=ap;}
-    out[eid]=rec;
+    const match=findKnockoutMatchForESPNEvent(ev);
+    if(!match)return;
+    const rec=koEventToResultRecord(ev,match);
+    if(!rec)return;
+    const key=koResultKeyForMatch(match);
+    out[key]=Object.assign({},out[key]||{},rec);
+    // 内部IDなしの後続参照でも拾えるよう、試合番号キーにも同じ結果を保存します。
+    if(match.no!==undefined)out[String(match.no)]=Object.assign({},out[key]);
   });
 
   // 試合中・終了済みで得点が入っているカードは、詳細APIも確認して得点者情報を保存します。
-  const targets=Object.entries(out).filter(([eid,rec])=>{
+  const targets=Object.entries(out).filter(([key,rec])=>{
+    // 同じ試合を internal id / no の両方で持つため、詳細取得は internal id 側だけに寄せます。
+    const match=KNOCKOUT_MATCHES.find(m=>koResultKeyForMatch(m)===key);
+    if(!match)return false;
     const goals=(Number(rec.hs)||0)+(Number(rec.as)||0);
     return (rec.completed||rec.live)&&goals>0;
   });
-  await runLimited(targets,4,async ([eid,rec])=>{
-    const match=KNOCKOUT_MATCHES.find(m=>String(m.id||'')===String(eid));
+  await runLimited(targets,4,async ([key,rec])=>{
+    const match=KNOCKOUT_MATCHES.find(m=>koResultKeyForMatch(m)===key);
     if(!match)return;
     const home=rec.home||resolveKoSide(match.a).id||'';
     const away=rec.away||resolveKoSide(match.b).id||'';
     if(!home||!away)return;
-    const temp={id:eid,home,away,status:rec.completed?'done':(rec.live?'live':'scheduled'),hs:rec.hs,as:rec.as};
+    const eventId=rec.espnEventId||match.id;
+    const temp={id:eventId,home,away,status:rec.completed?'done':(rec.live?'live':'scheduled'),hs:rec.hs,as:rec.as};
     try{
-      const data=await fetchESPNEventSummary(eid);
+      const data=await fetchESPNEventSummary(eventId);
       const parsed=parseMatchSummary(data,temp);
       if(Number.isFinite(Number(parsed.hs)))rec.hs=parsed.hs;
       if(Number.isFinite(Number(parsed.as)))rec.as=parsed.as;
       const scorers=localizeScorers(parsed.scorers,temp);
       if((scorers.home&&scorers.home.length)||(scorers.away&&scorers.away.length))rec.scorers=scorers;
+      if(match.no!==undefined)out[String(match.no)]=Object.assign({},rec);
     }catch(e){
-      console.warn('決勝T得点者取得失敗',eid,e);
+      console.warn('決勝T得点者取得失敗',eventId,e);
     }
   });
   return out;

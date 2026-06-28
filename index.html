@@ -466,7 +466,7 @@ const CODD_PROXY='https://api.codetabs.com/v1/proxy/?quest=';
 const NEWS_FAST_LIMIT_MS=18000;
 const NEWS_BG_IMAGE_LIMIT=0;
 const NEWS_MIN_STABLE_RESULTS=3;
-const NEWS_PIPELINE_VERSION='jp-news-direct-publisher-only-v21';
+const NEWS_PIPELINE_VERSION='jp-news-direct-publisher-only-v22';
 const CURATED_NEWS_SOURCES=[
   {name:'Soccer King W杯',url:'https://www.soccer-king.jp/news/world/wc'},
   {name:'サッカーキング 最新',url:'https://www.soccer-king.jp/'},
@@ -479,7 +479,10 @@ const CURATED_NEWS_SOURCES=[
   {name:'フットボールチャンネル',url:'https://www.footballchannel.jp/'},
   {name:'Qoly',url:'https://qoly.jp/'},
   {name:'超WORLDサッカー',url:'https://web.ultra-soccer.jp/news/'},
-  {name:'日刊スポーツ サッカー',url:'https://www.nikkansports.com/soccer/world/news/'}
+  {name:'日刊スポーツ サッカー',url:'https://www.nikkansports.com/soccer/world/news/'},
+  {name:'サッカーキング RSS',url:'https://www.soccer-king.jp/feed'},
+  {name:'ゲキサカ RSS',url:'https://web.gekisaka.jp/rss'},
+  {name:'Football ZONE RSS',url:'https://www.football-zone.net/feed'}
 ];
 const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
@@ -801,7 +804,7 @@ function normalizeStatStatus(status){
   return normalizeVisibleStatus(status);
 }
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
-const GROUP_DATA_VERSION='group-data-v117-20260628-72done-final-scorer-seed-third-place-highlight';
+const GROUP_DATA_VERSION='group-data-v118-20260628-72done-final-fixed-no-group-fetch';
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
 const ESPN_MAP={
@@ -1762,14 +1765,11 @@ async function updateKnockoutSchedule(){
   state.ko.status='更新中・・・';
   save();render();
   try{
-    const [standingsResult, knockoutResults]=await Promise.all([
-      fetchLatestStandings().catch(e=>{console.warn('決勝T日程・進出国更新失敗',e);return null}),
-      fetchKnockoutResults().catch(e=>{console.warn('決勝T日程・試合結果更新失敗',e);return null})
-    ]);
-    if(standingsResult&&standingsResult.groups)state.groups=standingsResult.groups;
-    // 決勝T表タブと同じ確定枠ロジックをここでも通し、日程タブ側の表示と整合させます。
-    applyConfirmedBracketSlots();
+    // 日程・結果タブだけは、決勝トーナメントの試合進行・結果・得点者を外部速報から更新します。
+    // ただし、グループステージ順位やベスト32カードは確定済みのため再取得しません。
+    const knockoutResults=await fetchKnockoutResults();
     if(knockoutResults)state.ko.results=Object.assign({},state.ko.results||{},knockoutResults);
+    applyConfirmedBracketSlots();
     state.ko.status='更新済';
   }catch(e){
     console.warn('決勝T日程更新失敗',e);
@@ -1792,7 +1792,7 @@ function pickPenaltyScore(competitor){
   return undefined;
 }
 async function fetchKnockoutResults(){
-  const ids=new Set(KNOCKOUT_MATCHES.map(m=>String(m.id||''))); 
+  const ids=new Set(KNOCKOUT_MATCHES.map(m=>String(m.id||'')));
   const settled=await Promise.allSettled(KNOCKOUT_ESPN_DATES.map(d=>fetchJSONNoStore(`${ESPN_SCOREBOARD}?dates=${d}&limit=100`)));
   const payloads=settled.filter(x=>x.status==='fulfilled').map(x=>x.value);
   const out={};
@@ -1814,6 +1814,30 @@ async function fetchKnockoutResults(){
     const ap=pickPenaltyScore(away);
     if(hp!==undefined&&hp!==''&&ap!==undefined&&ap!==''){rec.homePens=hp;rec.awayPens=ap;}
     out[eid]=rec;
+  });
+
+  // 試合中・終了済みで得点が入っているカードは、詳細APIも確認して得点者情報を保存します。
+  const targets=Object.entries(out).filter(([eid,rec])=>{
+    const goals=(Number(rec.hs)||0)+(Number(rec.as)||0);
+    return (rec.completed||rec.live)&&goals>0;
+  });
+  await runLimited(targets,4,async ([eid,rec])=>{
+    const match=KNOCKOUT_MATCHES.find(m=>String(m.id||'')===String(eid));
+    if(!match)return;
+    const home=rec.home||resolveKoSide(match.a).id||'';
+    const away=rec.away||resolveKoSide(match.b).id||'';
+    if(!home||!away)return;
+    const temp={id:eid,home,away,status:rec.completed?'done':(rec.live?'live':'scheduled'),hs:rec.hs,as:rec.as};
+    try{
+      const data=await fetchESPNEventSummary(eid);
+      const parsed=parseMatchSummary(data,temp);
+      if(Number.isFinite(Number(parsed.hs)))rec.hs=parsed.hs;
+      if(Number.isFinite(Number(parsed.as)))rec.as=parsed.as;
+      const scorers=localizeScorers(parsed.scorers,temp);
+      if((scorers.home&&scorers.home.length)||(scorers.away&&scorers.away.length))rec.scorers=scorers;
+    }catch(e){
+      console.warn('決勝T得点者取得失敗',eid,e);
+    }
   });
   return out;
 }
@@ -2266,37 +2290,39 @@ async function updateBracketTable(){
   state.bracketStatus='更新中・・・';
   save();render();
   try{
-    const result=await fetchLatestStandings();
+    // 決勝トーナメント表は全カード確定済みのため、外部取得せず内部データだけを再反映します。
+    const result=localGroupMatchResult();
     state.groups=result.groups;
-    applyScoreboardMatchUpdates(result.matchUpdates);
+    applyScoreboardMatchUpdates((result.matchUpdates||[]).map(u=>Object.assign({source:'built-in-final'},u)));
     applyConfirmedBracketSlots();
+    state.bracketStatus='更新済';
   }catch(e){
-    console.warn('決勝T表更新失敗',e);
+    console.warn('決勝T表内部再描画失敗',e);
     applyConfirmedBracketSlots();
+    state.bracketStatus='取得失敗';
   }
-  state.bracketStatus='更新済';
   save();render();
 }
 
+
 async function updateGroupStandings(){
   state.groupStatus='更新中・・・';
-  save();
-  if(currentGroup)renderGroupDetail(currentGroup);
-  render();
+  save();render();
   try{
-    const result=await fetchLatestStandings();
+    // グループステージは全試合終了済みのため、外部取得せず内部データだけを再描画します。
+    const result=localGroupMatchResult();
     state.groups=result.groups;
-    applyScoreboardMatchUpdates(result.matchUpdates);
+    applyScoreboardMatchUpdates((result.matchUpdates||[]).map(u=>Object.assign({source:'built-in-final'},u)));
     state.groupStatus='更新済';
   }catch(e){
-    console.warn('グループ順位更新失敗',e);
+    console.warn('グループ順位内部再描画失敗',e);
     state.groups=buildGroupRows(initialGroups);
     state.groupStatus='取得失敗';
   }
-  save();
-  render();
+  save();render();
   if(currentGroup)renderGroupDetail(currentGroup);
 }
+
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
 function confirmedIds(currentSlot){
   const ids=[];
@@ -2337,7 +2363,8 @@ function openGroupDetail(g){
   document.getElementById('backdrop').classList.add('show');
   sh.classList.add('show','group-detail');
   renderGroupDetail(g);
-  setTimeout(()=>loadGroupMatchDetails(g,{retryFailed:true}).catch(e=>console.warn('得点者取得失敗',e)),0);
+  // グループステージは全試合終了済みのため、詳細画面では内部保持データだけを表示します。
+  // 外部サイトへの得点者再取得は行いません。
 }
 function renderGroupDetail(g){
   const sh=document.getElementById('sheet');
@@ -3671,6 +3698,7 @@ function prepareNewsItems(items,target,limit=20){
     selected=all.filter(x=>x._newsScore>=45 && !hasUtilityOnlyNewsTopic(x.title));
     if(dedupeNews(selected,limit).length<NEWS_MIN_STABLE_RESULTS)selected=selected.concat(all.filter(x=>x._newsScore>=24));
     if(dedupeNews(selected,limit).length<NEWS_MIN_STABLE_RESULTS)selected=selected.concat(all.filter(x=>x._newsScore>=8));
+    if(dedupeNews(selected,limit).length<NEWS_MIN_STABLE_RESULTS)selected=selected.concat(all.filter(x=>x._newsScore>-80));
   }else{
     const textOf=x=>(x.title||'')+' '+(x.url||'')+' '+(x.domain||'')+' '+(x._query||'');
     const relevant=all.filter(x=>titleMatchesNewsTarget(textOf(x),target)||countryOpponentMatchesNewsTarget(textOf(x),target)||(x._queryTarget===target));
@@ -3678,6 +3706,7 @@ function prepareNewsItems(items,target,limit=20){
     if(dedupeNews(selected,limit).length<NEWS_MIN_STABLE_RESULTS)selected=selected.concat(relevant.filter(x=>x._newsCategory==='schedule'&&x._newsScore>=28));
     if(dedupeNews(selected,limit).length<NEWS_MIN_STABLE_RESULTS)selected=selected.concat(relevant.filter(x=>x._newsScore>=10));
     if(dedupeNews(selected,limit).length<NEWS_MIN_STABLE_RESULTS)selected=selected.concat(relevant);
+    if(dedupeNews(selected,limit).length<NEWS_MIN_STABLE_RESULTS)selected=selected.concat(all.filter(x=>x._newsScore>-80));
   }
   const cleaned=selected.sort((a,b)=>{
     if((b._newsScore||0)!==(a._newsScore||0))return (b._newsScore||0)-(a._newsScore||0);
@@ -4250,12 +4279,10 @@ function scorerNameForRanking(label){
 }
 function buildGoalRankingFromMatchScorers(){
   const map=new Map();
-  Object.values(GROUP_MATCHES).flat().forEach(m=>{
-    const cache=(state.matchCache||{})[m.id]||{};
-    const source=!hasNoScorers(cache)?cache.scorers:MATCH_SCORER_FALLBACKS[m.id];
-    if(!source)return;
-    const sc=normalizeScorers(source,m);
-    [['home',m.home],['away',m.away]].forEach(([side,team])=>{
+  const addScorers=(source,homeTeam,awayTeam)=>{
+    if(!source||!homeTeam||!awayTeam)return;
+    const sc=normalizeScorers(source,{home:homeTeam,away:awayTeam});
+    [['home',homeTeam],['away',awayTeam]].forEach(([side,team])=>{
       (sc[side]||[]).forEach(label=>{
         const player=scorerNameForRanking(label);
         if(!player||isOwnGoalScorerName(player))return;
@@ -4265,7 +4292,25 @@ function buildGoalRankingFromMatchScorers(){
         map.set(key,row);
       });
     });
+  };
+
+  // グループステージは内部保持済み得点者テーブルから集計します。
+  Object.values(GROUP_MATCHES).flat().forEach(m=>{
+    const cache=(state.matchCache||{})[m.id]||{};
+    const source=!hasNoScorers(cache)?cache.scorers:MATCH_SCORER_FALLBACKS[m.id];
+    addScorers(source,m.home,m.away);
   });
+
+  // 決勝トーナメントは「日程・結果」更新で取得・保存した得点者を加算します。
+  const koResults=(state.ko&&state.ko.results)||{};
+  KNOCKOUT_MATCHES.forEach(m=>{
+    const result=koResults[String(m.id||m.no)]||koResults[String(m.no)]||{};
+    if(!result||!result.scorers)return;
+    const home=result.home||resolveKoSide(m.a).id||'';
+    const away=result.away||resolveKoSide(m.b).id||'';
+    addScorers(result.scorers,home,away);
+  });
+
   const rows=[...map.values()].filter(r=>r.value>0).sort((a,b)=>b.value-a.value||String(T[a.team]?.[0]||a.team).localeCompare(String(T[b.team]?.[0]||b.team),'ja')||String(a.player).localeCompare(String(b.player),'ja'));
   let prev=null,rank=0;
   rows.forEach((r,i)=>{if(prev===null||r.value!==prev)rank=i+1;r.rank=rank;prev=r.value;});
@@ -4283,10 +4328,11 @@ async function updatePlayerStats(kind){
   const limit=statLimit(kind);
   if(kind==='goals'){
     try{
-      const result=await fetchLatestStandings();
-      state.groups=result.groups;
-      applyScoreboardMatchUpdates(result.matchUpdates);
-    }catch(e){console.warn('得点R用内部試合情報更新失敗',e)}
+      // 得点ランキングは、内部保持済みのグループステージ得点者に、決勝トーナメントの速報・結果得点者を加算します。
+      const knockoutResults=await fetchKnockoutResults();
+      state.ko=state.ko||{status:'',results:{}};
+      state.ko.results=Object.assign({},state.ko.results||{},knockoutResults||{});
+    }catch(e){console.warn('得点R用決勝T情報更新失敗',e)}
     const rows=currentGoalRankingRows().slice(0,limit);
     state.goals=rows;
     state.statStatus.goals=rows.length?'更新済':'取得失敗';
@@ -4946,28 +4992,18 @@ let liveRefreshBusy=false;
 async function refreshLiveDataSilently(){
   if(liveRefreshBusy)return;
   if(document.hidden)return;
-  if(!['bracket','knockout','groups'].includes(state.active)&&!currentGroup&&!currentKoMatchNo)return;
+  // 自動更新で外部接続するのは、変動する決勝トーナメント関連画面だけに限定します。
+  // 決勝トーナメント表・グループステージは内部データ固定のため外部取得しません。
+  if(!['knockout','goals'].includes(state.active)&&!currentKoMatchNo)return;
   liveRefreshBusy=true;
   try{
-    const [standingsResult, knockoutResults]=await Promise.all([
-      fetchLatestStandings().catch(e=>{console.warn('ライブ順位更新失敗',e);return null}),
-      fetchKnockoutResults().catch(e=>{console.warn('ライブ決勝T更新失敗',e);return null})
-    ]);
-    if(standingsResult&&standingsResult.groups){
-      state.groups=standingsResult.groups;
-      applyScoreboardMatchUpdates(standingsResult.matchUpdates||[]);
-      applyConfirmedBracketSlots();
-    }
+    const knockoutResults=await fetchKnockoutResults().catch(e=>{console.warn('ライブ決勝T更新失敗',e);return null});
     if(knockoutResults){
       state.ko=state.ko||{status:'',results:{},viewCol:0};
       state.ko.results=Object.assign({},state.ko.results||{},knockoutResults);
     }
-    if(currentGroup){
-      await refreshGroupScorers([currentGroup],{retryFailed:true}).catch(e=>console.warn('ライブ得点者更新失敗',e));
-    }
     save();
     render();
-    if(currentGroup)renderGroupDetail(currentGroup);
     if(currentKoMatchNo)openKoDetail(currentKoMatchNo);
   }finally{
     liveRefreshBusy=false;

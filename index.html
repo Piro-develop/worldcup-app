@@ -485,7 +485,7 @@ const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const ESPN_FULL_SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=950';
 const STAT_LIMITS={goals:20,assists:10};
-const STAT_DATA_VERSION='stat-own-goals-v114-yahoo-assists';
+const STAT_DATA_VERSION='stat-own-goals-v116-final-group-scorers-yahoo-assists';
 const FOX_STANDARD_STATS_BASE='https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026';
 const ESPN_SCORING_STATS_URL='https://www.espn.com/soccer/stats/_/league/FIFA.WORLD/view/scoring';
 const YAHOO_ASSIST_STATS_URL='https://soccer.yahoo.co.jp/wcup/category/2026/stats?gk=18&type=6';
@@ -497,25 +497,6 @@ const STAT_SOURCES={
     {name:'スポーツナビ アシストランキング',url:YAHOO_ASSIST_STATS_URL,parser:'yahoo'}
   ]
 };
-const STAT_SNAPSHOT_UPDATED='保存データ 2026-06-27時点';
-const SOCCERKING_GOALS_SNAPSHOT_UPDATED='サッカーキング 2026-06-26時点';
-const SOCCERKING_STATIC_GOALS=[
-  {rank:1,value:5,player:'リオネル・メッシ',team:'ar'},
-  {rank:2,value:4,player:'ヴィニシウス・ジュニオール',team:'br'},
-  {rank:3,value:4,player:'キリアン・エンバペ',team:'fr'},
-  {rank:4,value:4,player:'アーリング・ハーランド',team:'no'},
-  {rank:5,value:3,player:'デニズ・ウンダヴ',team:'de'},
-  {rank:6,value:3,player:'ヨハン・マンザンビ',team:'ch'},
-  {rank:7,value:3,player:'ブライアン・ブロビー',team:'nl'},
-  {rank:8,value:3,player:'マテウス・クーニャ',team:'br'},
-  {rank:9,value:3,player:'ジョナサン・デイヴィッド',team:'ca'},
-  {rank:10,value:3,player:'イスマエル・サイバリ',team:'ma'},
-  {rank:11,value:2,player:'クリセンシオ・サマーフィル',team:'nl'},
-  {rank:12,value:2,player:'ミケル・オヤルサバル',team:'es'},
-  {rank:13,value:2,player:'マクシミリアーノ・アラウホ',team:'uy'},
-  {rank:14,value:2,player:'ルベン・バルガス',team:'ch'},
-  {rank:15,value:2,player:'上田綺世',team:'jp'}
-];
 const YAHOO_SCHEDULE_URL='https://soccer.yahoo.co.jp/wcup/category/2026/schedule';
 const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule/31457/11/?gk=18',
@@ -524,7 +505,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=11;
+const SCORER_CACHE_VERSION=12;
 const MATCH_SCORER_FALLBACKS={
   '66456904':{home:['フリアン キニョーネス 前 9\'','ラウル ヒメネス 後 22\''],away:[]},
   '66456906':{home:['ファン インボム 後 22\'','オ ヒョンギュ 後 35\''],away:['ラディスラフ クレイチ 後 14\'']},
@@ -589,7 +570,15 @@ const MATCH_SCORER_FALLBACKS={
   '66457042':{home:['ハリー ケイン 前 12\'(PK)','ハリー ケイン 前 42\'','ジュード ベリンガム 後 2\'','マーカス ラッシュフォード 後 40\''],away:['マルティン バトゥリナ 前 36\'','ペタル ムサ 前 50\'']},
   '66457044':{home:['カレブ イレンキー 後 50\''],away:[]},
   '66457046':{home:[],away:[]},
-  '66457048':{home:[],away:['アンテ ブディミル 後 9\'']}
+  '66457048':{home:[],away:["アンテ ブディミル 後 9'"]},
+  '66456990':{home:["イライジャ ジャスト 後 39'"],away:["レアンドロ トロサール 前 28'","レアンドロ トロサール 後 5'","ケビン デ ブライネ 後 21'","ロメル ルカク 後 41'","アレクシス サーレマーケルス 後 49'"]},
+  '66456992':{home:["マフムード サーベル 前 5'"],away:["ラミン レザイーアン 前 14'"]},
+  '66457026':{home:["ムサ アルターマリ 後 20'"],away:["ジョバニ ロチェルソ 前 19'","ラウタロ マルティネス 前 31'(PK)","リオネル メッシ 後 35'"]},
+  '66457028':{home:["ラフィク ベルガリ 前 45'","リヤド マフレズ 後 15'","リヤド マフレズ 後 48'"],away:["マルコ アルナウトヴィッチ 前 28'","マルセル ザビッツァー 後 10'","サシャ カライジッチ 後 51'"]},
+  '66457038':{home:[],away:[]},
+  '66457040':{home:["ヨアン ウィサ 後 23'(PK)","フィストン マイェレ 後 33'","ヨアン ウィサ 後 46'"],away:["エルドル ショムロドフ 前 10'"]},
+  '66457050':{home:[],away:["ジュード ベリンガム 後 17'","ハリー ケイン 後 22'"]},
+  '66457052':{home:["ペタル スチッチ 前 31'","ニコラ ヴラシッチ 後 38'"],away:["デリック ルカッセン 後 28'"]}
 };
 const YAHOO_MATCH_URLS={
   // Group A
@@ -812,7 +801,7 @@ function normalizeStatStatus(status){
   return normalizeVisibleStatus(status);
 }
 const ESPN_DATES=['20260611','20260612','20260613','20260614','20260615','20260616','20260617','20260618','20260619','20260620','20260621','20260622','20260623','20260624','20260625','20260626','20260627'];
-const GROUP_DATA_VERSION='group-data-v108-20260627-64done-full-scorer-seed';
+const GROUP_DATA_VERSION='group-data-v117-20260628-72done-final-scorer-seed-third-place-highlight';
 const TEAM_TO_GROUP={};
 Object.entries(G).forEach(([g,ids])=>ids.forEach(id=>TEAM_TO_GROUP[id]=g));
 const ESPN_MAP={
@@ -842,12 +831,12 @@ const initialGroups={
  D:[['us',2,0,1,8,4,6],['au',1,1,1,2,2,4],['py',1,1,1,2,4,4],['tr',1,0,2,3,5,3]],
  E:[['de',2,0,1,10,4,6],['ci',2,0,1,4,2,6],['ec',1,1,1,2,2,4],['cw',0,1,2,1,9,1]],
  F:[['nl',2,1,0,10,4,7],['jp',1,2,0,7,3,5],['se',1,1,1,7,7,4],['tn',0,0,3,2,12,0]],
- G:[['eg',1,1,0,4,2,4],['ir',0,2,0,2,2,2],['be',0,2,0,1,1,2],['nz',0,1,1,3,5,1]],
+ G:[['be',1,2,0,6,2,5],['eg',1,2,0,5,3,5],['ir',0,3,0,3,3,3],['nz',0,1,2,4,10,1]],
  H:[['es',2,1,0,5,0,7],['cv',0,3,0,2,2,3],['uy',0,2,1,3,4,2],['sa',0,2,1,1,5,2]],
  I:[['fr',3,0,0,10,2,9],['no',2,0,1,8,7,6],['sn',1,0,2,8,6,3],['iq',0,0,3,1,12,0]],
- J:[['ar',2,0,0,5,0,6],['at',1,0,1,3,3,3],['dz',1,0,1,2,4,3],['jo',0,0,2,2,5,0]],
- K:[['co',2,0,0,4,1,6],['pt',1,1,0,6,1,4],['cd',0,1,1,1,2,1],['uz',0,0,2,1,8,0]],
- L:[['eng',1,1,0,4,2,4],['gh',1,1,0,1,0,4],['hr',1,0,1,3,4,3],['pa',0,0,2,0,2,0]]
+ J:[['ar',3,0,0,8,1,9],['at',1,1,1,6,6,4],['dz',1,1,1,5,7,4],['jo',0,0,3,3,8,0]],
+ K:[['co',2,1,0,4,1,7],['pt',1,2,0,6,1,5],['cd',1,1,1,4,3,4],['uz',0,0,3,2,11,0]],
+ L:[['eng',2,1,0,6,2,7],['hr',2,0,1,5,5,6],['gh',1,1,1,2,2,4],['pa',0,0,3,0,4,0]]
 };
 
 const GROUP_MATCHES={
@@ -904,8 +893,8 @@ const GROUP_MATCHES={
   {id:'66456984',date:'2026-06-15T21:00:00-04:00',home:'ir',away:'nz',status:'done',hs:2,as:2},
   {id:'66456986',date:'2026-06-21T15:00:00-04:00',home:'be',away:'ir',status:'done',hs:0,as:0},
   {id:'66456988',date:'2026-06-21T21:00:00-04:00',home:'nz',away:'eg',status:'done',hs:1,as:3},
-  {id:'66456990',date:'2026-06-26T23:00:00-04:00',home:'nz',away:'be',status:'scheduled'},
-  {id:'66456992',date:'2026-06-26T23:00:00-04:00',home:'eg',away:'ir',status:'scheduled'}
+  {id:'66456990',date:'2026-06-26T23:00:00-04:00',home:'nz',away:'be',status:'done',hs:1,as:5},
+  {id:'66456992',date:'2026-06-26T23:00:00-04:00',home:'eg',away:'ir',status:'done',hs:1,as:1}
  ],
  H:[
   {id:'66456994',date:'2026-06-15T12:00:00-04:00',home:'es',away:'cv',status:'done',hs:0,as:0},
@@ -928,24 +917,24 @@ const GROUP_MATCHES={
   {id:'66457020',date:'2026-06-17T00:00:00-04:00',home:'at',away:'jo',status:'done',hs:3,as:1},
   {id:'66457022',date:'2026-06-22T13:00:00-04:00',home:'ar',away:'at',status:'done',hs:2,as:0},
   {id:'66457024',date:'2026-06-22T23:00:00-04:00',home:'jo',away:'dz',status:'done',hs:1,as:2},
-  {id:'66457026',date:'2026-06-27T22:00:00-04:00',home:'jo',away:'ar',status:'scheduled'},
-  {id:'66457028',date:'2026-06-27T22:00:00-04:00',home:'dz',away:'at',status:'scheduled'}
+  {id:'66457026',date:'2026-06-27T22:00:00-04:00',home:'jo',away:'ar',status:'done',hs:1,as:3},
+  {id:'66457028',date:'2026-06-27T22:00:00-04:00',home:'dz',away:'at',status:'done',hs:3,as:3}
  ],
  K:[
   {id:'66457030',date:'2026-06-17T13:00:00-04:00',home:'pt',away:'cd',status:'done',hs:1,as:1},
   {id:'66457032',date:'2026-06-17T22:00:00-04:00',home:'uz',away:'co',status:'done',hs:1,as:3},
   {id:'66457034',date:'2026-06-23T13:00:00-04:00',home:'pt',away:'uz',status:'done',hs:5,as:0},
   {id:'66457036',date:'2026-06-23T22:00:00-04:00',home:'co',away:'cd',status:'done',hs:1,as:0},
-  {id:'66457038',date:'2026-06-27T19:30:00-04:00',home:'co',away:'pt',status:'scheduled'},
-  {id:'66457040',date:'2026-06-27T19:30:00-04:00',home:'cd',away:'uz',status:'scheduled'}
+  {id:'66457038',date:'2026-06-27T19:30:00-04:00',home:'co',away:'pt',status:'done',hs:0,as:0},
+  {id:'66457040',date:'2026-06-27T19:30:00-04:00',home:'cd',away:'uz',status:'done',hs:3,as:1}
  ],
  L:[
   {id:'66457042',date:'2026-06-17T16:00:00-04:00',home:'eng',away:'hr',status:'done',hs:4,as:2},
   {id:'66457044',date:'2026-06-17T19:00:00-04:00',home:'gh',away:'pa',status:'done',hs:1,as:0},
   {id:'66457046',date:'2026-06-23T16:00:00-04:00',home:'eng',away:'gh',status:'done',hs:0,as:0},
   {id:'66457048',date:'2026-06-23T19:00:00-04:00',home:'pa',away:'hr',status:'done',hs:0,as:1},
-  {id:'66457050',date:'2026-06-27T17:00:00-04:00',home:'pa',away:'eng',status:'scheduled'},
-  {id:'66457052',date:'2026-06-27T17:00:00-04:00',home:'hr',away:'gh',status:'scheduled'}
+  {id:'66457050',date:'2026-06-27T17:00:00-04:00',home:'pa',away:'eng',status:'done',hs:0,as:2},
+  {id:'66457052',date:'2026-06-27T17:00:00-04:00',home:'hr',away:'gh',status:'done',hs:2,as:1}
  ]
 };
 
@@ -1111,24 +1100,24 @@ function buildGroupRows(src){
 
 const initial={
  left:[
-  [{id:'l1a',tag:'E1',sel:['de'],opts:G.E,fixed:true,confirmed:true},{id:'l1b',tag:'3位',sel:[],opts:TH.t1}],
-  [{id:'l2a',tag:'I1',sel:['fr'],opts:G.I},{id:'l2b',tag:'3位',sel:['jp'],opts:TH.t2}],
-  [{id:'l3a',tag:'A2',sel:['kr','za'],opts:G.A},{id:'l3b',tag:'B2',sel:['ch','ca'],opts:G.B}],
-  [{id:'l4a',tag:'F1',sel:['jp'],opts:G.F},{id:'l4b',tag:'C2',sel:['br','ma'],opts:G.C}],
-  [{id:'l5a',tag:'K2',sel:['co','pt'],opts:G.K},{id:'l5b',tag:'L2',sel:['hr'],opts:G.L}],
-  [{id:'l6a',tag:'H1',sel:['es'],opts:G.H},{id:'l6b',tag:'J2',sel:['at'],opts:G.J}],
-  [{id:'l7a',tag:'D1',sel:['us'],opts:G.D,fixed:true,confirmed:true},{id:'l7b',tag:'3位',sel:[],opts:TH.t5}],
-  [{id:'l8a',tag:'G1',sel:['be'],opts:G.G},{id:'l8b',tag:'3位',sel:[],opts:TH.t6}]
+  [{id:'l1a',tag:'E1',sel:['de'],opts:G.E,fixed:true,confirmed:true},{id:'l1b',tag:'3位',sel:['py'],opts:TH.t1,fixed:true,confirmed:true}],
+  [{id:'l2a',tag:'I1',sel:['fr'],opts:G.I,fixed:true,confirmed:true},{id:'l2b',tag:'3位',sel:['se'],opts:TH.t2,fixed:true,confirmed:true}],
+  [{id:'l3a',tag:'A2',sel:['za'],opts:G.A,fixed:true,confirmed:true},{id:'l3b',tag:'B2',sel:['ca'],opts:G.B,fixed:true,confirmed:true}],
+  [{id:'l4a',tag:'F1',sel:['nl'],opts:G.F,fixed:true,confirmed:true},{id:'l4b',tag:'C2',sel:['ma'],opts:G.C,fixed:true,confirmed:true}],
+  [{id:'l5a',tag:'K2',sel:['pt'],opts:G.K,fixed:true,confirmed:true},{id:'l5b',tag:'L2',sel:['hr'],opts:G.L,fixed:true,confirmed:true}],
+  [{id:'l6a',tag:'H1',sel:['es'],opts:G.H,fixed:true,confirmed:true},{id:'l6b',tag:'J2',sel:['at'],opts:G.J,fixed:true,confirmed:true}],
+  [{id:'l7a',tag:'D1',sel:['us'],opts:G.D,fixed:true,confirmed:true},{id:'l7b',tag:'3位',sel:['ba'],opts:TH.t5,fixed:true,confirmed:true}],
+  [{id:'l8a',tag:'G1',sel:['be'],opts:G.G,fixed:true,confirmed:true},{id:'l8b',tag:'3位',sel:['sn'],opts:TH.t6,fixed:true,confirmed:true}]
  ],
  right:[
-  [{id:'r1a',tag:'C1',sel:['br','ma'],opts:G.C},{id:'r1b',tag:'F2',sel:['jp'],opts:G.F}],
-  [{id:'r2a',tag:'E2',sel:['ci'],opts:G.E},{id:'r2b',tag:'I2',sel:['no'],opts:G.I}],
-  [{id:'r3a',tag:'A1',sel:['mx'],opts:G.A,fixed:true,confirmed:true},{id:'r3b',tag:'3位',sel:[],opts:TH.t3}],
-  [{id:'r4a',tag:'L1',sel:['eng'],opts:G.L},{id:'r4b',tag:'3位',sel:[],opts:TH.t4}],
-  [{id:'r5a',tag:'J1',sel:['ar'],opts:G.J,fixed:true,confirmed:true},{id:'r5b',tag:'H2',sel:['uy'],opts:G.H}],
-  [{id:'r6a',tag:'D2',sel:['au','py'],opts:G.D},{id:'r6b',tag:'G2',sel:['eg'],opts:G.G}],
-  [{id:'r7a',tag:'B1',sel:['ca','ch'],opts:G.B},{id:'r7b',tag:'3位',sel:[],opts:TH.t7}],
-  [{id:'r8a',tag:'K1',sel:['pt','co'],opts:G.K},{id:'r8b',tag:'3位',sel:[],opts:TH.t8}]
+  [{id:'r1a',tag:'C1',sel:['br'],opts:G.C,fixed:true,confirmed:true},{id:'r1b',tag:'F2',sel:['jp'],opts:G.F,fixed:true,confirmed:true}],
+  [{id:'r2a',tag:'E2',sel:['ci'],opts:G.E,fixed:true,confirmed:true},{id:'r2b',tag:'I2',sel:['no'],opts:G.I,fixed:true,confirmed:true}],
+  [{id:'r3a',tag:'A1',sel:['mx'],opts:G.A,fixed:true,confirmed:true},{id:'r3b',tag:'3位',sel:['ec'],opts:TH.t3,fixed:true,confirmed:true}],
+  [{id:'r4a',tag:'L1',sel:['eng'],opts:G.L,fixed:true,confirmed:true},{id:'r4b',tag:'3位',sel:['cd'],opts:TH.t4,fixed:true,confirmed:true}],
+  [{id:'r5a',tag:'J1',sel:['ar'],opts:G.J,fixed:true,confirmed:true},{id:'r5b',tag:'H2',sel:['cv'],opts:G.H,fixed:true,confirmed:true}],
+  [{id:'r6a',tag:'D2',sel:['au'],opts:G.D,fixed:true,confirmed:true},{id:'r6b',tag:'G2',sel:['eg'],opts:G.G,fixed:true,confirmed:true}],
+  [{id:'r7a',tag:'B1',sel:['ch'],opts:G.B,fixed:true,confirmed:true},{id:'r7b',tag:'3位',sel:['dz'],opts:TH.t7,fixed:true,confirmed:true}],
+  [{id:'r8a',tag:'K1',sel:['co'],opts:G.K,fixed:true,confirmed:true},{id:'r8b',tag:'3位',sel:['gh'],opts:TH.t8,fixed:true,confirmed:true}]
  ]
 };
 
@@ -1136,27 +1125,35 @@ const initial={
 // ここに含めない未確定枠は、ユーザーの前回入力を保持します。
 const BRACKET_CONFIRMED_BY_TAG={
   A1:'mx',A2:'za',B1:'ch',B2:'ca',C1:'br',C2:'ma',
-  D1:'us',E1:'de',J1:'ar'
+  D1:'us',D2:'au',E1:'de',E2:'ci',F1:'nl',F2:'jp',
+  G1:'be',G2:'eg',H1:'es',H2:'cv',I1:'fr',I2:'no',
+  J1:'ar',J2:'at',K1:'co',K2:'pt',L1:'eng',L2:'hr'
 };
+const BRACKET_CONFIRMED_BY_SLOT_ID={
+  l1b:'py',l2b:'se',l7b:'ba',l8b:'sn',
+  r3b:'ec',r4b:'cd',r7b:'dz',r8b:'gh'
+};
+// 3位通過で決勝トーナメント進出が確定したチームも、グループステージ順位表でハイライトします。
+const THIRD_PLACE_QUALIFIED_TEAMS=['py','se','ba','sn','ec','cd','dz','gh'];
 const KNOCKOUT_ESPN_DATES=['20260628','20260629','20260630','20260701','20260702','20260703','20260704','20260705','20260706','20260707','20260709','20260710','20260711','20260714','20260715','20260718','20260719'];
 const KNOCKOUT_ROUNDS=['ベスト32','ラウンド16','準々決勝','準決勝','3位決定戦','決勝'];
 const KNOCKOUT_MATCHES=[
-  {no:73,id:'53452545',round:'ベスト32',date:'2026-06-28T12:00:00-07:00',venue:'ロサンゼルス',a:'A2',b:'B2'},
-  {no:76,id:'53452557',round:'ベスト32',date:'2026-06-29T12:00:00-05:00',venue:'ヒューストン',a:'C1',b:'F2'},
-  {no:74,id:'53452541',round:'ベスト32',date:'2026-06-29T16:30:00-04:00',venue:'フォックスボロ',a:'E1',b:'3ABCDF'},
-  {no:75,id:'53452547',round:'ベスト32',date:'2026-06-29T19:00:00-06:00',venue:'グアダラハラ',a:'F1',b:'C2'},
-  {no:78,id:'53452561',round:'ベスト32',date:'2026-06-30T12:00:00-05:00',venue:'ダラス',a:'E2',b:'I2'},
-  {no:77,id:'53452543',round:'ベスト32',date:'2026-06-30T17:00:00-04:00',venue:'ニュージャージー',a:'I1',b:'3CDFGH'},
-  {no:79,id:'53452563',round:'ベスト32',date:'2026-06-30T19:00:00-06:00',venue:'メキシコシティ',a:'A1',b:'3CEFHI'},
-  {no:80,id:'53452565',round:'ベスト32',date:'2026-07-01T12:00:00-04:00',venue:'アトランタ',a:'L1',b:'3EHIJK'},
-  {no:82,id:'53452555',round:'ベスト32',date:'2026-07-01T13:00:00-07:00',venue:'シアトル',a:'G1',b:'3AEHIJ'},
-  {no:81,id:'53452553',round:'ベスト32',date:'2026-07-01T17:00:00-07:00',venue:'サンタクララ',a:'D1',b:'3BEFIJ'},
-  {no:84,id:'53452551',round:'ベスト32',date:'2026-07-02T12:00:00-07:00',venue:'ロサンゼルス',a:'H1',b:'J2'},
-  {no:83,id:'53452549',round:'ベスト32',date:'2026-07-02T19:00:00-04:00',venue:'トロント',a:'K2',b:'L2'},
-  {no:85,id:'53452505',round:'ベスト32',date:'2026-07-02T20:00:00-07:00',venue:'バンクーバー',a:'B1',b:'3EFGIJ'},
-  {no:88,id:'53452503',round:'ベスト32',date:'2026-07-03T13:00:00-05:00',venue:'ダラス',a:'D2',b:'G2'},
-  {no:86,id:'53452569',round:'ベスト32',date:'2026-07-03T18:00:00-04:00',venue:'マイアミ',a:'J1',b:'H2'},
-  {no:87,id:'53452507',round:'ベスト32',date:'2026-07-03T20:30:00-05:00',venue:'カンザスシティ',a:'K1',b:'3DEIJL'},
+  {no:73,id:'53452545',round:'ベスト32',date:'2026-06-28T12:00:00-07:00',venue:'ロサンゼルス',a:'za',b:'ca'},
+  {no:76,id:'53452557',round:'ベスト32',date:'2026-06-29T12:00:00-05:00',venue:'ヒューストン',a:'br',b:'jp'},
+  {no:74,id:'53452541',round:'ベスト32',date:'2026-06-29T16:30:00-04:00',venue:'フォックスボロ',a:'de',b:'py'},
+  {no:75,id:'53452547',round:'ベスト32',date:'2026-06-29T19:00:00-06:00',venue:'グアダラハラ',a:'nl',b:'ma'},
+  {no:78,id:'53452561',round:'ベスト32',date:'2026-06-30T12:00:00-05:00',venue:'ダラス',a:'ci',b:'no'},
+  {no:77,id:'53452543',round:'ベスト32',date:'2026-06-30T17:00:00-04:00',venue:'ニュージャージー',a:'fr',b:'se'},
+  {no:79,id:'53452563',round:'ベスト32',date:'2026-06-30T19:00:00-06:00',venue:'メキシコシティ',a:'mx',b:'ec'},
+  {no:80,id:'53452565',round:'ベスト32',date:'2026-07-01T12:00:00-04:00',venue:'アトランタ',a:'eng',b:'cd'},
+  {no:82,id:'53452555',round:'ベスト32',date:'2026-07-01T13:00:00-07:00',venue:'シアトル',a:'be',b:'sn'},
+  {no:81,id:'53452553',round:'ベスト32',date:'2026-07-01T17:00:00-07:00',venue:'サンタクララ',a:'us',b:'ba'},
+  {no:84,id:'53452551',round:'ベスト32',date:'2026-07-02T12:00:00-07:00',venue:'ロサンゼルス',a:'es',b:'at'},
+  {no:83,id:'53452549',round:'ベスト32',date:'2026-07-02T19:00:00-04:00',venue:'トロント',a:'pt',b:'hr'},
+  {no:85,id:'53452505',round:'ベスト32',date:'2026-07-02T20:00:00-07:00',venue:'バンクーバー',a:'ch',b:'dz'},
+  {no:88,id:'53452503',round:'ベスト32',date:'2026-07-03T13:00:00-05:00',venue:'ダラス',a:'au',b:'eg'},
+  {no:86,id:'53452569',round:'ベスト32',date:'2026-07-03T18:00:00-04:00',venue:'マイアミ',a:'ar',b:'cv'},
+  {no:87,id:'53452507',round:'ベスト32',date:'2026-07-03T20:30:00-05:00',venue:'カンザスシティ',a:'co',b:'gh'},
   {no:90,id:'53452511',round:'ラウンド16',date:'2026-07-04T12:00:00-05:00',venue:'ヒューストン',a:'W73',b:'W75'},
   {no:89,id:'53452509',round:'ラウンド16',date:'2026-07-04T17:00:00-04:00',venue:'フィラデルフィア',a:'W74',b:'W77'},
   {no:91,id:'53452517',round:'ラウンド16',date:'2026-07-05T16:00:00-04:00',venue:'ニュージャージー',a:'W76',b:'W78'},
@@ -1336,6 +1333,7 @@ function slotHTML(s,side,mi,si){
 }
 function isGroupComplete(rows){return rows&&rows.length===4&&rows.every(r=>(r.w+r.d+r.l)>=3)}
 function isQualifiedTeam(id){
+  if(THIRD_PLACE_QUALIFIED_TEAMS.includes(id))return true;
   const rows=state.groups?.[TEAM_TO_GROUP[id]]||[];
   if(!rows.length)return false;
   const r=rows.find(x=>x.team===id);
@@ -2014,13 +2012,13 @@ function applyConfirmedBracketSlots(){
   const applied=[];
   const locked=new Set();
 
-  // 公式・手元データ上ですでに進出枠が確定しているものは、保存済み入力より優先して固定します。
+  // ベスト32が確定したため、決勝トーナメント表の全枠を内部データで固定します。
   slots.forEach(s=>{
-    const team=BRACKET_CONFIRMED_BY_TAG[String(s.tag||'')];
+    const team=BRACKET_CONFIRMED_BY_SLOT_ID[String(s.id||'')]||BRACKET_CONFIRMED_BY_TAG[String(s.tag||'')];
     if(team&&setBracketSlotConfirmed(s,team,locked))applied.push(s);
   });
 
-  // グループ全試合が完了した枠は、順位表から1位/2位を自動反映します。
+  // 将来、内部順位表を更新した場合に備え、1位/2位枠だけは順位表からの補正も許可します。
   slots.forEach(s=>{
     if(applied.includes(s))return;
     const m=String(s.tag||'').match(/^([A-L])([12])$/);
@@ -2032,8 +2030,6 @@ function applyConfirmedBracketSlots(){
     if(row&&row.team&&setBracketSlotConfirmed(s,row.team,locked))applied.push(s);
   });
 
-  // 確定済みチームが他の未確定枠に残っていた場合だけ除外します。
-  // 未確定枠のユーザー入力そのものは残します。
   slots.forEach(s=>{
     if(applied.includes(s)||s.fixed)return;
     const before=(s.sel||[]).length;
@@ -2247,15 +2243,7 @@ function standingsFromMatchesWithUpdates(updates){
   return {groups:standingsFromStats(stats),count};
 }
 
-const LIVE_MATCH_OVERRIDES=[
-  // 外部取得が一時的に遅延・失敗した場合でも、直近終了済みのGroup Hを予定・試合中へ戻さない安全弁です。
-  // ESPN/スポーツナビから新しい確定結果が取れた場合は、そちらを優先します。
-  {id:'66457002',completed:true,live:false,inProgress:false,hs:0,as:1,statusText:'試合終了',source:'local-final',expiresAt:'2026-06-28T06:00:00+09:00'},
-  {id:'66457004',completed:true,live:false,inProgress:false,hs:0,as:0,statusText:'試合終了',source:'local-final',expiresAt:'2026-06-28T06:00:00+09:00'},
-  // 2026-06-27 12時台時点のGroup G試合中安全弁。外部取得が取れればそちらを優先します。
-  {id:'66456990',completed:false,live:true,inProgress:true,hs:0,as:0,statusText:'試合中',source:'local-live',expiresAt:'2026-06-27T14:30:00+09:00'},
-  {id:'66456992',completed:false,live:true,inProgress:true,hs:1,as:1,statusText:'試合中',source:'local-live',expiresAt:'2026-06-27T14:30:00+09:00'}
-];
+const LIVE_MATCH_OVERRIDES=[];
 function currentLiveMatchOverrides(){
   const now=Date.now();
   return LIVE_MATCH_OVERRIDES.filter(u=>{
@@ -2265,23 +2253,14 @@ function currentLiveMatchOverrides(){
 }
 
 async function fetchLatestStandings(){
-  const [espnPayloadResult,yahooScheduleResult,yahooDetailResult]=await Promise.allSettled([
-    fetchGroupScoreboardPayloads(),
-    fetchYahooScheduleMatchUpdates(),
-    fetchYahooDetailMatchUpdates()
-  ]);
-  const payloads=espnPayloadResult.status==='fulfilled'?espnPayloadResult.value:[];
-  const events=uniqueESPNEvents(payloads);
-  cacheScorersFromESPNEvents(events);
-  const espnUpdates=scoreboardMatchUpdatesFromEvents(events).map(u=>Object.assign({source:'espn-scoreboard'},u));
-  const yahooScheduleUpdates=yahooScheduleResult.status==='fulfilled'?yahooScheduleResult.value:[];
-  const yahooDetailUpdates=yahooDetailResult.status==='fulfilled'?yahooDetailResult.value:[];
-  const localUpdates=(localGroupMatchResult().matchUpdates||[]).map(u=>Object.assign({source:'local'},u));
-  const liveOverrides=currentLiveMatchOverrides();
-  const matchUpdates=mergeMatchUpdates([].concat(localUpdates,liveOverrides,espnUpdates,yahooScheduleUpdates,yahooDetailUpdates));
-  const table=standingsFromMatchesWithUpdates(matchUpdates);
-  if(table.count===0)return localGroupMatchResult();
-  return {groups:table.groups,count:table.count,matchUpdates};
+  // グループステージ全72試合が終了したため、順位表とベスト32進出枠は内部データから生成します。
+  // 外部APIの遅延・旧データ返却で、確定済みカードが崩れることを防ぎます。
+  const local=localGroupMatchResult();
+  return {
+    groups:local.groups,
+    count:local.count,
+    matchUpdates:(local.matchUpdates||[]).map(u=>Object.assign({source:'built-in-final'},u))
+  };
 }
 async function updateBracketTable(){
   state.bracketStatus='更新中・・・';
@@ -2301,7 +2280,6 @@ async function updateBracketTable(){
 
 async function updateGroupStandings(){
   state.groupStatus='更新中・・・';
-  resetFailedScorerCachesForAllGroups();
   save();
   if(currentGroup)renderGroupDetail(currentGroup);
   render();
@@ -2309,20 +2287,14 @@ async function updateGroupStandings(){
     const result=await fetchLatestStandings();
     state.groups=result.groups;
     applyScoreboardMatchUpdates(result.matchUpdates);
+    state.groupStatus='更新済';
   }catch(e){
     console.warn('グループ順位更新失敗',e);
-    if(!state.groups)state.groups=buildGroupRows(initialGroups);
+    state.groups=buildGroupRows(initialGroups);
+    state.groupStatus='取得失敗';
   }
   save();
-  if(currentGroup)renderGroupDetail(currentGroup);
-  try{
-    const refreshed=await refreshAllGroupScorers({retryFailed:true});
-    state.groupStatus='更新済';
-  }catch(e){
-    console.warn('全グループ得点者更新失敗',e);
-    state.groupStatus='更新済';
-  }
-  save();render();
+  render();
   if(currentGroup)renderGroupDetail(currentGroup);
 }
 function findSlot(id){for(const side of ['left','right'])for(const m of state.bracket[side])for(const s of m)if(s.id===id)return s;return null}
@@ -2529,6 +2501,8 @@ function isFailedScorerCache(cache,m){
 function shouldFetchScorersForMatch(m,options={}){
   if(!m||(!isMatchCompleted(m)&&!isMatchLive(m)))return false;
   if(scorerGoalTotal(m)<=0)return false;
+  const builtIn=MATCH_SCORER_FALLBACKS[m.id];
+  if(builtIn&&!hasNoScorers({scorers:builtIn})&&!options.force)return false;
   const cache=(state.matchCache||{})[m.id];
   // 一度取得できた得点者情報は成功キャッシュとして扱い、更新失敗で空上書きしない。
   if(cache&&!hasNoScorers(cache))return !!options.force;
@@ -2585,6 +2559,8 @@ async function fetchAndStoreMatchScorers(m){
     state.matchCache[m.id]=Object.assign({},existing,parsed,{loading:false,fetched:true,scorerVersion:SCORER_CACHE_VERSION});
     return true;
   };
+  const builtInFallback=MATCH_SCORER_FALLBACKS[m.id];
+  if(builtInFallback&&!hasNoScorers({scorers:builtInFallback})&&!live)return saveSuccess(builtInFallback,'built-in-cache');
   try{
     const yahooScorers=await fetchMatchPageScorers(m);
     if(yahooScorers&&(yahooScorers.home.length||yahooScorers.away.length))return saveSuccess(yahooScorers,'yahoo-detail');
@@ -4310,8 +4286,7 @@ async function updatePlayerStats(kind){
       const result=await fetchLatestStandings();
       state.groups=result.groups;
       applyScoreboardMatchUpdates(result.matchUpdates);
-    }catch(e){console.warn('得点R用試合情報更新失敗',e)}
-    try{await refreshAllGroupScorers({retryFailed:true});}catch(e){console.warn('得点R用得点者更新失敗',e)}
+    }catch(e){console.warn('得点R用内部試合情報更新失敗',e)}
     const rows=currentGoalRankingRows().slice(0,limit);
     state.goals=rows;
     state.statStatus.goals=rows.length?'更新済':'取得失敗';

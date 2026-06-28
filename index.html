@@ -421,7 +421,7 @@ function showBootError(err){
     const app=document.getElementById('app');
     if(!app)return;
     const msg=(err&&(err.message||err.reason||err.toString()))||'原因不明の表示エラー';
-    app.innerHTML='<div class="boot-error"><h2>表示エラー</h2><p class="small">初期表示でエラーが出ました。URL末尾に ?v=25 を付けて再読み込みしてください。</p><code>'+String(msg).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})+'</code></div>';
+    app.innerHTML='<div class="boot-error"><h2>表示エラー</h2><p class="small">初期表示でエラーが出ました。URL末尾に ?v=121 を付けて再読み込みしてください。</p><code>'+String(msg).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})+'</code></div>';
   }catch(e){}
 }
 window.addEventListener('error',function(e){showBootError(e.error||e.message||e)});
@@ -508,7 +508,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=12;
+const SCORER_CACHE_VERSION=13;
 const MATCH_SCORER_FALLBACKS={
   '66456904':{home:['フリアン キニョーネス 前 9\'','ラウル ヒメネス 後 22\''],away:[]},
   '66456906':{home:['ファン インボム 後 22\'','オ ヒョンギュ 後 35\''],away:['ラディスラフ クレイチ 後 14\'']},
@@ -1725,7 +1725,7 @@ function openKoDetail(no){
   const aWin=done&&isKoWinner(result,'home');
   const bWin=done&&isKoWinner(result,'away');
   const score=done?`${scoreText(hs,result.homePens)||'-'} - ${scoreText(as,result.awayPens)||'-'}`:(live?'試合中':'予定');
-  const scorers=normalizeScorers(result.scorers||{}, {home:aSide.id||'',away:bSide.id||''});
+  const scorers=normalizeScorers(result.scorers||{}, {home:aSide.id||'',away:bSide.id||'',hs:result.hs,as:result.as});
   const sh=document.getElementById('sheet');
   document.getElementById('backdrop').classList.add('show');
   sh.classList.add('show','group-detail');
@@ -2536,11 +2536,54 @@ function localizeScorerLabel(label){
   const name=localizeScorerName(p.name||'得点');
   return `${name}${p.period?` ${p.period}`:''}${p.minute?` ${p.minute}`:''}`.trim();
 }
+function teamAliasCandidates(id){
+  const out=[];
+  if(T[id]?.[0])out.push(T[id][0]);
+  if(NEWS_EN&&NEWS_EN[id])out.push(NEWS_EN[id]);
+  Object.entries(NAME_MAP||{}).forEach(([name,teamId])=>{if(teamId===id)out.push(name)});
+  if(FLAG_CODE[id])out.push(FLAG_CODE[id]);
+  return uniq(out.map(x=>String(x||'').replace(/[’']/g,"'").replace(/\s+/g,' ').trim()).filter(Boolean));
+}
+function scorerNameCore(label){
+  const p=parseScorerLabel(label);
+  return String(p.name||label||'')
+    .replace(/^\(?PK\)?\s*/i,'')
+    .replace(/[’']/g,"'")
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function isBogusScorerLabel(label,m){
+  const name=scorerNameCore(label);
+  if(!name)return true;
+  if(/^\d+$/.test(name))return true;
+  const lower=name.toLowerCase();
+  if(/^(goal|goal!|得点)$/.test(lower))return true;
+  const teams=[m&&m.home,m&&m.away].filter(Boolean);
+  const aliases=uniq(teams.flatMap(teamAliasCandidates)).filter(Boolean);
+  for(const alias of aliases){
+    const a=escapeRegExp(alias).replace(/\\\s\+/g,'\\s+');
+    const teamScore=new RegExp(`^${a}\\s+\\d+$`,'i');
+    const scoreLineStart=new RegExp(`^${a}\\s+\\d+\\s*[,，-]\\s*`,'i');
+    if(teamScore.test(name)||scoreLineStart.test(name))return true;
+  }
+  // ESPNのGoal本文から「South Africa 0」「Canada 1」のようなスコア断片を拾った場合を除外
+  if(/^[A-Za-z][A-Za-z .'-]+\s+\d+$/.test(name)){
+    const maybeTeam=name.replace(/\s+\d+$/,'').toLowerCase();
+    if(aliases.some(a=>String(a).toLowerCase()===maybeTeam))return true;
+  }
+  return false;
+}
+function sanitizeScorerLabel(label,m){
+  if(isBogusScorerLabel(label,m))return '';
+  const localized=localizeScorerLabel(label);
+  if(isBogusScorerLabel(localized,m))return '';
+  return localized;
+}
 function localizeScorers(scorers,m){
   const normalized=normalizeScorers(scorers,m);
   return {
-    home:normalized.home.map(localizeScorerLabel).filter(Boolean),
-    away:normalized.away.map(localizeScorerLabel).filter(Boolean)
+    home:normalized.home.map(x=>sanitizeScorerLabel(x,m)).filter(Boolean),
+    away:normalized.away.map(x=>sanitizeScorerLabel(x,m)).filter(Boolean)
   };
 }
 function normalizeScorers(scorers,m){
@@ -2563,8 +2606,22 @@ function normalizeScorers(scorers,m){
       out[side].push(typeof x==='string'?x:formatScorerLabel(x.name||x.player||x.label||'得点',x.minute));
     }));
   }
-  out.home=[...new Set(out.home.filter(Boolean).map(localizeScorerLabel))];
-  out.away=[...new Set(out.away.filter(Boolean).map(localizeScorerLabel))];
+  out.home=[...new Set(out.home.filter(Boolean).map(x=>sanitizeScorerLabel(x,m)).filter(Boolean))];
+  out.away=[...new Set(out.away.filter(Boolean).map(x=>sanitizeScorerLabel(x,m)).filter(Boolean))];
+  // 保存済みキャッシュに誤って相手側得点者が混入している場合でも、表示時にスコアと矛盾する側は落とす。
+  const hs=Number(m&&m.hs);
+  const as=Number(m&&m.as);
+  if(Number.isFinite(hs)&&hs===0)out.home=[];
+  if(Number.isFinite(as)&&as===0)out.away=[];
+  if(Number.isFinite(hs)&&Number.isFinite(as)){
+    const homeSet=new Set(out.home);
+    const awaySet=new Set(out.away);
+    const dup=[...homeSet].filter(x=>awaySet.has(x));
+    dup.forEach(x=>{
+      if(hs===0&&as>0)out.home=out.home.filter(v=>v!==x);
+      else if(as===0&&hs>0)out.away=out.away.filter(v=>v!==x);
+    });
+  }
   return out;
 }
 function scorerLines(items){return (items||[]).map(x=>{
@@ -2923,6 +2980,8 @@ function parseScorersFromText(text,m){
     if(!team)team=teamIdFromText(l);
     let label=formatScorerLabel(name||l.replace(/^Goal!\s*/i,'').slice(0,40),minute);
     if(/penalty|ペナルティ|PK/i.test(l)&&!/shootout|PK戦/i.test(l))label=addPenaltyPrefixToScorerLabel(label);
+    label=sanitizeScorerLabel(label,m);
+    if(!label)return;
     if(team===m.home&&!out.home.includes(label))out.home.push(label);
     if(team===m.away&&!out.away.includes(label))out.away.push(label);
   });
@@ -2965,11 +3024,13 @@ function extractScorers(data,m){
   candidates.forEach(item=>{
     if(!isGoalEvent(item))return;
     const minute=goalMinute(item);
-    const athlete=goalAthlete(item);
+    const athlete=goalAthlete(item,m);
     const team=goalTeam(item,m);
     const rawText=String(item.text||item.displayText||item.shortText||item.commentary||item.description||'').replace(/\s+/g,' ').trim();
     let label=formatScorerLabel(athlete||rawText||'得点',minute);
     if(/penalty|ペナルティ|PK/i.test(rawText)&&!/shootout|PK戦/i.test(rawText))label=addPenaltyPrefixToScorerLabel(label);
+    label=sanitizeScorerLabel(label,m);
+    if(!label)return;
     if(team===m.home && !out.home.includes(label))out.home.push(label);
     if(team===m.away && !out.away.includes(label))out.away.push(label);
   });
@@ -3018,31 +3079,51 @@ function scorerMinuteFromClock(value,period){
   if(period===4)return `延後 ${Math.max(1,total-105)}'`;
   return `後 ${Math.max(1,total-45)}'`;
 }
-function goalAthlete(item){
+function goalAthlete(item,m){
   const pools=[item.athletesInvolved,item.participants,item.athletes,item.players].filter(Array.isArray);
   for(const arr of pools){
     for(const p of arr){
       const a=p.athlete||p.player||p;
       const n=a.displayName||a.fullName||a.name||p.displayName||p.name;
-      if(n&&!Object.values(T).some(v=>v[0]===n))return String(n);
+      if(n&&!Object.values(T).some(v=>v[0]===n)&&!isBogusScorerLabel(n,m))return String(n);
     }
   }
   const direct=item.athlete?.displayName||item.player?.displayName||item.scorer?.displayName||item.participant?.displayName||'';
-  if(direct)return String(direct);
+  if(direct&&!isBogusScorerLabel(direct,m))return String(direct);
   const txt=String(item.text||item.displayText||item.shortText||item.commentary||item.description||'').replace(/\s+/g,' ').trim();
-  const m=txt.match(/(?:Goal!|Goal by|goal by)\s*([^.,;]+)/i);
-  if(m)return m[1].trim();
+  // ESPN本文例: "Goal! South Africa 0, Canada 1. Stephen Eustaquio (Canada) ..."
+  // 先頭のスコア断片ではなく、ピリオド後の選手名を優先して拾う。
+  const afterScore=txt.match(/Goal!\s*[^.]*\.\s*([^(.]+?)\s*\(([^)]+)\)/i);
+  if(afterScore&&!isBogusScorerLabel(afterScore[1],m))return afterScore[1].trim();
+  const byPattern=txt.match(/(?:Goal by|goal by|scored by|scores)\s+([^,.\(]+)(?:\s*\(([^)]+)\))?/i);
+  if(byPattern&&!isBogusScorerLabel(byPattern[1],m))return byPattern[1].trim();
+  const generic=txt.match(/(?:Goal!|Goal by|goal by)\s*([^.,;]+)/i);
+  if(generic&&!isBogusScorerLabel(generic[1],m))return generic[1].trim();
   return '';
 }
 function goalTeam(item,m){
   const id=resolveTeamFromESPN(item.team||item.teamInfo||item.competitor||{});
   if(id)return id;
-  const txt=String(item.text||item.displayText||item.commentary||item.description||item.shortText||'').toLowerCase();
+  const rawTxt=String(item.text||item.displayText||item.commentary||item.description||item.shortText||'').replace(/\s+/g,' ').trim();
+  // ESPN本文例: "Goal! South Africa 0, Canada 1. Stephen Eustaquio (Canada) ..."
+  // 文頭のスコア断片には両国名が入るため、まず得点者直後の括弧内チームを優先する。
+  const afterScore=rawTxt.match(/Goal!\s*[^.]*\.\s*[^(.]+?\s*\(([^)]+)\)/i);
+  if(afterScore){
+    const fromParen=teamIdFromText(afterScore[1]);
+    if(fromParen)return fromParen;
+  }
+  const byPattern=rawTxt.match(/(?:goal by|scored by|scores)\s+[^,.\(]+(?:\s*\(([^)]+)\))?/i);
+  if(byPattern&&byPattern[1]){
+    const fromBy=teamIdFromText(byPattern[1]);
+    if(fromBy)return fromBy;
+  }
+  const txt=rawTxt.toLowerCase();
   for(const t of [m.home,m.away]){
     const name=String(T[t]?.[0]||'').toLowerCase();
     const code=String(FLAG_CODE[t]||'').toLowerCase();
     if(name&&txt.includes(name))return t;
     if(code&&txt.includes(code))return t;
+    if(teamAliasCandidates(t).some(alias=>txt.includes(String(alias).toLowerCase())))return t;
   }
   return '';
 }
@@ -5146,7 +5227,7 @@ function boot(){
   }catch(e){
     console.error('初期表示エラー',e);
     const app=document.getElementById('app');
-    if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=25 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
+    if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=121 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
   }
 }
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot,{once:true});}else{boot();}

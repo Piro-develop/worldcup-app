@@ -364,23 +364,23 @@
     .ko-lines{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
     .ko-lines path{fill:none;stroke:rgba(205,220,245,.34);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
     .ko-round-title{position:absolute;top:0;z-index:3;text-align:center;font-weight:900;font-size:13px;color:#eef5ff;background:rgba(12,20,36,.98);border:1px solid rgba(205,220,245,.16);border-radius:12px;padding:8px;white-space:nowrap}
-    .ko-card{position:absolute;z-index:2;width:196px;border:1px solid rgba(205,220,245,.18);border-radius:15px;background:linear-gradient(180deg,#111c30,#0d1728);padding:9px;min-height:96px;box-shadow:var(--shadow);cursor:pointer}
+    .ko-card{position:absolute;z-index:2;width:196px;border:1px solid rgba(205,220,245,.18);border-radius:15px;background:linear-gradient(180deg,#111c30,#0d1728);padding:9px;height:96px;min-height:96px;box-shadow:var(--shadow);cursor:pointer;overflow:hidden}
     .ko-card:hover{border-color:rgba(52,210,208,.50)}
     .ko-card:active{transform:scale(.992)}
     .ko-card.done{border-color:rgba(52,210,208,.45)}
     .ko-card.live{border-color:rgba(255,231,151,.58)}
-    .ko-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;color:#9fb0ca;font-size:11px;font-weight:800}
+    .ko-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;color:#9fb0ca;font-size:11px;font-weight:800;min-width:0;overflow:hidden}.ko-meta span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .ko-card-label{flex:0 0 auto;border:1px solid rgba(52,210,208,.36);border-radius:999px;padding:2px 6px;background:rgba(52,210,208,.12);color:#dffefd;font-size:10px;font-weight:900}
     .ko-card-label.third{border-color:rgba(240,201,107,.38);background:rgba(240,201,107,.12);color:#ffe79a}
     .ko-teams{display:flex;flex-direction:column;gap:6px}
-    .ko-team{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:8px;border-radius:10px;padding:5px 6px;color:#eef5ff;font-weight:900;font-size:12.5px;line-height:1.25}
-    .ko-team.has-score{grid-template-columns:minmax(0,1fr) 46px}
+    .ko-team{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:6px;border-radius:10px;padding:5px 6px;color:#eef5ff;font-weight:900;font-size:12.5px;line-height:1.25;min-width:0;overflow:hidden}
+    .ko-team.has-score{grid-template-columns:minmax(0,1fr) 28px}
     .ko-team.jp:not(.winner){background:linear-gradient(180deg,rgba(35,135,139,.95),rgba(16,89,96,.95));border:1px solid rgba(93,243,240,.64);color:#eef5ff}
     .ko-team.winner{background:linear-gradient(180deg,#f6d87f,#c89933);color:#15120a;box-shadow:0 0 0 1px rgba(255,231,151,.35),0 0 14px rgba(240,201,107,.20)}
     .ko-team.jp.winner{border:1px solid rgba(93,243,240,.82)}
-    .ko-team-main{display:flex;align-items:center;gap:5px;min-width:0}
-    .ko-team-main span:last-child{white-space:normal;overflow:visible;text-overflow:clip}
-    .ko-score{justify-self:end;width:46px;text-align:right;font-weight:900;color:#ffe79a;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .ko-team-main{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden}
+    .ko-team-main span:last-child{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ko-score{justify-self:end;width:28px;text-align:right;font-weight:900;color:#ffe79a;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
     .ko-team.winner .ko-score{color:#15120a}
     .ko-placeholder{color:#aebdd3;font-weight:900}
     .ko-note{margin-top:10px;font-size:11px;color:#8fa1bc;line-height:1.55}
@@ -396,7 +396,7 @@
     .ko-detail-team.home .ko-detail-scorers{align-self:flex-start}
     .ko-detail-team.away .ko-detail-scorers{align-self:flex-end}
     .ko-detail-empty{color:#8fa1bc;font-size:11px;font-weight:700}
-    @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-head h2{font-size:18px}.ko-card{min-height:90px;padding:7px}.ko-team{font-size:11px;padding:5px 4px}.ko-round-title{font-size:11px;padding:7px 3px}.ko-meta{font-size:10px}.ko-card-label{font-size:9px;padding:2px 5px}}
+    @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-head h2{font-size:18px}.ko-card{height:94px;min-height:94px;padding:7px}.ko-team{font-size:11px;padding:5px 4px}.ko-team.has-score{grid-template-columns:minmax(0,1fr) 24px}.ko-score{width:24px}.ko-round-title{font-size:11px;padding:7px 3px}.ko-meta{font-size:10px}.ko-card-label{font-size:9px;padding:2px 5px}}
     @media (max-width:430px){.group-toolbar{gap:6px}.group-toolbar-left{font-size:11px;letter-spacing:-.03em}.panel-head-title{font-size:17px;letter-spacing:-.04em}.group-toolbar-helper{font-size:10.5px;margin-top:-6px}.group-toolbar-actions .group-status{font-size:10px;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-spacer{min-width:8px}}
     @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px;margin-right:3px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:0}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
   </style>
@@ -1529,9 +1529,9 @@ function koViewRangeLabel(titles,viewCol){
 }
 function knockoutPage(viewCol=koViewCol()){
   const pages=[
-    {cols:[0,1,2],titles:['ベスト32','ラウンド16','準々決勝']},
-    {cols:[1,2,3],titles:['ラウンド16','準々決勝','準決勝']},
-    {cols:[2,3,4],titles:['準々決勝','準決勝','決勝']},
+    {cols:[0,1],titles:['ベスト32','ラウンド16']},
+    {cols:[1,2],titles:['ラウンド16','準々決勝']},
+    {cols:[2,3],titles:['準々決勝','準決勝']},
     {cols:[3,4],titles:['準決勝','決勝']}
   ];
   return pages[Math.max(0,Math.min(3,viewCol))]||pages[0];
@@ -1541,8 +1541,8 @@ function knockoutLayout(viewCol=koViewCol()){
   const page=knockoutPage(viewCol);
   const visibleCols=page.cols;
   const twoColView=visibleCols.length===2;
-  const xCols=twoColView?[8,56]:[2,34.5,67];
-  const cardW=twoColView?36:30.5;
+  const xCols=[3,54];
+  const cardW=43;
   const r32=[73,75,74,77,83,84,81,82,76,78,79,80,86,88,85,87];
   const r16=[90,89,93,94,91,92,95,96];
   const qf=[97,98,99,100];
@@ -1593,7 +1593,7 @@ function knockoutLayout(viewCol=koViewCol()){
   return {pos,orders,titles:page.titles,globalTitles,visibleCols,visibleMatches,cardW,cardH,boardW:100,boardH,viewCol};
 }
 function koBoardInnerHTML(layout){
-  const titleXs=layout.visibleCols.length===2?[8,56]:[2,34.5,67];
+  const titleXs=[3,54];
   return `${knockoutLinesHTML(layout)}
     ${layout.visibleCols.map((col,i)=>`<div class="ko-round-title" style="left:${titleXs[i]}%;width:${layout.cardW}%">${esc(layout.globalTitles[col])}</div>`).join('')}
     ${layout.visibleMatches.map(no=>koMatchCardHTML(koMatchByNo(no),layout.pos[no])).join('')}`;
@@ -1648,8 +1648,9 @@ function koMatchCardHTML(m,pos){
   const live=!!result.live;
   const aSide=result.home?{type:'team',id:result.home}:resolveKoSide(m.a);
   const bSide=result.away?{type:'team',id:result.away}:resolveKoSide(m.b);
-  const aScore=scoreText(result.hs,result.homePens);
-  const bScore=scoreText(result.as,result.awayPens);
+  const showScore=done||live;
+  const aScore=showScore?scoreText(result.hs,result.homePens):'';
+  const bScore=showScore?scoreText(result.as,result.awayPens):'';
   const aWin=done&&isKoWinner(result,'home');
   const bWin=done&&isKoWinner(result,'away');
   const roundLabel=m.no===104?'決勝':(m.no===103?'3位決定戦':'');

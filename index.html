@@ -503,7 +503,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=15;
+const SCORER_CACHE_VERSION=16;
 const MATCH_SCORER_FALLBACKS={
   '66456904':{home:['フリアン キニョーネス 前 9\'','ラウル ヒメネス 後 22\''],away:[]},
   '66456906':{home:['ファン インボム 後 22\'','オ ヒョンギュ 後 35\''],away:['ラディスラフ クレイチ 後 14\'']},
@@ -1242,8 +1242,38 @@ const KNOCKOUT_MATCHES=[
 // 確定済みで今後変わらない決勝トーナメント結果は、外部取得より内部データを優先します。
 // 日本は敗退確定済みのため、ブラジル戦の日本側得点者は固定データとして保持します。
 const KNOCKOUT_STATIC_RESULTS={
-  '76':{completed:true,live:false,inProgress:false,home:'br',away:'jp',hs:2,as:1,winner:'home',scorerSource:'built-in-final',scorerVersion:15,scorers:{home:[],away:['佐野海舟']}},
-  '53452557':{completed:true,live:false,inProgress:false,home:'br',away:'jp',hs:2,as:1,winner:'home',scorerSource:'built-in-final',scorerVersion:15,scorers:{home:[],away:['佐野海舟']}}
+  '76':{
+    completed:true,
+    live:false,
+    inProgress:false,
+    home:'br',
+    away:'jp',
+    hs:2,
+    as:1,
+    winner:'home',
+    scorerSource:'built-in-final',
+    scorerVersion:16,
+    scorers:{
+      home:['カゼミーロ 後 56','ガブリエウ・マルティネッリ 後 90+5'],
+      away:['佐野海舟 前 29']
+    }
+  },
+  '53452557':{
+    completed:true,
+    live:false,
+    inProgress:false,
+    home:'br',
+    away:'jp',
+    hs:2,
+    as:1,
+    winner:'home',
+    scorerSource:'built-in-final',
+    scorerVersion:16,
+    scorers:{
+      home:['カゼミーロ 後 56','ガブリエウ・マルティネッリ 後 90+5'],
+      away:['佐野海舟 前 29']
+    }
+  }
 };
 function koStaticResultForMatch(m){
   if(!m)return {};

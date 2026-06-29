@@ -338,7 +338,8 @@
 
     .ko-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
     .ko-head h2{margin:0;font-size:20px;line-height:1.25;white-space:nowrap}
-    .ko-viewbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 8px}
+    .ko-viewbar{position:sticky;top:calc(var(--main-tabs-height, 86px) + 8px);z-index:50;display:grid;grid-template-columns:38px minmax(0,1fr) minmax(0,1fr) 38px;align-items:center;gap:6px;margin:2px 0 8px;padding:5px;border:1px solid rgba(205,220,245,.24);border-radius:15px;background:rgba(7,12,22,.94);backdrop-filter:blur(14px);box-shadow:0 10px 26px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.035)}
+    .ko-sticky-round-title{min-width:0;border:1px solid rgba(52,210,208,.30);border-radius:11px;background:linear-gradient(180deg,rgba(22,34,55,.98),rgba(12,20,36,.98));color:#eef5ff;padding:8px 4px;font-size:12px;font-weight:900;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
     .ko-nav-btn{appearance:none;width:38px;height:38px;border:1px solid rgba(205,220,245,.24);border-radius:999px;background:#111c30;color:#eef5ff;font-size:24px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.22)}
     .ko-nav-btn:disabled{opacity:.35;cursor:not-allowed}
     .ko-view-spacer{flex:1;min-width:0}
@@ -391,7 +392,7 @@
     .ko-detail-team.away .ko-detail-scorers{align-self:flex-end}
     .ko-detail-empty{color:#8fa1bc;font-size:11px;font-weight:700}
     @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-head h2{font-size:18px}.ko-card{height:94px;min-height:94px;padding:7px}.ko-team{font-size:11px;padding:5px 4px}.ko-team.has-score{grid-template-columns:minmax(0,1fr) 24px}.ko-score{width:24px}.ko-round-title{font-size:11px;padding:7px 3px}.ko-meta{font-size:10px}.ko-card-label{font-size:9px;padding:2px 5px}}
-    @media (max-width:430px){.group-toolbar{gap:6px}.group-toolbar-left{font-size:11px;letter-spacing:-.03em}.panel-head-title{font-size:17px;letter-spacing:-.04em}.group-toolbar-helper{font-size:10.5px;margin-top:-6px}.group-toolbar-actions .group-status{font-size:10px;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-spacer{min-width:8px}}
+    @media (max-width:430px){.group-toolbar{gap:6px}.group-toolbar-left{font-size:11px;letter-spacing:-.03em}.panel-head-title{font-size:17px;letter-spacing:-.04em}.group-toolbar-helper{font-size:10.5px;margin-top:-6px}.group-toolbar-actions .group-status{font-size:10px;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-viewbar{top:calc(var(--main-tabs-height, 86px) + 6px);grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) 34px;gap:5px;padding:5px}.ko-sticky-round-title{font-size:11px;padding:7px 2px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-spacer{min-width:8px}}
     @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:7px}.slot-main{gap:5px;padding:3px 7px}.tag{flex-basis:33px;height:24px;font-size:11px;border-radius:7px}.confirm-btn{display:none}.flag-img{width:16px;height:11px;margin-right:3px}.team-line .flag-img{width:17px;height:12px;margin-right:3px}.group-table .flag-img{width:16px;height:11px;margin-right:3px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:10.5px;line-height:1.08;gap:1px;letter-spacing:-.04em}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:0}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
   </style>
 </head>
@@ -1519,6 +1520,10 @@ function koViewRangeLabel(titles,viewCol){
   const page=knockoutPage(viewCol);
   return `表示：${page.titles.join(' / ')}`;
 }
+function koStickyRoundTitlesHTML(layout){
+  const titles=(layout&&layout.visibleCols||[]).map(col=>layout.globalTitles[col]||'');
+  return titles.map(label=>`<div class="ko-sticky-round-title">${esc(label)}</div>`).join('');
+}
 function knockoutPage(viewCol=koViewCol()){
   const pages=[
     {cols:[0,1],titles:['ベスト32','ラウンド16']},
@@ -1529,7 +1534,7 @@ function knockoutPage(viewCol=koViewCol()){
   return pages[Math.max(0,Math.min(3,viewCol))]||pages[0];
 }
 function knockoutLayout(viewCol=koViewCol()){
-  const cardH=96, top=54;
+  const cardH=96, top=10;
   const page=knockoutPage(viewCol);
   const visibleCols=page.cols;
   const twoColView=visibleCols.length===2;
@@ -1585,9 +1590,7 @@ function knockoutLayout(viewCol=koViewCol()){
   return {pos,orders,titles:page.titles,globalTitles,visibleCols,visibleMatches,cardW,cardH,boardW:100,boardH,viewCol};
 }
 function koBoardInnerHTML(layout){
-  const titleXs=[3,54];
   return `${knockoutLinesHTML(layout)}
-    ${layout.visibleCols.map((col,i)=>`<div class="ko-round-title" style="left:${titleXs[i]}%;width:${layout.cardW}%">${esc(layout.globalTitles[col])}</div>`).join('')}
     ${layout.visibleMatches.map(no=>koMatchCardHTML(koMatchByNo(no),layout.pos[no])).join('')}`;
 }
 function knockoutScheduleHTML(){
@@ -1611,7 +1614,7 @@ function knockoutScheduleHTML(){
   return `<section class="panel"><div class="card"><div class="ko-head"><h2>決勝トーナメント日程・結果</h2><div class="group-toolbar-actions"><div class="group-status">${esc(ko.status||'')}</div><button class="btn primary" id="updateKnockout">更新</button></div></div>
     <div class="group-toolbar-helper">試合結果は各カードをタップ</div>
     <div class="group-toolbar-helper">グループステージの結果詳細は各グループを参照</div>
-    <div class="ko-viewbar"><button class="ko-nav-btn" data-ko-nav="-1" ${prevDisabled} aria-label="左へ">‹</button><div class="ko-view-spacer" aria-hidden="true"></div><button class="ko-nav-btn" data-ko-nav="1" ${nextDisabled} aria-label="右へ">›</button></div>
+    <div class="ko-viewbar"><button class="ko-nav-btn" data-ko-nav="-1" ${prevDisabled} aria-label="左へ">‹</button>${koStickyRoundTitlesHTML(layout)}<button class="ko-nav-btn" data-ko-nav="1" ${nextDisabled} aria-label="右へ">›</button></div>
     <div class="ko-board-wrap">${boardHtml}</div>
   </div></section>`;
 }
@@ -1954,22 +1957,38 @@ function simpleTab(tab){
     <table class="table stat-table"><thead><tr><th>順位</th><th>${label}</th><th>国旗 選手名（国名）</th></tr></thead><tbody>${rowsData.map((r,i)=>`<tr><td>${r.rank||i+1}</td><td>${esc(r.value||'')}</td><td><span class="stat-player">${r.team?teamFlag(r.team):''}${esc(r.player||'')}</span>${r.team?` <span class="small">(${esc(T[r.team]?.[0]||r.team)})</span>`:''}${r.tieNote?` <span class="small">${esc(r.tieNote)}</span>`:''}</td></tr>`).join('')}</tbody></table>
   </div>`
 }
-function changeKnockoutView(delta){
+function setKnockoutView(nextView){
   state.ko=state.ko||{status:'',results:{},viewCol:0};
-  const d=Number(delta||0);
-  const next=Math.max(0,Math.min(3,koViewCol()+d));
+  const next=Math.max(0,Math.min(3,Number(nextView||0)));
   const prev=koViewCol();
   if(next===prev)return;
   state.ko.prevViewCol=prev;
   state.ko.viewCol=next;
-  state.ko.anim=d>0?'next':'prev';
+  state.ko.anim=next>prev?'next':'prev';
   save();
   render();
+  requestAnimationFrame(()=>{
+    const marker=document.getElementById('koStickyRoundTitles');
+    if(marker)marker.scrollIntoView({block:'nearest',inline:'nearest'});
+  });
+}
+function changeKnockoutView(delta){
+  const d=Number(delta||0);
+  setKnockoutView(koViewCol()+d);
 }
 function bindKnockoutAutoAlign(){
   // ページ切替式に変更したため、横スクロール補正は不要です。
 }
+function updateStickyNavOffset(){
+  try{
+    const tabsEl=document.getElementById('tabs');
+    const h=tabsEl?Math.ceil(tabsEl.getBoundingClientRect().height):86;
+    document.documentElement.style.setProperty('--main-tabs-height',h+'px');
+  }catch(e){}
+}
 function bind(){
+  updateStickyNavOffset();
+  window.addEventListener('resize',updateStickyNavOffset,{passive:true});
   document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{state.active=b.dataset.tab;save();render()});
   document.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>openSheet(b.dataset.slot));
   document.querySelectorAll('[data-confirm]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();toggleConfirm(b.dataset.confirm)});

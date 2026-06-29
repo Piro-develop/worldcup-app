@@ -87,30 +87,23 @@
     }
     .slot-main{
       appearance:none;border:0;background:transparent;color:inherit;
-      flex:1 1 auto;min-width:0;height:100%;
-      display:flex;align-items:center;gap:5px;
-      padding:2px 4px 2px 5px;text-align:left;cursor:pointer;
+      flex:1 1 100%;width:100%;min-width:0;height:100%;
+      display:flex;align-items:center;gap:7px;
+      padding:3px 8px;text-align:left;cursor:pointer;
     }
     .slot.fixed .slot-main{cursor:default}
     .slot-main:disabled{opacity:1}
-    .confirm-btn{
-      appearance:none;flex:0 0 25px;height:calc(100% - 6px);margin-right:3px;
-      border:1px solid rgba(205,220,245,.18);border-radius:7px;
-      background:#1d2b44;color:#c8d6ea;font-size:10px;font-weight:900;
-      display:flex;align-items:center;justify-content:center;cursor:pointer;
-    }
-    .confirm-btn.active{background:#7a5414;color:#fff3cf;border-color:rgba(255,225,135,.75)}
-    .slot.confirmed .confirm-btn{background:#17130a;color:#ffe79a;border-color:rgba(0,0,0,.24)}
+    .confirm-btn{display:none}
     .tag{
-      flex:0 0 31px;
-      height:24px;
+      flex:0 0 38px;
+      height:27px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      border-radius:6px;
+      border-radius:7px;
       background:#24314a;
       color:#c8d5e8;
-      font-size:10px;
+      font-size:12px;
       font-weight:900;
     }
     .slot.jp .tag{background:#6ee7e5;color:#08212a}
@@ -123,21 +116,22 @@
       flex-direction:column;
       justify-content:center;
       gap:1px;
-      font-size:clamp(7px,.9vw,10px);
+      font-size:clamp(10px,1.25vw,13px);
       font-weight:900;
-      line-height:1.05;
+      line-height:1.08;
       overflow:hidden;
-      letter-spacing:-.03em;
+      letter-spacing:-.025em;
     }
     .team-line{
       display:flex;
       align-items:center;
       min-width:0;
+      max-width:100%;
       white-space:nowrap;
-      overflow:visible;
+      overflow:hidden;
     }
-    .team-line .flag-img{width:14px;height:9px;margin-right:2px}
-    .team-name{display:inline-block;min-width:0;overflow:visible;text-overflow:clip}
+    .team-line .flag-img{width:18px;height:12px;margin-right:3px}
+    .team-name{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .team-text .muted{font-weight:700;color:#aab8cc}
     .slot.confirmed .team-text .muted{color:#473811}
     .flag-img{
@@ -398,7 +392,7 @@
     .ko-detail-empty{color:#8fa1bc;font-size:11px;font-weight:700}
     @media (max-width:700px){.tabs{grid-template-columns:repeat(3,1fr)}.tab{font-size:11px}.ko-head h2{font-size:18px}.ko-card{height:94px;min-height:94px;padding:7px}.ko-team{font-size:11px;padding:5px 4px}.ko-team.has-score{grid-template-columns:minmax(0,1fr) 24px}.ko-score{width:24px}.ko-round-title{font-size:11px;padding:7px 3px}.ko-meta{font-size:10px}.ko-card-label{font-size:9px;padding:2px 5px}}
     @media (max-width:430px){.group-toolbar{gap:6px}.group-toolbar-left{font-size:11px;letter-spacing:-.03em}.panel-head-title{font-size:17px;letter-spacing:-.04em}.group-toolbar-helper{font-size:10.5px;margin-top:-6px}.group-toolbar-actions .group-status{font-size:10px;max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stat-head h2{font-size:18px}.stat-actions{gap:6px}.stat-actions .stat-status{font-size:10px;min-width:50px}.news-head h2{font-size:18px}.news-controls{grid-template-columns:1fr auto}.news-item{grid-template-columns:64px 1fr}.news-thumb{width:64px;height:46px}.news-title{font-size:11.5px}.ko-nav-btn{width:34px;height:34px;font-size:22px}.ko-view-spacer{min-width:8px}}
-    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:6px}.tag{flex-basis:24px;height:20px;font-size:9px}.confirm-btn{flex-basis:21px;font-size:9px;margin-right:2px}.flag-img{width:14px;height:9px;margin-right:2px}.group-table .flag-img{width:16px;height:11px;margin-right:3px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:7.5px;line-height:1.05;gap:1px}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:0}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
+    @media (max-width:430px){.wrap{padding-left:5px;padding-right:5px}.title{font-size:19px}.lead{display:none}.bracket{height:760px}.slot{padding:0;border-radius:7px}.slot-main{gap:5px;padding:3px 7px}.tag{flex-basis:33px;height:24px;font-size:11px;border-radius:7px}.confirm-btn{display:none}.flag-img{width:16px;height:11px;margin-right:3px}.team-line .flag-img{width:17px;height:12px;margin-right:3px}.group-table .flag-img{width:16px;height:11px;margin-right:3px}.opt .flag-img{width:22px;height:15px;margin-right:0}.team-text{font-size:10.5px;line-height:1.08;gap:1px;letter-spacing:-.04em}.toolbar{display:flex;gap:6px;align-items:center;justify-content:space-between}.toolbar .btn{padding:7px 8px;font-size:11px}.tabs{gap:4px;padding:6px}.tab{font-size:10px;padding:8px 1px}.sheet.group-detail{width:calc(100vw - 10px);max-height:90vh}.group-detail-title{font-size:16px}.detail-table{font-size:11px}.detail-table th,.detail-table td{padding:6px 2px}.match-main{font-size:11px;gap:2px;grid-template-columns:minmax(0,1fr) 46px minmax(0,1fr)}.match-team{padding:4px 2px}.team-scorers{font-size:7.6px;max-width:100%;line-height:1.18}.scorer-line{letter-spacing:-.08em}.scorer-name{padding-right:9px}.scorer-period{padding-right:0}.scorer-minute{padding-left:0}.match-score{min-width:46px;padding:3px 4px;font-size:10.5px;white-space:nowrap}}
   </style>
 </head>
 <body>
@@ -1376,10 +1370,8 @@ function slotHTML(s,side,mi,si){
   const left=side==='left'?1.0:61.0;
   const classes=`slot ${s.sel.includes('jp')?'jp':''} ${s.sel.length?'':'empty'} ${s.fixed?'fixed':''} ${s.confirmed||s.fixed?'confirmed':''}`;
   const mainAttr=s.fixed?'disabled aria-disabled="true"':`data-slot="${s.id}"`;
-  const confirmAttr=s.fixed?'aria-label="確定済み"':`data-confirm="${s.id}" aria-label="確定"`;
   return `<div class="${classes}" style="left:${left}%;top:${top}%">
     <button class="slot-main" type="button" ${mainAttr}><span class="tag">${esc(s.tag)}</span><span class="team-text">${teamText(s.sel)}</span></button>
-    <button class="confirm-btn ${s.confirmed||s.fixed?'active':''}" type="button" ${confirmAttr}>確</button>
   </div>`
 }
 function isGroupComplete(rows){return rows&&rows.length===4&&rows.every(r=>(r.w+r.d+r.l)>=3)}

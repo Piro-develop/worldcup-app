@@ -503,7 +503,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=13;
+const SCORER_CACHE_VERSION=15;
 const MATCH_SCORER_FALLBACKS={
   '66456904':{home:['フリアン キニョーネス 前 9\'','ラウル ヒメネス 後 22\''],away:[]},
   '66456906':{home:['ファン インボム 後 22\'','オ ヒョンギュ 後 35\''],away:['ラディスラフ クレイチ 後 14\'']},
@@ -751,6 +751,27 @@ Object.assign(STAT_PLAYER_JA,{
   'kevin pina':'ケヴィン・ピナ','kévin pina':'ケヴィン・ピナ','elio varela':'エリオ・ヴァレラ','dailon livramento':'ダイロン・リブラメント','jovane cabral':'ジョバネ・カブラル','garry rodrigues':'ギャリー・ロドリゲス',
   'luis diaz':'ルイス・ディアス','luis díaz':'ルイス・ディアス','jhon duran':'ジョン・ドゥラン','jhon durán':'ジョン・ドゥラン','james rodriguez':'ハメス・ロドリゲス','james rodríguez':'ハメス・ロドリゲス','jhon arias':'ジョン・アリアス','rafael borre':'ラファエル・ボレ','rafael borré':'ラファエル・ボレ','haminton campaz':'ハミントン・カンパス','jefferson lerma':'ジェフェルソン・レルマ',
   'mohammed kudus':'モハメド・クドゥス','jordan ayew':'ジョーダン・アイェウ','andre ayew':'アンドレ・アイェウ','andré ayew':'アンドレ・アイェウ','inaki williams':'イニャキ・ウィリアムズ','iñaki williams':'イニャキ・ウィリアムズ','antoine semenyo':'アントワーヌ・セメニョ','thomas partey':'トーマス・パーテイ','caleb yirenkyi':'カレブ・イレンキー'
+});
+Object.assign(STAT_PLAYER_JA,{
+  // 日本代表：ESPN等で姓だけ・姓名逆順・省略形で返るケースを表示時に日本語化します。
+  'kubo':'久保建英','kubo takefusa':'久保建英','takefusa kubo':'久保建英','take kubo':'久保建英','t kubo':'久保建英','kubo t':'久保建英',
+  'doan':'堂安律','doan ritsu':'堂安律','ritsu doan':'堂安律','r doan':'堂安律','doan r':'堂安律',
+  'mitoma':'三笘薫','mitoma kaoru':'三笘薫','kaoru mitoma':'三笘薫','k mitoma':'三笘薫','mitoma k':'三笘薫',
+  'minamino':'南野拓実','minamino takumi':'南野拓実','takumi minamino':'南野拓実','t minamino':'南野拓実','minamino t':'南野拓実',
+  'ueda':'上田綺世','ueda ayase':'上田綺世','ayase ueda':'上田綺世','a ueda':'上田綺世','ueda a':'上田綺世',
+  'kamada':'鎌田大地','kamada daichi':'鎌田大地','daichi kamada':'鎌田大地','d kamada':'鎌田大地','kamada d':'鎌田大地',
+  'nakamura':'中村敬斗','nakamura keito':'中村敬斗','keito nakamura':'中村敬斗','k nakamura':'中村敬斗','nakamura k':'中村敬斗',
+  'maeda':'前田大然','maeda daizen':'前田大然','daizen maeda':'前田大然','d maeda':'前田大然','maeda d':'前田大然',
+  'ito':'伊東純也','ito junya':'伊東純也','junya ito':'伊東純也','j ito':'伊東純也','ito j':'伊東純也',
+  'tanaka':'田中碧','tanaka ao':'田中碧','ao tanaka':'田中碧','a tanaka':'田中碧','tanaka a':'田中碧',
+  'endo':'遠藤航','endo wataru':'遠藤航','wataru endo':'遠藤航','w endo':'遠藤航','endo w':'遠藤航',
+  'morita':'守田英正','morita hidemasa':'守田英正','hidemasa morita':'守田英正','h morita':'守田英正','morita h':'守田英正',
+  'machino':'町野修斗','machino shuto':'町野修斗','shuto machino':'町野修斗','s machino':'町野修斗','machino s':'町野修斗',
+  'hosoya':'細谷真大','hosoya mao':'細谷真大','mao hosoya':'細谷真大','m hosoya':'細谷真大','hosoya m':'細谷真大',
+  'sugawara':'菅原由勢','sugawara yukinari':'菅原由勢','yukinari sugawara':'菅原由勢','y sugawara':'菅原由勢','sugawara y':'菅原由勢',
+  'tomiyasu':'冨安健洋','tomiyasu takehiro':'冨安健洋','takehiro tomiyasu':'冨安健洋','t tomiyasu':'冨安健洋','tomiyasu t':'冨安健洋',
+  'sano':'佐野海舟','sano kaishu':'佐野海舟','kaishu sano':'佐野海舟','k sano':'佐野海舟','sano k':'佐野海舟',
+  'itakura':'板倉滉','itakura ko':'板倉滉','ko itakura':'板倉滉','k itakura':'板倉滉','itakura k':'板倉滉'
 });
 function normalizePlayerAlias(name){
   return String(name||'')
@@ -1218,6 +1239,30 @@ const KNOCKOUT_MATCHES=[
   {no:104,round:'決勝',date:'2026-07-19T15:00:00-04:00',venue:'ニュージャージー',a:'W101',b:'W102'}
 ];
 
+// 確定済みで今後変わらない決勝トーナメント結果は、外部取得より内部データを優先します。
+// 日本は敗退確定済みのため、ブラジル戦の日本側得点者は固定データとして保持します。
+const KNOCKOUT_STATIC_RESULTS={
+  '76':{completed:true,live:false,inProgress:false,home:'br',away:'jp',hs:2,as:1,winner:'home',scorerSource:'built-in-final',scorerVersion:15,scorers:{home:[],away:['佐野海舟']}},
+  '53452557':{completed:true,live:false,inProgress:false,home:'br',away:'jp',hs:2,as:1,winner:'home',scorerSource:'built-in-final',scorerVersion:15,scorers:{home:[],away:['佐野海舟']}}
+};
+function koStaticResultForMatch(m){
+  if(!m)return {};
+  const rec=KNOCKOUT_STATIC_RESULTS[String(m.no)]||KNOCKOUT_STATIC_RESULTS[String(m.id||'')];
+  return rec?JSON.parse(JSON.stringify(rec)):{};
+}
+function hasStaticKoResult(m){return Object.keys(koStaticResultForMatch(m)).length>0}
+function addStaticKoResultsToMap(out){
+  const next=Object.assign({},out||{});
+  KNOCKOUT_MATCHES.forEach(m=>{
+    const rec=koStaticResultForMatch(m);
+    if(!Object.keys(rec).length)return;
+    const key=koResultKeyForMatch(m);
+    next[key]=Object.assign({},next[key]||{},rec);
+    if(m.no!==undefined)next[String(m.no)]=Object.assign({},next[key]);
+  });
+  return next;
+}
+
 let state=load();let editing=null;
 applyConfirmedBracketSlots();
 function clone(x){return JSON.parse(JSON.stringify(x))}
@@ -1656,7 +1701,9 @@ function koMatchCardHTML(m,pos){
 }
 function getKoResult(m){
   const results=(state.ko&&state.ko.results)||{};
-  return results[String(m.id||m.no)]||results[String(m.no)]||{};
+  const saved=results[String(m.id||m.no)]||results[String(m.no)]||{};
+  const fixed=koStaticResultForMatch(m);
+  return Object.keys(fixed).length?Object.assign({},saved,fixed):saved;
 }
 function scoreText(score,pens){
   if(score===undefined||score===null||score==='')return '';
@@ -1907,6 +1954,10 @@ async function fetchKnockoutResults(){
   uniqueESPNEvents(payloads).forEach(ev=>{
     const match=findKnockoutMatchForESPNEvent(ev);
     if(!match)return;
+    if(hasStaticKoResult(match)){
+      Object.assign(out,addStaticKoResultsToMap(out));
+      return;
+    }
     const rec=koEventToResultRecord(ev,match);
     if(!rec)return;
     const key=koResultKeyForMatch(match);
@@ -1920,6 +1971,7 @@ async function fetchKnockoutResults(){
     // 同じ試合を internal id / no の両方で持つため、詳細取得は internal id 側だけに寄せます。
     const match=KNOCKOUT_MATCHES.find(m=>koResultKeyForMatch(m)===key);
     if(!match)return false;
+    if(hasStaticKoResult(match))return false;
     const goals=(Number(rec.hs)||0)+(Number(rec.as)||0);
     return (rec.completed||rec.live)&&goals>0;
   });
@@ -1943,7 +1995,7 @@ async function fetchKnockoutResults(){
       console.warn('決勝T得点者取得失敗',eventId,e);
     }
   });
-  return out;
+  return addStaticKoResultsToMap(out);
 }
 function simpleTab(tab){
   const title={goals:'得点ランキング',assists:'アシストランキング',flash:'速報',news:'ニュース'}[tab];
@@ -4503,9 +4555,8 @@ function buildGoalRankingFromMatchScorers(){
   });
 
   // 決勝トーナメントは「日程・結果」更新で取得・保存した得点者を加算します。
-  const koResults=(state.ko&&state.ko.results)||{};
   KNOCKOUT_MATCHES.forEach(m=>{
-    const result=koResults[String(m.id||m.no)]||koResults[String(m.no)]||{};
+    const result=getKoResult(m);
     if(!result||!result.scorers)return;
     const home=result.home||resolveKoSide(m.a).id||'';
     const away=result.away||resolveKoSide(m.b).id||'';

@@ -503,7 +503,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=16;
+const SCORER_CACHE_VERSION=18;
 const MATCH_SCORER_FALLBACKS={
   '66456904':{home:['フリアン キニョーネス 前 9\'','ラウル ヒメネス 後 22\''],away:[]},
   '66456906':{home:['ファン インボム 後 22\'','オ ヒョンギュ 後 35\''],away:['ラディスラフ クレイチ 後 14\'']},
@@ -802,11 +802,16 @@ function cleanPlayerNameForLocalization(name){
   let s=stripStatImageNoise(name);
   if(!s)return '';
   try{s=decodeHtml(s)}catch(e){}
-  s=s.replace(/^(?:Goal!|Goal by|Goal|Scored by)\s*/i,'');
+  s=s.replace(/^(?:Goal!|Goal by|Goal|Scored by|Score by|scores?)\s*/i,'');
   s=s.replace(/^[\s:：・|-]+/,'');
+  // 得点本文や速報本文がそのまま入った場合は、選手名だけを残します。
+  // 例: "Kylian Mbappe Goal - Header" / "Kylian Mbappe right footed shot ..." / "Assisted by ..."
+  if(/^(?:assisted by|assist by|assist|from|following|right|left|header|headed|shot|corner|free kick)\b/i.test(s))return '';
   s=s.replace(/\s*\((?:[^)]*(?:Canada|South Africa|Brazil|Japan|Germany|Paraguay|Netherlands|Morocco|Ivory Coast|Norway|France|Sweden|Mexico|Ecuador|England|Congo|Belgium|Senegal|United States|USA|Bosnia|Spain|Austria|Portugal|Croatia|Switzerland|Algeria|Australia|Egypt|Argentina|Cape Verde|Colombia|Ghana)[^)]*)\).*$/i,'');
+  s=s.replace(/\s+(?:Goal|GOAL|scores?|scored)\b.*$/i,'');
+  s=s.replace(/\s+[-–—]\s*(?:Goal|GOAL|header|headed|right|left|shot|scores?|scored|assist|assisted)\b.*$/i,'');
   s=s.replace(/[,.;].*$/,'');
-  s=s.replace(/\s+(?:right|left|header|headed|tap-in|shot|penalty|free kick|from|assist|assisted by)\b.*$/i,'');
+  s=s.replace(/\s+(?:right|left|header|headed|tap-in|shot|penalty|free kick|from|assist|assisted by|following|corner|cross|inside|outside|bottom|top|centre|center)\b.*$/i,'');
   s=s.replace(/\s+own goal$/i,' own goal');
   return s.replace(/\s+/g,' ').trim();
 }
@@ -1252,7 +1257,7 @@ const KNOCKOUT_STATIC_RESULTS={
     as:1,
     winner:'home',
     scorerSource:'built-in-final',
-    scorerVersion:16,
+    scorerVersion:SCORER_CACHE_VERSION,
     scorers:{
       home:['カゼミーロ 後 56','ガブリエウ・マルティネッリ 後 90+5'],
       away:['佐野海舟 前 29']
@@ -1268,7 +1273,7 @@ const KNOCKOUT_STATIC_RESULTS={
     as:1,
     winner:'home',
     scorerSource:'built-in-final',
-    scorerVersion:16,
+    scorerVersion:SCORER_CACHE_VERSION,
     scorers:{
       home:['カゼミーロ 後 56','ガブリエウ・マルティネッリ 後 90+5'],
       away:['佐野海舟 前 29']
@@ -2615,6 +2620,26 @@ function scorerBlock(items,done,live,goals,loading,fetched){
   if(goalCount>0&&fetched)return `<div class="team-scorers"><div class="scorer-empty">得点者取得不可</div></div>`;
   return '';
 }
+function isPenaltyShootoutText(value){
+  const raw=String(value||'').replace(/[’′]/g,"'").replace(/［/g,'[').replace(/］/g,']').trim();
+  if(!raw)return false;
+  const s=raw.toLowerCase().replace(/\s+/g,' ');
+  return /pk戦|ｐｋ戦|ＰＫ戦|ペナルティ(?:ー|−|-)?シュートアウト|penalty\s*shoot[- ]?out|shoot[- ]?out|penalties\s*\(|won on penalties|on penalties|penalty\s+kicks|shootout\s+goal|penalty\s+shootout\s+goal/i.test(raw)||/(penalty|penalties).{0,24}(shootout|shoot-out)|(?:shootout|shoot-out).{0,24}(penalty|penalties)/i.test(s);
+}
+function isPenaltyShootoutScorerLabel(label){
+  const p=parseScorerLabel(label);
+  return isPenaltyShootoutText(label)||isPenaltyShootoutText(p.name)||isPenaltyShootoutText(p.period)||isPenaltyShootoutText(p.minute);
+}
+function isPenaltyShootoutEvent(item){
+  if(!item||typeof item!=='object')return false;
+  const periodNum=Number(item.period?.number||item.period);
+  if(Number.isFinite(periodNum)&&periodNum>4)return true;
+  const rawPeriod=String(item.period?.displayValue||item.period?.text||item.period?.name||item.period||'');
+  const rawType=String(item.type?.text||item.type?.displayName||item.type?.name||item.type||item.scoringType||'');
+  const rawText=String(item.text||item.displayText||item.shortText||item.commentary||item.description||item.summary||'');
+  if(item.shootout===true||item.penaltyShootout===true)return true;
+  return isPenaltyShootoutText(rawPeriod+' '+rawType+' '+rawText);
+}
 function localizeScorerName(name){
   const raw=String(name||'').trim();
   if(!raw)return '';
@@ -2652,6 +2677,10 @@ function isBogusScorerLabel(label,m){
   if(/^\d+$/.test(name))return true;
   const lower=name.toLowerCase();
   if(/^(goal|goal!|得点)$/.test(lower))return true;
+  const cleaned=cleanPlayerNameForLocalization(name);
+  if(!cleaned)return true;
+  // 選手名ではなく、得点速報の説明文が混入したものは除外します。
+  if(cleaned===name&&/\b(?:assisted by|right footed|left footed|headed|header|shot from|from the|inside the box|outside the box|bottom left|bottom right|top left|top right|centre of the|center of the|following a|corner|free kick|cross)\b/i.test(name))return true;
   const teams=[m&&m.home,m&&m.away].filter(Boolean);
   const aliases=uniq(teams.flatMap(teamAliasCandidates)).filter(Boolean);
   for(const alias of aliases){
@@ -2668,8 +2697,10 @@ function isBogusScorerLabel(label,m){
   return false;
 }
 function sanitizeScorerLabel(label,m){
+  if(isPenaltyShootoutScorerLabel(label))return '';
   if(isBogusScorerLabel(label,m))return '';
   const localized=localizeScorerLabel(label);
+  if(isPenaltyShootoutScorerLabel(localized))return '';
   if(isBogusScorerLabel(localized,m))return '';
   return localized;
 }
@@ -2679,6 +2710,36 @@ function localizeScorers(scorers,m){
     home:normalized.home.map(x=>sanitizeScorerLabel(x,m)).filter(Boolean),
     away:normalized.away.map(x=>sanitizeScorerLabel(x,m)).filter(Boolean)
   };
+}
+function scorerLabelIdentity(label){
+  const p=parseScorerLabel(label);
+  const name=normalizePlayerAlias(localizeScorerName(p.name||'')).replace(/[・･]/g,' ').replace(/\s+/g,' ').trim();
+  const minute=normalizeScorerMinute(p.minute).replace(/[^0-9+]/g,'');
+  const period=normalizeScorerPeriod(p.period);
+  return `${name}|${period}|${minute}`;
+}
+function dedupeScorerLabels(labels){
+  const map=new Map();
+  (labels||[]).forEach(label=>{
+    const clean=String(label||'').trim();
+    if(!clean)return;
+    const key=scorerLabelIdentity(clean);
+    const prev=map.get(key);
+    if(!prev){map.set(key,clean);return;}
+    const p=parseScorerLabel(clean), pp=parseScorerLabel(prev);
+    const hasTime=!!(p.period||p.minute), prevHasTime=!!(pp.period||pp.minute);
+    if(hasTime&&!prevHasTime)map.set(key,clean);
+    else if(clean.length<prev.length)map.set(key,clean);
+  });
+  const values=[...map.values()];
+  const nameKey=label=>normalizePlayerAlias(localizeScorerName(parseScorerLabel(label).name||'')).replace(/[・･]/g,' ').replace(/\s+/g,' ').trim();
+  const timedNames=new Set(values.filter(label=>{const p=parseScorerLabel(label);return !!(p.period||p.minute)}).map(nameKey));
+  return values.filter(label=>{
+    const p=parseScorerLabel(label);
+    if(p.period||p.minute)return true;
+    const key=nameKey(label);
+    return !key||!timedNames.has(key);
+  });
 }
 function normalizeScorers(scorers,m){
   const out={home:[],away:[]};
@@ -2700,8 +2761,8 @@ function normalizeScorers(scorers,m){
       out[side].push(typeof x==='string'?x:formatScorerLabel(x.name||x.player||x.label||'得点',x.minute));
     }));
   }
-  out.home=[...new Set(out.home.filter(Boolean).map(x=>sanitizeScorerLabel(x,m)).filter(Boolean))];
-  out.away=[...new Set(out.away.filter(Boolean).map(x=>sanitizeScorerLabel(x,m)).filter(Boolean))];
+  out.home=dedupeScorerLabels(out.home.filter(Boolean).map(x=>sanitizeScorerLabel(x,m)).filter(Boolean));
+  out.away=dedupeScorerLabels(out.away.filter(Boolean).map(x=>sanitizeScorerLabel(x,m)).filter(Boolean));
   // 保存済みキャッシュに誤って相手側得点者が混入している場合でも、表示時にスコアと矛盾する側は落とす。
   const hs=Number(m&&m.hs);
   const as=Number(m&&m.as);
@@ -3061,6 +3122,7 @@ function parseScorersFromText(text,m){
   const joined=lines.join('\n');
   const goalLines=lines.filter(l=>/Goal!|GOAL|goal by|scores/i.test(l));
   goalLines.forEach(l=>{
+    if(isPenaltyShootoutText(l))return;
     if(/missed|saved|ruled out|offside|penalty shootout|woodwork|post|bar/i.test(l))return;
     const minute=(l.match(/(\d{1,3}(?:\+\d{1,2})?)['’]/)||l.match(/\b(\d{1,3})(?:st|nd|rd|th) minute\b/i)||[])[1]||'';
     let name='';
@@ -3117,6 +3179,10 @@ function extractScorers(data,m){
   const out={home:[],away:[]};
   candidates.forEach(item=>{
     if(!isGoalEvent(item))return;
+    if(isPenaltyShootoutEvent(item))return;
+    const rawType=String(item.type?.text||item.type?.displayName||item.type?.name||item.type||item.scoringType||'');
+    const rawTextForFilter=String(item.text||item.displayText||item.shortText||item.commentary||item.description||item.summary||rawType||'');
+    if(isPenaltyShootoutText(rawType+' '+rawTextForFilter))return;
     const minute=goalMinute(item);
     const athlete=goalAthlete(item,m);
     const team=goalTeam(item,m);
@@ -3142,9 +3208,11 @@ function collectGoalLikeObjects(obj,out,seen,depth){
 }
 function isGoalEvent(item){
   if(!item||typeof item!=='object')return false;
+  if(isPenaltyShootoutEvent(item))return false;
   const rawType=String(item.type?.text||item.type?.displayName||item.type?.name||item.type||item.scoringType||'');
   const rawText=String(item.text||item.displayText||item.shortText||item.commentary||item.description||item.summary||rawType||'');
   const all=(rawType+' '+rawText).toLowerCase();
+  if(isPenaltyShootoutText(rawType+' '+rawText))return false;
   if(!/(^|\b)goal\b|ゴール/.test(all))return false;
   if(/penalty shootout|shootout|missed|saved|post|woodwork|offside|var overturned|ruled out|disallowed|substitution|yellow card|red card/.test(all))return false;
   return true;
@@ -3191,6 +3259,8 @@ function goalAthlete(item,m){
   if(afterScore&&!isBogusScorerLabel(afterScore[1],m))return afterScore[1].trim();
   const byPattern=txt.match(/(?:Goal by|goal by|scored by|scores)\s+([^,.\(]+)(?:\s*\(([^)]+)\))?/i);
   if(byPattern&&!isBogusScorerLabel(byPattern[1],m))return byPattern[1].trim();
+  const headline=txt.match(/^([^,.;()]+?)\s+(?:Goal|GOAL|scores?|scored)\b/i);
+  if(headline&&!isBogusScorerLabel(headline[1],m))return headline[1].trim();
   const generic=txt.match(/(?:Goal!|Goal by|goal by)\s*([^.,;]+)/i);
   if(generic&&!isBogusScorerLabel(generic[1],m))return generic[1].trim();
   return '';
@@ -4557,6 +4627,7 @@ function dedupeNews(items,limit=20){
 
 function isOwnGoalScorerName(name){return /オウンゴール|own\s*goal/i.test(String(name||''));}
 function scorerNameForRanking(label){
+  if(isPenaltyShootoutScorerLabel(label))return '';
   const p=parseScorerLabel(label);
   return String(p.name||'').replace(/^\(PK\)\s*/,'').trim();
 }

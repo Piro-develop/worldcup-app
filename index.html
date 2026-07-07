@@ -416,7 +416,7 @@ function showBootError(err){
     const app=document.getElementById('app');
     if(!app)return;
     const msg=(err&&(err.message||err.reason||err.toString()))||'原因不明の表示エラー';
-    app.innerHTML='<div class="boot-error"><h2>表示エラー</h2><p class="small">初期表示でエラーが出ました。URL末尾に ?v=121 を付けて再読み込みしてください。</p><code>'+String(msg).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})+'</code></div>';
+    app.innerHTML='<div class="boot-error"><h2>表示エラー</h2><p class="small">初期表示でエラーが出ました。URL末尾に ?v=137 を付けて再読み込みしてください。</p><code>'+String(msg).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})+'</code></div>';
   }catch(e){}
 }
 window.addEventListener('error',function(e){showBootError(e.error||e.message||e)});
@@ -483,7 +483,7 @@ const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const ESPN_FULL_SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=950';
 const STAT_LIMITS={goals:20,assists:10};
-const STAT_DATA_VERSION='stat-own-goals-v116-final-group-scorers-yahoo-assists';
+const STAT_DATA_VERSION='stat-own-goals-v138-assists-internal-20260707';
 const FOX_STANDARD_STATS_BASE='https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026';
 const ESPN_SCORING_STATS_URL='https://www.espn.com/soccer/stats/_/league/FIFA.WORLD/view/scoring';
 const YAHOO_ASSIST_STATS_URL='https://soccer.yahoo.co.jp/wcup/category/2026/stats?gk=18&type=6';
@@ -503,7 +503,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=19;
+const SCORER_CACHE_VERSION=21;
 const MATCH_SCORER_FALLBACKS={
   '66456904':{home:['フリアン キニョーネス 前 9\'','ラウル ヒメネス 後 22\''],away:[]},
   '66456906':{home:['ファン インボム 後 22\'','オ ヒョンギュ 後 35\''],away:['ラディスラフ クレイチ 後 14\'']},
@@ -667,6 +667,19 @@ const YAHOO_MATCH_URLS={
 };
 
 
+const INTERNAL_ASSIST_RANKING=[
+  // 2026-07-07時点のスポーツナビ掲載値。外部取得失敗時も、この内部データを表示します。
+  {rank:1,value:5,player:'ミカエル オリーズ',team:'fr'},
+  {rank:2,value:4,player:'ブルーノ ギマランイス',team:'br'},
+  {rank:2,value:4,player:'ブラヒム ディアス',team:'ma'},
+  {rank:4,value:3,player:'アレクサンダー イサク',team:'se'},
+  {rank:4,value:3,player:'ロベルト アルバラード',team:'mx'},
+  {rank:4,value:3,player:'ブカヨ サカ',team:'eng'},
+  {rank:4,value:3,player:'フロリアン ヴィルツ',team:'de'},
+  {rank:4,value:3,player:'アンドレアス シェルデルップ',team:'no'},
+  {rank:4,value:3,player:'マルティン ウーデゴール',team:'no'},
+  {rank:10,value:2,player:'クリス ウッド',team:'nz'}
+];
 const FOX_STATIC_FALLBACK_STATS={
   goals:[
     {rank:1,value:5,player:'Lionel Messi',team:'ar'},
@@ -685,18 +698,7 @@ const FOX_STATIC_FALLBACK_STATS={
     {rank:14,value:2,player:'Daichi Kamada',team:'jp'},
     {rank:15,value:2,player:'Kai Havertz',team:'de'}
   ],
-  assists:[
-    {rank:1,value:3,player:'Alexander Isak',team:'se'},
-    {rank:2,value:3,player:'Bruno Guimaraes',team:'br'},
-    {rank:3,value:3,player:'Michael Olise',team:'fr'},
-    {rank:4,value:2,player:'Hannibal Mejbri',team:'tn'},
-    {rank:5,value:2,player:'Viktor Gyokeres',team:'se'},
-    {rank:6,value:2,player:'Denzel Dumfries',team:'nl'},
-    {rank:7,value:2,player:'Julio Enciso',team:'py'},
-    {rank:8,value:2,player:'Breel Embolo',team:'ch'},
-    {rank:9,value:2,player:'Ryan Gravenberch',team:'nl'},
-    {rank:10,value:2,player:'Roberto Alvarado',team:'mx'}
-  ]
+  assists:INTERNAL_ASSIST_RANKING
 };
 const STAT_PLAYER_JA={
   'lionel messi':'リオネル・メッシ','messi':'リオネル・メッシ',
@@ -751,6 +753,38 @@ Object.assign(STAT_PLAYER_JA,{
   'kevin pina':'ケヴィン・ピナ','kévin pina':'ケヴィン・ピナ','elio varela':'エリオ・ヴァレラ','dailon livramento':'ダイロン・リブラメント','jovane cabral':'ジョバネ・カブラル','garry rodrigues':'ギャリー・ロドリゲス',
   'luis diaz':'ルイス・ディアス','luis díaz':'ルイス・ディアス','jhon duran':'ジョン・ドゥラン','jhon durán':'ジョン・ドゥラン','james rodriguez':'ハメス・ロドリゲス','james rodríguez':'ハメス・ロドリゲス','jhon arias':'ジョン・アリアス','rafael borre':'ラファエル・ボレ','rafael borré':'ラファエル・ボレ','haminton campaz':'ハミントン・カンパス','jefferson lerma':'ジェフェルソン・レルマ',
   'mohammed kudus':'モハメド・クドゥス','jordan ayew':'ジョーダン・アイェウ','andre ayew':'アンドレ・アイェウ','andré ayew':'アンドレ・アイェウ','inaki williams':'イニャキ・ウィリアムズ','iñaki williams':'イニャキ・ウィリアムズ','antoine semenyo':'アントワーヌ・セメニョ','thomas partey':'トーマス・パーテイ','caleb yirenkyi':'カレブ・イレンキー'
+});
+Object.assign(STAT_PLAYER_JA,{
+  // 決勝トーナメント：外部速報がフルネーム・姓だけ・頭文字＋姓で返す場合を日本語化します。
+  'stephen eustaquio':'スティーブン・エウスタキオ','stephen eustáquio':'スティーブン・エウスタキオ','eustaquio':'スティーブン・エウスタキオ','eustáquio':'スティーブン・エウスタキオ','s eustaquio':'スティーブン・エウスタキオ',
+  'issa diop':'イッサ・ディオプ','i diop':'イッサ・ディオプ','diop':'イッサ・ディオプ',
+  'antonio nusa':'アントニオ・ヌサ','a nusa':'アントニオ・ヌサ','nusa':'アントニオ・ヌサ',
+  'brian cipenga':'ブライアン・チペンガ','b cipenga':'ブライアン・チペンガ','cipenga':'ブライアン・チペンガ',
+  'pedro porro':'ペドロ・ポロ','p porro':'ペドロ・ポロ','porro':'ペドロ・ポロ',
+  'soufiane rahimi':'ソフィアン・ラヒミ','sofiane rahimi':'ソフィアン・ラヒミ','s rahimi':'ソフィアン・ラヒミ','rahimi':'ソフィアン・ラヒミ',
+  'azzedine ounahi':'アゼディン・ウナヒ','a ounahi':'アゼディン・ウナヒ','ounahi':'アゼディン・ウナヒ',
+  'lisandro martinez':'リサンドロ・マルティネス','lisandro martínez':'リサンドロ・マルティネス','li martinez':'リサンドロ・マルティネス','l martinez':'リサンドロ・マルティネス',
+  'deroy duarte':'デロイ・ドゥアルテ','d duarte':'デロイ・ドゥアルテ','deroy':'デロイ・ドゥアルテ',
+  'sidny lopes cabral':'シドニー・ロペス・カブラル','sidny cabral':'シドニー・ロペス・カブラル','lopes cabral':'シドニー・ロペス・カブラル','s lopes cabral':'シドニー・ロペス・カブラル',
+  'jhon arias':'ジョン・アリアス','j arias':'ジョン・アリアス','jhon arias':'ジョン・アリアス',
+  'dan ndoye':'ダン・ンドイ','d ndoye':'ダン・ンドイ','ndoye':'ダン・ンドイ',
+  'goncalo ramos':'ゴンサロ・ラモス','gonçalo ramos':'ゴンサロ・ラモス','g ramos':'ゴンサロ・ラモス',
+  'ivan perisic':'イバン・ペリシッチ','ivan perišić':'イバン・ペリシッチ','i perisic':'イバン・ペリシッチ',
+  'kai havertz':'カイ・ハフェルツ','k havertz':'カイ・ハフェルツ','havertz':'カイ・ハフェルツ',
+  'julio enciso':'フリオ・エンシソ','j enciso':'フリオ・エンシソ','enciso':'フリオ・エンシソ',
+  'cody gakpo':'コーディ・ガクポ','c gakpo':'コーディ・ガクポ','gakpo':'コーディ・ガクポ',
+  'habib diarra':'アビブ・ディアッラ','h diarra':'アビブ・ディアッラ',
+  'romelu lukaku':'ロメル・ルカク','r lukaku':'ロメル・ルカク','lukaku':'ロメル・ルカク',
+  'youri tielemans':'ユーリ・ティーレマンス','y tielemans':'ユーリ・ティーレマンス','tielemans':'ユーリ・ティーレマンス',
+  'malik tillman':'マリク・ティルマン','m tillman':'マリク・ティルマン','tillman':'マリク・ティルマン',
+  'folarin balogun':'フォラリン・バログン','f balogun':'フォラリン・バログン','balogun':'フォラリン・バログン',
+  'mikel oyarzabal':'ミケル・オヤルサバル','m oyarzabal':'ミケル・オヤルサバル','oyarzabal':'ミケル・オヤルサバル',
+  'mikel merino':'ミケル・メリーノ','m merino':'ミケル・メリーノ','merino':'ミケル・メリーノ',
+  'bradley barcola':'ブラッドリー・バルコラ','b barcola':'ブラッドリー・バルコラ','barcola':'ブラッドリー・バルコラ',
+  'amad diallo':'アマド・ディアロ','a diallo':'アマド・ディアロ',
+  'julián quiñones':'フリアン・キニョーネス','julian quinones':'フリアン・キニョーネス','j quinones':'フリアン・キニョーネス','quinones':'フリアン・キニョーネス','quiñones':'フリアン・キニョーネス',
+  'raul jimenez':'ラウル・ヒメネス','raúl jiménez':'ラウル・ヒメネス','r jimenez':'ラウル・ヒメネス','jimenez':'ラウル・ヒメネス',
+  'breel embolo':'ブリール・エンボロ','b embolo':'ブリール・エンボロ','embolo':'ブリール・エンボロ'
 });
 Object.assign(STAT_PLAYER_JA,{
   // 日本代表：ESPN等で姓だけ・姓名逆順・省略形で返るケースを表示時に日本語化します。
@@ -810,7 +844,9 @@ function cleanPlayerNameForLocalization(name){
   s=s.replace(/\s*\((?:[^)]*(?:Canada|South Africa|Brazil|Japan|Germany|Paraguay|Netherlands|Morocco|Ivory Coast|Norway|France|Sweden|Mexico|Ecuador|England|Congo|Belgium|Senegal|United States|USA|Bosnia|Spain|Austria|Portugal|Croatia|Switzerland|Algeria|Australia|Egypt|Argentina|Cape Verde|Colombia|Ghana)[^)]*)\).*$/i,'');
   s=s.replace(/\s+(?:Goal|GOAL|scores?|scored)\b.*$/i,'');
   s=s.replace(/\s+[-–—]\s*(?:Goal|GOAL|header|headed|right|left|shot|scores?|scored|assist|assisted)\b.*$/i,'');
-  s=s.replace(/[,.;].*$/,'');
+  s=s.replace(/[,;].*$/,'');
+  s=s.replace(/\.(?=\s+(?:right|left|header|headed|shot|assisted|from|corner|free kick|cross)\b).*$/i,'');
+  s=s.replace(/\.$/,'');
   s=s.replace(/\s+(?:right|left|header|headed|tap-in|shot|penalty|free kick|from|assist|assisted by|following|corner|cross|inside|outside|bottom|top|centre|center)\b.*$/i,'');
   s=s.replace(/\s+own goal$/i,' own goal');
   return s.replace(/\s+/g,' ').trim();
@@ -819,8 +855,14 @@ function localizeStatPlayerName(name){
   const raw=cleanPlayerNameForLocalization(name);
   if(!raw)return '';
   const alias=normalizePlayerAlias(raw);
-  const direct=STAT_PLAYER_JA[raw.toLowerCase()]||STAT_PLAYER_JA[alias]||STAT_PLAYER_JA[alias.replace(/\./g,'')];
-  if(direct)return direct;
+  const compact=alias.replace(/\./g,'').replace(/\s+/g,' ').trim();
+  const noInitial=compact.replace(/^[a-z]\s+/, '').trim();
+  const noNumber=compact.replace(/^\d+\s+/, '').trim();
+  const candidates=uniq([raw.toLowerCase(),alias,compact,noInitial,noNumber]).filter(Boolean);
+  for(const key of candidates){
+    const direct=STAT_PLAYER_JA[key];
+    if(direct)return direct;
+  }
   if(/[ぁ-んァ-ヶ一-龯]/.test(raw))return raw;
   return raw;
 }
@@ -857,8 +899,8 @@ function statLimit(kind){return STAT_LIMITS[kind]||20}
 function fallbackStatRows(kind){
   // 得点Rは外部ランキングではなく、試合別得点者データだけで作ります。
   if(kind==='goals')return [];
-  // アシストRは得点者データから作れないため、英語統計の確認済みスナップショットを補助表示します。
-  if(kind==='assists')return localizeStatRows(FOX_STATIC_FALLBACK_STATS[kind]||[],kind).slice(0,statLimit(kind));
+  // アシストRは得点者データから独自集計できないため、確認済みの最新内部データを常時保持します。
+  if(kind==='assists')return localizeStatRows(INTERNAL_ASSIST_RANKING,kind).slice(0,statLimit(kind));
   return [];
 }
 function normalizeVisibleStatus(status){
@@ -1245,7 +1287,7 @@ const KNOCKOUT_MATCHES=[
 ];
 
 // 確定済みで今後変わらない決勝トーナメント結果は、外部取得より内部データを優先します。
-// 日本は敗退確定済みのため、ブラジル戦の日本側得点者は固定データとして保持します。
+// 確定した試合は日本語得点者を内部固定し、外部速報や古い端末キャッシュより優先します。
 const KNOCKOUT_STATIC_RESULTS={
   '76':{
     completed:true,
@@ -1277,6 +1319,38 @@ const KNOCKOUT_STATIC_RESULTS={
     scorers:{
       home:['カゼミーロ 後 56','ガブリエウ・マルティネッリ 後 90+5'],
       away:['佐野海舟 前 29']
+    }
+  },
+  '93':{
+    completed:true,
+    live:false,
+    inProgress:false,
+    home:'pt',
+    away:'es',
+    hs:0,
+    as:1,
+    winner:'away',
+    scorerSource:'built-in-final',
+    scorerVersion:SCORER_CACHE_VERSION,
+    scorers:{
+      home:[],
+      away:['ミケル・メリーノ 後 90+1']
+    }
+  },
+  '53452513':{
+    completed:true,
+    live:false,
+    inProgress:false,
+    home:'pt',
+    away:'es',
+    hs:0,
+    as:1,
+    winner:'away',
+    scorerSource:'built-in-final',
+    scorerVersion:SCORER_CACHE_VERSION,
+    scorers:{
+      home:[],
+      away:['ミケル・メリーノ 後 90+1']
     }
   }
 };
@@ -1318,14 +1392,18 @@ function load(){
   const merged=Object.assign(base,saved||{});
   if(merged.statDataVersion!==STAT_DATA_VERSION){
     merged.goals=[];
-    merged.assists=[];
-    merged.statStatus={goals:'',assists:''};
+    // バージョン更新時は、古い端末キャッシュを破棄し、最新の内部アシストデータを即時反映します。
+    merged.assists=fallbackStatRows('assists');
+    merged.statStatus={goals:'',assists:merged.assists.length?'更新済':''};
     merged.statDataVersion=STAT_DATA_VERSION;
   }
   merged.goals=localizeStatRows(Array.isArray(merged.goals)?merged.goals:[],'goals').slice(0,statLimit('goals'));
   merged.assists=localizeStatRows(Array.isArray(merged.assists)?merged.assists:[],'assists').slice(0,statLimit('assists'));
   if(!statRowsDisplayable(merged.goals))merged.goals=[];
-  if(!statRowsDisplayable(merged.assists))merged.assists=[];
+  if(!statRowsDisplayable(merged.assists)){
+    merged.assists=fallbackStatRows('assists');
+    if(merged.assists.length)merged.statStatus=Object.assign({goals:'',assists:''},merged.statStatus||{},{assists:'更新済'});
+  }
   const preserved=migrateSavedBracket();
   if(preserved)merged.bracket=preserved;
   if(!tabs.some(([id])=>id===merged.active))merged.active='bracket';
@@ -1841,16 +1919,33 @@ async function loadKoMatchDetails(m){
   const key=String(m.id||m.no);
   const result=getKoResult(m);
   if(!result||(!result.completed&&!result.live))return;
+  const fixed=koStaticResultForMatch(m);
+  if(Object.keys(fixed).length){
+    state.ko=state.ko||{results:{}};
+    state.ko.results=state.ko.results||{};
+    state.ko.results[key]=Object.assign({},result,fixed);
+    save();
+    if(currentKoMatchNo===Number(m.no))openKoDetail(m.no);
+    return;
+  }
   const home=result.home||resolveKoSide(m.a).id||'';
   const away=result.away||resolveKoSide(m.b).id||'';
   if(!home||!away)return;
   const temp={id:m.id,home,away,status:result.completed?'done':(result.live?'live':'scheduled'),hs:result.hs,as:result.as};
   let scorers={home:[],away:[]};
+  // 決勝トーナメントも日本語の試合詳細を最優先し、取得できない場合だけESPNへフォールバックする。
   try{
-    const data=await fetchESPNEventSummary(result.espnEventId||m.id);
-    const parsed=parseMatchSummary(data,temp);
-    scorers=normalizeScorers(parsed.scorers,temp);
-  }catch(e){console.warn('決勝T ESPN得点者取得失敗',e)}
+    const yahooScorers=await fetchMatchPageScorers(temp);
+    const localized=normalizeScorers(yahooScorers,temp);
+    if((localized.home&&localized.home.length)||(localized.away&&localized.away.length))scorers=localized;
+  }catch(e){console.warn('決勝T Yahoo得点者取得失敗',e)}
+  if(!scorers.home.length&&!scorers.away.length){
+    try{
+      const data=await fetchESPNEventSummary(result.espnEventId||m.id);
+      const parsed=parseMatchSummary(data,temp);
+      scorers=normalizeScorers(parsed.scorers,temp);
+    }catch(e){console.warn('決勝T ESPN得点者取得失敗',e)}
+  }
   state.ko=state.ko||{results:{}};
   state.ko.results=state.ko.results||{};
   state.ko.results[key]=Object.assign({},result,{home,away,scorers});
@@ -2017,18 +2112,30 @@ async function fetchKnockoutResults(){
     const away=rec.away||resolveKoSide(match.b).id||'';
     if(!home||!away)return;
     const eventId=rec.espnEventId||match.id;
-    const temp={id:eventId,home,away,status:rec.completed?'done':(rec.live?'live':'scheduled'),hs:rec.hs,as:rec.as};
+    const temp={id:match.id||eventId,home,away,status:rec.completed?'done':(rec.live?'live':'scheduled'),hs:rec.hs,as:rec.as};
+    let scorerResolved=false;
+    // 日本語の得点者名を返す試合詳細を最優先する。
     try{
-      const data=await fetchESPNEventSummary(eventId);
-      const parsed=parseMatchSummary(data,temp);
-      if(Number.isFinite(Number(parsed.hs)))rec.hs=parsed.hs;
-      if(Number.isFinite(Number(parsed.as)))rec.as=parsed.as;
-      const scorers=localizeScorers(parsed.scorers,temp);
-      if((scorers.home&&scorers.home.length)||(scorers.away&&scorers.away.length))rec.scorers=scorers;
-      if(match.no!==undefined)out[String(match.no)]=Object.assign({},rec);
-    }catch(e){
-      console.warn('決勝T得点者取得失敗',eventId,e);
+      const yahooScorers=await fetchMatchPageScorers(temp);
+      const localized=normalizeScorers(yahooScorers,temp);
+      if((localized.home&&localized.home.length)||(localized.away&&localized.away.length)){
+        rec.scorers=localized;
+        scorerResolved=true;
+      }
+    }catch(e){console.warn('決勝T Yahoo得点者取得失敗',eventId,e)}
+    if(!scorerResolved){
+      try{
+        const data=await fetchESPNEventSummary(eventId);
+        const parsed=parseMatchSummary(data,temp);
+        if(Number.isFinite(Number(parsed.hs)))rec.hs=parsed.hs;
+        if(Number.isFinite(Number(parsed.as)))rec.as=parsed.as;
+        const scorers=localizeScorers(parsed.scorers,temp);
+        if((scorers.home&&scorers.home.length)||(scorers.away&&scorers.away.length))rec.scorers=scorers;
+      }catch(e){
+        console.warn('決勝T得点者取得失敗',eventId,e);
+      }
     }
+    if(match.no!==undefined)out[String(match.no)]=Object.assign({},rec);
   });
   return addStaticKoResultsToMap(out);
 }
@@ -2655,19 +2762,30 @@ function isPenaltyShootoutEvent(item){
   if(!hasClock&&/\bpenalt(?:y|ies)\b|\bpk\b|ＰＫ|PK/i.test(rawAll)&&/\b(?:scored|converted|made|goal|成功)\b/i.test(rawAll))return true;
   return false;
 }
+function containsLatinLetters(value){
+  return /[A-Za-z]/.test(String(value||''));
+}
+function hasJapanesePlayerName(value){
+  return /[ぁ-んァ-ヶ一-龯]/.test(String(value||''));
+}
 function localizeScorerName(name){
   const raw=String(name||'').trim();
   if(!raw)return '';
   if(/^\(?PK\)?/.test(raw)){
     const rest=raw.replace(/^\(?PK\)?\s*/,'');
-    return `(PK)${localizeScorerName(rest)}`;
+    const localized=localizeScorerName(rest);
+    return localized?`(PK)${localized}`:'';
   }
   if(/オウンゴール|own\s*goal/i.test(raw))return 'オウンゴール';
-  return localizeStatPlayerName(raw);
+  const localized=localizeStatPlayerName(raw);
+  // 辞書未登録の英語名は、そのまま表示しない。日本語取得元または内部固定データへ切り替わるまで非表示にする。
+  if(!localized||containsLatinLetters(localized)||!hasJapanesePlayerName(localized))return '';
+  return localized;
 }
 function localizeScorerLabel(label){
   const p=parseScorerLabel(label);
-  const name=localizeScorerName(p.name||'得点');
+  const name=localizeScorerName(p.name||'');
+  if(!name)return '';
   return `${name}${p.period?` ${p.period}`:''}${p.minute?` ${p.minute}`:''}`.trim();
 }
 function teamAliasCandidates(id){
@@ -5439,7 +5557,7 @@ function boot(){
   }catch(e){
     console.error('初期表示エラー',e);
     const app=document.getElementById('app');
-    if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=121 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
+    if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=138 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
   }
 }
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot,{once:true});}else{boot();}

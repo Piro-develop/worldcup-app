@@ -483,7 +483,7 @@ const GROUPS='ABCDEFGHIJKL'.split('');
 const ESPN_SCOREBOARD='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const ESPN_FULL_SCOREBOARD_URL='https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719&limit=950';
 const STAT_LIMITS={goals:20,assists:10};
-const STAT_DATA_VERSION='stat-own-goals-v138-assists-internal-20260707';
+const STAT_DATA_VERSION='stat-own-goals-v140-argentina-egypt-final';
 const FOX_STANDARD_STATS_BASE='https://www.foxsports.com/soccer/fifa-world-cup/stats?category=standard&groupId=12&season=2026';
 const ESPN_SCORING_STATS_URL='https://www.espn.com/soccer/stats/_/league/FIFA.WORLD/view/scoring';
 const YAHOO_ASSIST_STATS_URL='https://soccer.yahoo.co.jp/wcup/category/2026/stats?gk=18&type=6';
@@ -503,7 +503,7 @@ const YAHOO_SCHEDULE_URLS=[
   'https://soccer.yahoo.co.jp/wcup/category/2026/schedule'
 ];
 const YAHOO_SUMMARY_BASE='https://soccer.yahoo.co.jp/wcup/category/2026/game/';
-const SCORER_CACHE_VERSION=21;
+const SCORER_CACHE_VERSION=23;
 const MATCH_SCORER_FALLBACKS={
   '66456904':{home:['フリアン キニョーネス 前 9\'','ラウル ヒメネス 後 22\''],away:[]},
   '66456906':{home:['ファン インボム 後 22\'','オ ヒョンギュ 後 35\''],away:['ラディスラフ クレイチ 後 14\'']},
@@ -551,9 +551,9 @@ const MATCH_SCORER_FALLBACKS={
   '66457000':{home:['マクシ アラウホ 前 44\'','アグスティン カノッビオ 前 51\''],away:['ケヴィン ピナ 前 21\'','エリオ ヴァレラ 後 16\'']},
   '66457002':{home:[],away:['アレックス バエナ 前 42\'']},
   '66457004':{home:[],away:[]},
-  '66457006':{home:['キリアン エムバペ 後 21\'','キリアン エムバペ 後 51\'','ブラッドリー バルコラ 後 37\''],away:['イブラヒム エンバイェ 後 50\'']},
+  '66457006':{home:['キリアン・エンバペ 後 21\'','キリアン・エンバペ 後 51\'','ブラッドリー バルコラ 後 37\''],away:['イブラヒム エンバイェ 後 50\'']},
   '66457008':{home:['アイメン フセイン 前 39\''],away:['アーリング ハーランド 前 29\'','アーリング ハーランド 前 43\'','レオ エスティゴール 後 31\'','オウンゴール 後 51\'']},
-  '66457010':{home:['キリアン エムバペ 前 14\'','キリアン エムバペ 後 9\'','ウスマン デンベレ 後 21\''],away:[]},
+  '66457010':{home:['キリアン・エンバペ 前 14\'','キリアン・エンバペ 後 9\'','ウスマン デンベレ 後 21\''],away:[]},
   '66457012':{home:['マルクス ホルムグレン ペデルセン 前 43\'','アーリング ハーランド 後 3\'','アーリング ハーランド 後 13\''],away:['イスマイラ サール 後 8\'','イスマイラ サール 後 48\'']},
   '66457014':{home:['セロ アースゴール 前 21\''],away:['ウスマン デンベレ 前 7\'','ウスマン デンベレ 前 20\'','ウスマン デンベレ 前 32\'','デジレ ドゥエ 後 49\'']},
   '66457016':{home:['アビブ ディアッラ 前 4\'','イスマイラ サール 後 11\'','パペ ゲイェ 後 14\'','パペ ゲイェ 後 26\'','イリマン エンディアイェ 後 37\''],away:[]},
@@ -561,7 +561,7 @@ const MATCH_SCORER_FALLBACKS={
   '66457020':{home:['ロマーノ シュミット 前 20\'','オウンゴール 後 31\'','マルコ アルナウトヴィッチ 後 57\'(PK)'],away:['アリ オルワン 後 5\'']},
   '66457022':{home:['リオネル メッシ 前 38\'','リオネル メッシ 後 50\''],away:[]},
   '66457024':{home:['ニザル アルラシュダン 前 36\''],away:['ナディル ベンブアリ 後 24\'','アミーヌ グイリ 後 37\'']},
-  '66457030':{home:['ジョアン ネヴェス 前 6\''],away:['ヨアヌ ウィサ 前 50\'']},
+  '66457030':{home:['ジョアン ネヴェス 前 6\''],away:['ヨアヌ・ウィサ 前 50\'']},
   '66457032':{home:['アボスベク ファイズラエフ 後 15\''],away:['ダニエル ムニョス 前 40\'','ルイス ディアス 後 20\'','ハミントン カンパス 後 54\'']},
   '66457034':{home:['クリスティアーノ ロナウド 前 6\'','クリスティアーノ ロナウド 前 39\'','ヌーノ メンデス 前 17\'','オウンゴール 後 15\'','ラファエル レオン 後 42\''],away:[]},
   '66457036':{home:['ダニエル ムニョス 後 31\''],away:[]},
@@ -569,12 +569,12 @@ const MATCH_SCORER_FALLBACKS={
   '66457044':{home:['カレブ イレンキー 後 50\''],away:[]},
   '66457046':{home:[],away:[]},
   '66457048':{home:[],away:["アンテ ブディミル 後 9'"]},
-  '66456990':{home:["イライジャ ジャスト 後 39'"],away:["レアンドロ トロサール 前 28'","レアンドロ トロサール 後 5'","ケビン デ ブライネ 後 21'","ロメル ルカク 後 41'","アレクシス サーレマーケルス 後 49'"]},
+  '66456990':{home:["イライジャ ジャスト 後 39'"],away:["レアンドロ トロサール 前 28'","レアンドロ トロサール 後 5'","ケヴィン・デ・ブライネ 後 21'","ロメル ルカク 後 41'","アレクシス サーレマーケルス 後 49'"]},
   '66456992':{home:["マフムード サーベル 前 5'"],away:["ラミン レザイーアン 前 14'"]},
   '66457026':{home:["ムサ アルターマリ 後 20'"],away:["ジョバニ ロチェルソ 前 19'","ラウタロ マルティネス 前 31'(PK)","リオネル メッシ 後 35'"]},
   '66457028':{home:["ラフィク ベルガリ 前 45'","リヤド マフレズ 後 15'","リヤド マフレズ 後 48'"],away:["マルコ アルナウトヴィッチ 前 28'","マルセル ザビッツァー 後 10'","サシャ カライジッチ 後 51'"]},
   '66457038':{home:[],away:[]},
-  '66457040':{home:["ヨアン ウィサ 後 23'(PK)","フィストン マイェレ 後 33'","ヨアン ウィサ 後 46'"],away:["エルドル ショムロドフ 前 10'"]},
+  '66457040':{home:["ヨアヌ・ウィサ 後 23'(PK)","フィストン マイェレ 後 33'","ヨアヌ・ウィサ 後 46'"],away:["エルドル ショムロドフ 前 10'"]},
   '66457050':{home:[],away:["ジュード ベリンガム 後 17'","ハリー ケイン 後 22'"]},
   '66457052':{home:["ペタル スチッチ 前 31'","ニコラ ヴラシッチ 後 38'"],away:["デリック ルカッセン 後 28'"]}
 };
@@ -749,7 +749,7 @@ Object.assign(STAT_PLAYER_JA,{
   'riyad mahrez':'リヤド・マフレズ','amine gouiri':'アミーヌ・グイリ','ismael bennacer':'イスマエル・ベナセル','ismaël bennacer':'イスマエル・ベナセル','said benrahma':'サイード・ベンラーマ','saïd benrahma':'サイード・ベンラーマ','nadir benbouali':'ナディル・ベンブアリ','baghdad bounedjah':'バグダッド・ブネジャー',
   'nestory irankunda':'ネストリ・イランクンダ','nestor irankunda':'ネストリ・イランクンダ','connor metcalfe':'コナー・メトカーフ','craig goodwin':'クレイグ・グッドウィン','mitchell duke':'ミッチェル・デューク','harry souttar':'ハリー・サウター','martin boyle':'マーティン・ボイル','brandon borrello':'ブランドン・ボレロ',
   'trezeguet':'トレゼゲ','trezeguet':'トレゼゲ','omar marmoush':'オマル・マルムシュ','mostafa mohamed':'モスタファ・モハメド','emam ashour':'エマム・アシュール','imam ashour':'エマム・アシュール','mostafa ziko':'モスタファ・ジーコ','ahmed sayed zizo':'アフメド・サイード・ジーゾ','zizo':'ジーゾ',
-  'julian alvarez':'フリアン・アルバレス','julián álvarez':'フリアン・アルバレス','lautaro martinez':'ラウタロ・マルティネス','lautaro martínez':'ラウタロ・マルティネス','alexis mac allister':'アレクシス・マック・アリスター','enzo fernandez':'エンソ・フェルナンデス','enzo fernández':'エンソ・フェルナンデス','paulo dybala':'パウロ・ディバラ','angel di maria':'アンヘル・ディ・マリア','ángel di maría':'アンヘル・ディ・マリア',
+  'julian alvarez':'フリアン・アルバレス','julián álvarez':'フリアン・アルバレス','lautaro martinez':'ラウタロ・マルティネス','lautaro martínez':'ラウタロ・マルティネス','alexis mac allister':'アレクシス・マック・アリスター','enzo fernandez':'エンソ・フェルナンデス','enzo fernández':'エンソ・フェルナンデス','cristian romero':'クリスティアン・ロメロ','c romero':'クリスティアン・ロメロ','romero':'クリスティアン・ロメロ','yasser ibrahim':'ヤセル・イブラヒム','yasser ibrahim ahmed el hanafi':'ヤセル・イブラヒム','y ibrahim':'ヤセル・イブラヒム','mostafa zico':'モスタファ・ジーコ','mostafa ziko':'モスタファ・ジーコ','mostafa mohamed zaki abd el raouf':'モスタファ・ジーコ','m zico':'モスタファ・ジーコ','m ziko':'モスタファ・ジーコ','paulo dybala':'パウロ・ディバラ','angel di maria':'アンヘル・ディ・マリア','ángel di maría':'アンヘル・ディ・マリア',
   'kevin pina':'ケヴィン・ピナ','kévin pina':'ケヴィン・ピナ','elio varela':'エリオ・ヴァレラ','dailon livramento':'ダイロン・リブラメント','jovane cabral':'ジョバネ・カブラル','garry rodrigues':'ギャリー・ロドリゲス',
   'luis diaz':'ルイス・ディアス','luis díaz':'ルイス・ディアス','jhon duran':'ジョン・ドゥラン','jhon durán':'ジョン・ドゥラン','james rodriguez':'ハメス・ロドリゲス','james rodríguez':'ハメス・ロドリゲス','jhon arias':'ジョン・アリアス','rafael borre':'ラファエル・ボレ','rafael borré':'ラファエル・ボレ','haminton campaz':'ハミントン・カンパス','jefferson lerma':'ジェフェルソン・レルマ',
   'mohammed kudus':'モハメド・クドゥス','jordan ayew':'ジョーダン・アイェウ','andre ayew':'アンドレ・アイェウ','andré ayew':'アンドレ・アイェウ','inaki williams':'イニャキ・ウィリアムズ','iñaki williams':'イニャキ・ウィリアムズ','antoine semenyo':'アントワーヌ・セメニョ','thomas partey':'トーマス・パーテイ','caleb yirenkyi':'カレブ・イレンキー'
@@ -817,6 +817,29 @@ function normalizePlayerAlias(name){
     .trim()
     .toLowerCase();
 }
+// 選手名の表記揺れを、表示とランキング集計の前に同一名へ統一します。
+// キーは空白・中黒・記号を除いた表記です。新しい表記揺れはここへ追加します。
+const PLAYER_CANONICAL_NAME_ALIASES={
+  'キリアンエムバペ':'キリアン・エンバペ',
+  'キリアンエンバペ':'キリアン・エンバペ',
+  'エムバペ':'キリアン・エンバペ',
+  'エンバペ':'キリアン・エンバペ',
+  'ヨアンウィサ':'ヨアヌ・ウィサ',
+  'ヨアヌウィサ':'ヨアヌ・ウィサ',
+  'ケビンデブライネ':'ケヴィン・デ・ブライネ',
+  'ケヴィンデブライネ':'ケヴィン・デ・ブライネ'
+};
+function playerCanonicalAliasKey(name){
+  return String(name||'')
+    .normalize('NFKC')
+    .replace(/[・･\s\-_.、，,.'’`´]/g,'')
+    .toLowerCase();
+}
+function canonicalPlayerDisplayName(name){
+  const raw=String(name||'').replace(/\s+/g,' ').trim();
+  if(!raw)return '';
+  return PLAYER_CANONICAL_NAME_ALIASES[playerCanonicalAliasKey(raw)]||raw;
+}
 function stripStatImageNoise(name){
   let s=String(name||'');
   try{s=decodeHtml(s)}catch(e){}
@@ -861,9 +884,9 @@ function localizeStatPlayerName(name){
   const candidates=uniq([raw.toLowerCase(),alias,compact,noInitial,noNumber]).filter(Boolean);
   for(const key of candidates){
     const direct=STAT_PLAYER_JA[key];
-    if(direct)return direct;
+    if(direct)return canonicalPlayerDisplayName(direct);
   }
-  if(/[ぁ-んァ-ヶ一-龯]/.test(raw))return raw;
+  if(/[ぁ-んァ-ヶ一-龯]/.test(raw))return canonicalPlayerDisplayName(raw);
   return raw;
 }
 function statPlayerKeyForLookup(name){
@@ -1351,6 +1374,38 @@ const KNOCKOUT_STATIC_RESULTS={
     scorers:{
       home:[],
       away:['ミケル・メリーノ 後 90+1']
+    }
+  },
+  '95':{
+    completed:true,
+    live:false,
+    inProgress:false,
+    home:'ar',
+    away:'eg',
+    hs:3,
+    as:2,
+    winner:'home',
+    scorerSource:'built-in-final',
+    scorerVersion:SCORER_CACHE_VERSION,
+    scorers:{
+      home:['クリスティアン・ロメロ 後 79','リオネル・メッシ 後 83','エンソ・フェルナンデス 後 90+2'],
+      away:['ヤセル・イブラヒム 前 15','モスタファ・ジーコ 後 67']
+    }
+  },
+  '53452521':{
+    completed:true,
+    live:false,
+    inProgress:false,
+    home:'ar',
+    away:'eg',
+    hs:3,
+    as:2,
+    winner:'home',
+    scorerSource:'built-in-final',
+    scorerVersion:SCORER_CACHE_VERSION,
+    scorers:{
+      home:['クリスティアン・ロメロ 後 79','リオネル・メッシ 後 83','エンソ・フェルナンデス 後 90+2'],
+      away:['ヤセル・イブラヒム 前 15','モスタファ・ジーコ 後 67']
     }
   }
 };
@@ -4795,7 +4850,8 @@ function isOwnGoalScorerName(name){return /オウンゴール|own\s*goal/i.test(
 function scorerNameForRanking(label){
   if(isPenaltyShootoutScorerLabel(label))return '';
   const p=parseScorerLabel(label);
-  return String(p.name||'').replace(/^\(PK\)\s*/,'').trim();
+  const raw=String(p.name||'').replace(/^\(PK\)\s*/,'').trim();
+  return canonicalPlayerDisplayName(localizeStatPlayerName(raw)||raw);
 }
 function buildGoalRankingFromMatchScorers(){
   const map=new Map();
@@ -4918,7 +4974,8 @@ function statRankValue(r){
   return Number.isFinite(n)?n:0;
 }
 function statPlayerKey(player,team){
-  const name=String(player||'')
+  const canonical=canonicalPlayerDisplayName(localizeStatPlayerName(player)||player);
+  const name=String(canonical||'')
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g,'')
     .replace(/[・･\s\-_.、，,.'’`´]/g,'')
@@ -5557,7 +5614,7 @@ function boot(){
   }catch(e){
     console.error('初期表示エラー',e);
     const app=document.getElementById('app');
-    if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=138 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
+    if(app)app.innerHTML=`<div class="card"><h2>表示エラー</h2><p class="small">アプリの初期表示でエラーが発生しました。ブラウザのキャッシュを削除するか、URL末尾に ?v=140 などを付けて再読み込みしてください。</p><p class="small">${esc(e.message||e)}</p></div>`;
   }
 }
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot,{once:true});}else{boot();}
